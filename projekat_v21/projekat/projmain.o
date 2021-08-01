@@ -6,7 +6,7 @@ Id	Name		Size
 0	UNDEFINED	0000
 3	data	0002
 1	ivt	0010
-2	text	007c
+2	text	008c
 
 
 Symbol table:
@@ -19,14 +19,14 @@ Value	Type	Section		Name		Id
 002d	l	text	isr_terminal	000b
 0005	l	text	isr_timer	000a
 0000	l	ivt	ivt	0002
-002e	l	text	main	000c
+003e	l	text	main	000c
 0000	g	data	myCounter	0007
 ff02	l	ABSOLUTE	term_in	0005
 ff00	l	ABSOLUTE	term_out	0004
 0000	l	text	text	0008
 ff10	l	ABSOLUTE	tim_cfg	0006
-0033	l	text	tim_loop	000d
-004c	l	text	wait	000e
+0043	l	text	tim_loop	000d
+005c	l	text	wait	000e
 
 
 Relocation data <ABSOLUTE>:
@@ -68,12 +68,12 @@ Offset	Type		Dat/Ins	Symbol	Section name
 0004	R_HYP_16	i	text	text
 000f	R_HYP_16	i	myCounter	text
 001b	R_HYP_16_PC	i	myCounter	text
-0046	R_HYP_16_PC	i	myCounter	text
-0050	R_HYP_16	i	myCounter	text
-0063	R_HYP_16	i	text	text
+0056	R_HYP_16_PC	i	myCounter	text
+0060	R_HYP_16	i	myCounter	text
+0073	R_HYP_16	i	text	text
 
 Section data <text>:
-0000: 50 ff 00 00 2e 
+0000: 50 ff 00 00 3e 
 0005: b0 06 12 
 0008: b0 36 12 
 000b: a0 0f 04 00 00 
@@ -85,25 +85,29 @@ Section data <text>:
 0026: a0 36 42 
 0029: a0 06 42 
 002c: 20 
-002d: 20 
-002e: a0 1f 00 00 05 
-0033: a0 0f 00 00 53 
-0038: b0 0f 04 ff 00 
-003d: a0 5f 00 00 00 
-0042: b0 57 03 ff fe 
-0047: b0 1f 04 ff 10 
-004c: a0 0f 04 00 00 
-0051: a0 2f 00 00 02 
-0056: a0 3f 00 00 01 
-005b: 90 32 
-005d: 74 03 
-005f: 52 ff 00 00 4c 
-0064: 60 31 
-0066: a0 2f 00 00 01 
-006b: 71 32 
-006d: 60 31 
-006f: a0 4f 00 00 00 
-0074: 74 14 
-0076: 53 f7 05 ff b8 
-007b: 00 
+002d: b0 06 12 
+0030: a0 0f 04 ff 02 
+0035: b0 0f 04 ff 00 
+003a: a0 06 42 
+003d: 20 
+003e: a0 1f 00 00 05 
+0043: a0 0f 00 00 53 
+0048: b0 0f 04 ff 00 
+004d: a0 5f 00 00 00 
+0052: b0 57 03 ff fe 
+0057: b0 1f 04 ff 10 
+005c: a0 0f 04 00 00 
+0061: a0 2f 00 00 02 
+0066: a0 3f 00 00 01 
+006b: 90 32 
+006d: 74 03 
+006f: 52 ff 00 00 5c 
+0074: 60 31 
+0076: a0 2f 00 00 01 
+007b: 71 32 
+007d: 60 31 
+007f: a0 4f 00 00 00 
+0084: 74 14 
+0086: 53 f7 05 ff b8 
+008b: 00 
 

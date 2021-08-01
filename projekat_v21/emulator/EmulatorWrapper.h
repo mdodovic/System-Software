@@ -168,8 +168,9 @@ class EmulatorWrapper
     void timer_tick();
 
     // Terminal
-    void configure_terminal();
+    bool configure_terminal();
     void reset_terminal();
+    void read_character_from_input();
 
     ofstream emulator_output_file;
 

@@ -25,6 +25,10 @@
 	pop r0
     iret
   isr_terminal:
+  	push r0
+  	ldr r0, term_in
+  	str r0, term_out
+  	pop r0
     iret
   main:
 	ldr r1, $5

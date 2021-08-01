@@ -2,6 +2,10 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include <unistd.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <termios.h>
 
 #include "EmulatorWrapper.h"
 //#include "EmulatorConstants.h"
@@ -39,7 +43,7 @@ EmulatorWrapper::EmulatorWrapper(string input_file_name_)
 bool EmulatorWrapper::collect_data_from_relocatible_files()
 {
 
-    cout << "Collect data from file:" << input_file_name << endl;
+    emulator_output_file << "Collect data from file:" << input_file_name << endl;
     ifstream input_file(input_file_name, ios::binary);
     if (input_file.fail())
     {
@@ -49,8 +53,8 @@ bool EmulatorWrapper::collect_data_from_relocatible_files()
 
     int number_of_segments = 0;
     input_file.read((char *)&number_of_segments, sizeof(number_of_segments));
-    cout << number_of_segments << endl;
-    cout << hex;
+    emulator_output_file << number_of_segments << endl;
+    emulator_output_file << hex;
     for (int i = 0; i < number_of_segments; i++)
     {
         // segment data
@@ -58,11 +62,11 @@ bool EmulatorWrapper::collect_data_from_relocatible_files()
 
         // This is the start address where data should be loaded in memory
         input_file.read((char *)&segment.virtual_address, sizeof(segment.virtual_address));
-        cout << segment.virtual_address << endl;
+        emulator_output_file << segment.virtual_address << endl;
 
         // This will represent how many 1B-data there are in memory in each segment
         input_file.read((char *)&segment.number_of_bytes, sizeof(segment.number_of_bytes));
-        cout << segment.number_of_bytes << endl;
+        emulator_output_file << segment.number_of_bytes << endl;
         for (int j = 0; j < segment.number_of_bytes; j++)
         {
             char c;
@@ -76,16 +80,16 @@ bool EmulatorWrapper::collect_data_from_relocatible_files()
             char c = segment.data[i];
             if (counter % 8 == 0)
             {
-                cout << hex << setfill('0') << setw(4) << (0xffff & counter + segment.virtual_address) << "   ";
+                emulator_output_file << hex << setfill('0') << setw(4) << (0xffff & counter + segment.virtual_address) << "   ";
             }
-            cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            emulator_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
             counter++;
             if (counter % 8 == 0)
             {
-                cout << endl;
+                emulator_output_file << endl;
             }
         }
-        cout << endl;
+        emulator_output_file << endl;
         segments.push_back(segment);
     }
     input_file.close();
@@ -106,7 +110,7 @@ bool EmulatorWrapper::load_data_to_memory()
             memory[i + s.virtual_address] = s.data[i];
         }
     }
-    cout << "Loading data to memory ..." << endl;
+    emulator_output_file << "Loading data to memory ..." << endl;
     create_memory_snapshot("memory_snapshot_begin.txt");
     return true;
 }
@@ -129,7 +133,7 @@ void EmulatorWrapper::create_memory_snapshot(string filename)
             text_output_file << endl;
         }
     }
-    cout << endl;
+    emulator_output_file << endl;
     text_output_file.close();
 }
 
@@ -156,10 +160,10 @@ short EmulatorWrapper::read_memory(int address, int size, bool little_endian)
             // [L H] is the representation in memory
             char lower_value = memory[address];
             char higher_value = memory[address + 1];
-            cout << " _READ:Val=> " << (int)higher_value << " " << (int)lower_value;
+            emulator_output_file << " _READ:Val=> " << (int)higher_value << " " << (int)lower_value;
             // This is combination of lower and higher Byte. Lower Byte is only 8b and higher byte is expanded (its sign is expanded to the size of an int)
             short value = (short)((higher_value << 8) + (0xff & lower_value));
-            cout << " :" << value << "; READ_";
+            emulator_output_file << " :" << value << "; READ_";
             return value;
         }
         else
@@ -167,10 +171,10 @@ short EmulatorWrapper::read_memory(int address, int size, bool little_endian)
             // [H L] is the representation in memory
             char higher_value = memory[address];
             char lower_value = memory[address + 1];
-            cout << " _READ:Val=> " << (int)higher_value << " " << (int)lower_value;
+            emulator_output_file << " _READ:Val=> " << (int)higher_value << " " << (int)lower_value;
             // This is combination of lower and higher Byte. Lower Byte is only 8b and higher byte is expanded (its sign is expanded to the size of an int)
             short value = (short)((higher_value << 8) + (0xff & lower_value));
-            cout << " :" << value << "; READ_";
+            emulator_output_file << " :" << value << "; READ_";
             return value;
         }
     }
@@ -187,28 +191,28 @@ void EmulatorWrapper::write_memory(short value, int address, int size, bool litt
     {
         char lower_value = value & 0xff;
         char higher_value = (value >> 8) & 0xff;
-        cout << " _WRITE:Val: " << (int)higher_value << " " << (int)lower_value << "! ";
+        emulator_output_file << " _WRITE:Val: " << (int)higher_value << " " << (int)lower_value << "! ";
         if (little_endian)
         {
             // [L H] is the representation in memory
-            cout << " [0, 1] " << (int)memory[address] << ", " << (int)memory[address + 1] << " => ";
+            emulator_output_file << " [0, 1] " << (int)memory[address] << ", " << (int)memory[address + 1] << " => ";
             memory[address] = lower_value;
             memory[address + 1] = higher_value;
-            cout << (int)memory[address] << ", " << (int)memory[address + 1] << "; WRITE_";
+            emulator_output_file << (int)memory[address] << ", " << (int)memory[address + 1] << "; WRITE_";
         }
         else
         {
             // [H L] is the representation in memory
-            cout << " [0, 1] " << (int)memory[address] << ", " << (int)memory[address + 1] << " => ";
+            emulator_output_file << " [0, 1] " << (int)memory[address] << ", " << (int)memory[address + 1] << " => ";
             memory[address] = higher_value;
             memory[address + 1] = lower_value;
-            cout << (int)memory[address] << ", " << (int)memory[address + 1] << "; WRITE_";
+            emulator_output_file << (int)memory[address] << ", " << (int)memory[address + 1] << "; WRITE_";
         }
     }
 
     if (address == TERM_OUT)
     {
-        cout << ">>" << (char)value << "<< ; WRITE_" << flush;
+        emulator_output_file << ">>" << (char)value << "<< ; WRITE_" << flush;
         cout << (char)value << flush << endl;
     }
 }
@@ -218,23 +222,26 @@ bool EmulatorWrapper::start_emulation()
     // First 16B in memory are Interrupt Vector Table's Entries
     // 0's entry is the entry point of the programm (pc <= ivt[0])
     rpc = read_memory(START_PROGRAM_ADDRESS_ENTRY * 2, WORD);
-    cout << "PC:" << rpc << endl;
+    emulator_output_file << "PC:" << rpc << endl;
 
     // Stack pointer is pointed to (1) occupied location and grows toward (2) lower addresses
     // First address of the stack is right below memory mapped space
     rsp = MEMORY_MAPPED_REGISTERS;
-    cout << "SP:" << rsp << endl;
+    emulator_output_file << "SP:" << rsp << endl;
 
     // after starting the programm (ivt[0]) all interrupts should be allowed
     reset_flag(Tr);
     reset_flag(Tl);
     reset_flag(I);
-    cout << "PSW:" << rpsw << endl;
+    emulator_output_file << "PSW:" << rpsw << endl;
 
     // Timer and terminal have to be set up before the beginning;
-    reset_timer();        // establish initialy timer period
-    configure_terminal(); // setup terminal's functions and properties
-
+    reset_timer(); // establish initialy timer period
+    // setup terminal's (STDIN) properties
+    if (configure_terminal() == false)
+    {
+        return false;
+    }
     running = true;
 
     while (running)
@@ -248,7 +255,7 @@ bool EmulatorWrapper::start_emulation()
         }
         else
         {
-            cout << "OK(s:" << instruction_size << ")_I!" << endl;
+            emulator_output_file << "OK(s:" << instruction_size << ")_I!" << endl;
         }
         if (instruction_execute() == false)
         {
@@ -256,21 +263,24 @@ bool EmulatorWrapper::start_emulation()
         }
         else
         {
-            cout << "OK_E!" << endl;
+            emulator_output_file << "OK_E!" << endl;
         }
 
         timer_tick();
-        cout << endl;
+        emulator_output_file << endl;
 
-        //terminal_input();
-        //cout << endl;
+        read_character_from_input();
+        emulator_output_file << endl;
 
         // check interrupts:
         interrupt_requests_handler();
-        cout << endl;
+        emulator_output_file << endl;
 
-        cout << endl;
+        emulator_output_file << endl;
     }
+
+    reset_terminal();
+
     create_memory_snapshot("memory_snapshot_end.txt");
 
     return true;
@@ -282,7 +292,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
     rpc += 1;
 
     // instruction_description is consisted of: operation_code (4b) | modificator(4b)
-    cout << hex << setfill('0') << setw(2) << instruction_description << " ";
+    emulator_output_file << hex << setfill('0') << setw(2) << instruction_description << " ";
     char operation_code = (instruction_description >> 4) & 0xF;
     char modificator = instruction_description & 0xF;
 
@@ -316,7 +326,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         // another 1B needs to be fetched: description of the registers (dest|src)
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
 
         source_register_number = register_description & 0xF;
@@ -328,7 +338,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
             return false;
         }
 
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         return true;
     }
@@ -360,7 +370,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         // first is the description of the registers (dest|src)
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         if (destination_register_number != 0xF)
         {
@@ -370,15 +380,15 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         }
 
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         // second is type of addressing and type of update related register (update_type|address_type)
         short update_address_type = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << update_address_type << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << update_address_type << " ";
         update_type = (update_address_type >> 4) & 0xF;
         address_type = update_address_type & 0xF;
-        cout << hex << "(a:" << address_type << ";u:" << update_type << ") ";
+        emulator_output_file << hex << "(a:" << address_type << ";u:" << update_type << ") ";
 
         // Size of ldr instruction is 3 or 5B
         instruction_size = 3;
@@ -388,7 +398,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
             instruction_size += 2;
             instruction_payload = read_memory(rpc, WORD, false);
             rpc += 2;
-            cout << hex << setfill('0') << setw(2) << instruction_payload << " ";
+            emulator_output_file << hex << setfill('0') << setw(2) << instruction_payload << " ";
         }
 
         return true;
@@ -413,19 +423,19 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         {
             // instruction mnemonic depends on modificatios.
         case 0x0:
-            cout << " !" << (int)modificator << "->jmp! ";
+            emulator_output_file << " !" << (int)modificator << "->jmp! ";
             instruction_mnemonic = jmp;
             break;
         case 0x1:
-            cout << " !" << (int)modificator << "->jeq! ";
+            emulator_output_file << " !" << (int)modificator << "->jeq! ";
             instruction_mnemonic = jeq;
             break;
         case 0x2:
-            cout << " !" << (int)modificator << "->jne! ";
+            emulator_output_file << " !" << (int)modificator << "->jne! ";
             instruction_mnemonic = jne;
             break;
         case 0x3:
-            cout << " !" << (int)modificator << "->jgt! ";
+            emulator_output_file << " !" << (int)modificator << "->jgt! ";
             instruction_mnemonic = jgt;
             break;
 
@@ -438,7 +448,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         // first is the description of the registers (dest|src)
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         if (destination_register_number != 0xF)
         {
@@ -447,15 +457,15 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
             return false;
         }
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         // second is type of addressing and type of update related register (update_type|address_type)
         short update_address_type = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << update_address_type << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << update_address_type << " ";
         update_type = (update_address_type >> 4) & 0xF;
         address_type = update_address_type & 0xF;
-        cout << hex << "(a:" << address_type << ";u:" << update_type << ") ";
+        emulator_output_file << hex << "(a:" << address_type << ";u:" << update_type << ") ";
 
         // Size of ldr instruction is 3 or 5B
         instruction_size = 3;
@@ -465,7 +475,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
             instruction_size += 2;
             instruction_payload = read_memory(rpc, WORD, false);
             rpc += 2;
-            cout << hex << setfill('0') << setw(2) << instruction_payload << " ";
+            emulator_output_file << hex << setfill('0') << setw(2) << instruction_payload << " ";
         }
 
         return true;
@@ -485,10 +495,10 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         // This instruction is 2B size
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         return true;
     }
@@ -499,23 +509,23 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         {
             // instruction mnemonic depends on modificatios.
         case 0x0:
-            cout << " !" << (int)modificator << "->add! ";
+            emulator_output_file << " !" << (int)modificator << "->add! ";
             instruction_mnemonic = add;
             break;
         case 0x1:
-            cout << " !" << (int)modificator << "->sub! ";
+            emulator_output_file << " !" << (int)modificator << "->sub! ";
             instruction_mnemonic = sub;
             break;
         case 0x2:
-            cout << " !" << (int)modificator << "->mul! ";
+            emulator_output_file << " !" << (int)modificator << "->mul! ";
             instruction_mnemonic = mul;
             break;
         case 0x3:
-            cout << " !" << (int)modificator << "->div! ";
+            emulator_output_file << " !" << (int)modificator << "->div! ";
             instruction_mnemonic = div;
             break;
         case 0x4:
-            cout << " !" << (int)modificator << "->cmp! ";
+            emulator_output_file << " !" << (int)modificator << "->cmp! ";
             instruction_mnemonic = cmp;
             break;
 
@@ -527,10 +537,10 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
           // All aritmetic instructions have the same 2B size
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         return true;
     }
@@ -542,23 +552,23 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         {
             // instruction mnemonic depends on modificatios.
         case 0x0:
-            cout << " !" << (int)modificator << "->not! ";
+            emulator_output_file << " !" << (int)modificator << "->not! ";
             instruction_mnemonic = not_i;
             break;
         case 0x1:
-            cout << " !" << (int)modificator << "->and! ";
+            emulator_output_file << " !" << (int)modificator << "->and! ";
             instruction_mnemonic = and_i;
             break;
         case 0x2:
-            cout << " !" << (int)modificator << "->or! ";
+            emulator_output_file << " !" << (int)modificator << "->or! ";
             instruction_mnemonic = or_i;
             break;
         case 0x3:
-            cout << " !" << (int)modificator << "->xor! ";
+            emulator_output_file << " !" << (int)modificator << "->xor! ";
             instruction_mnemonic = xor_i;
             break;
         case 0x4:
-            cout << " !" << (int)modificator << "->test! ";
+            emulator_output_file << " !" << (int)modificator << "->test! ";
             instruction_mnemonic = test;
             break;
 
@@ -570,10 +580,10 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
           // All logic instructions have the same 2B size
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         return true;
     }
@@ -585,11 +595,11 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         {
             // instruction mnemonic depends on modificatios.
         case 0x0:
-            cout << " !" << (int)modificator << "->shl! ";
+            emulator_output_file << " !" << (int)modificator << "->shl! ";
             instruction_mnemonic = shl;
             break;
         case 0x1:
-            cout << " !" << (int)modificator << "->shr! ";
+            emulator_output_file << " !" << (int)modificator << "->shr! ";
             instruction_mnemonic = shr;
             break;
 
@@ -601,10 +611,10 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
           // All shift instructions have the same 2B size
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         return true;
     }
@@ -623,18 +633,18 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
         // first is the description of the registers (dest|src)
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         // second is type of addressing and type of update related register (update_type|address_type)
         short update_address_type = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << update_address_type << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << update_address_type << " ";
         update_type = (update_address_type >> 4) & 0xF;
         address_type = update_address_type & 0xF;
-        cout << hex << "(a:" << address_type << ";u:" << update_type << ") ";
+        emulator_output_file << hex << "(a:" << address_type << ";u:" << update_type << ") ";
 
         // Size of ldr instruction is 3 or 5B
         instruction_size = 3;
@@ -644,7 +654,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
             instruction_size += 2;
             instruction_payload = read_memory(rpc, WORD, false);
             rpc += 2;
-            cout << hex << setfill('0') << setw(2) << instruction_payload << " ";
+            emulator_output_file << hex << setfill('0') << setw(2) << instruction_payload << " ";
         }
 
         return true;
@@ -664,18 +674,18 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
 
         short register_description = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << register_description << " ";
         destination_register_number = (register_description >> 4) & 0xF;
         source_register_number = register_description & 0xF;
-        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+        emulator_output_file << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
 
         // second is type of addressing and type of update related register (update_type|address_type)
         short update_address_type = read_memory(rpc, BYTE);
         rpc += 1;
-        cout << hex << setfill('0') << setw(2) << update_address_type << " ";
+        emulator_output_file << hex << setfill('0') << setw(2) << update_address_type << " ";
         update_type = (update_address_type >> 4) & 0xF;
         address_type = update_address_type & 0xF;
-        cout << hex << "(a:" << address_type << ";u:" << update_type << ") ";
+        emulator_output_file << hex << "(a:" << address_type << ";u:" << update_type << ") ";
 
         // Size of ldr instruction is 3 or 5B
         instruction_size = 3;
@@ -685,7 +695,7 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
             instruction_size += 2;
             instruction_payload = read_memory(rpc, WORD, false);
             rpc += 2;
-            cout << hex << setfill('0') << setw(2) << instruction_payload << " ";
+            emulator_output_file << hex << setfill('0') << setw(2) << instruction_payload << " ";
         }
 
         return true;
@@ -703,18 +713,18 @@ void EmulatorWrapper::update_before_address_fetch_source_register()
     switch (update_type)
     {
     case no_update:
-        cout << " ,no pre update, ";
+        emulator_output_file << " ,no pre update, ";
         return;
     case pre_auto_dec:
-        cout << " ,pre update (" << registers[source_register_number] << "->";
+        emulator_output_file << " ,pre update (" << registers[source_register_number] << "->";
         registers[source_register_number] -= 2;
-        cout << registers[source_register_number] << "), ";
+        emulator_output_file << registers[source_register_number] << "), ";
 
         return;
     case pre_auto_inc:
-        cout << " ,pre update (" << registers[source_register_number] << "->";
+        emulator_output_file << " ,pre update (" << registers[source_register_number] << "->";
         registers[source_register_number] += 2;
-        cout << registers[source_register_number] << "), ";
+        emulator_output_file << registers[source_register_number] << "), ";
         return;
 
     default:
@@ -727,17 +737,17 @@ void EmulatorWrapper::update_after_address_fetch_source_register()
     switch (update_type)
     {
     case no_update:
-        cout << " ,no post update, ";
+        emulator_output_file << " ,no post update, ";
         return;
     case post_auto_dec:
-        cout << " ,post update (" << registers[source_register_number] << "->";
+        emulator_output_file << " ,post update (" << registers[source_register_number] << "->";
         registers[source_register_number] -= 2;
-        cout << registers[source_register_number] << "), ";
+        emulator_output_file << registers[source_register_number] << "), ";
         return;
     case post_auto_inc:
-        cout << " ,post update (" << registers[source_register_number] << "->";
+        emulator_output_file << " ,post update (" << registers[source_register_number] << "->";
         registers[source_register_number] += 2;
-        cout << registers[source_register_number] << "), ";
+        emulator_output_file << registers[source_register_number] << "), ";
 
     default:
         break;
@@ -752,37 +762,37 @@ short EmulatorWrapper::fetch_operand_by_addressing_type()
     case imm:
     {
         operand = instruction_payload;
-        cout << "imm+ (" << operand << ")";
+        emulator_output_file << "imm+ (" << operand << ")";
         break;
     }
     case reg_dir:
     {
         operand = registers[source_register_number];
-        cout << "reg_dir (" << operand << ")";
+        emulator_output_file << "reg_dir (" << operand << ")";
         break;
     }
     case reg_ind:
     {
         operand = read_memory(registers[source_register_number], WORD, true);
-        cout << "reg_ind+ (" << operand << ")";
+        emulator_output_file << "reg_ind+ (" << operand << ")";
         break;
     }
     case reg_ind_displ:
     {
         operand = read_memory(registers[source_register_number] + instruction_payload, WORD, true);
-        cout << "reg ind disp (" << operand << ")";
+        emulator_output_file << "reg ind disp (" << operand << ")";
         break;
     }
     case mem_dir:
     {
         operand = read_memory(instruction_payload, WORD, true);
-        cout << "mem dir (" << operand << ")";
+        emulator_output_file << "mem dir (" << operand << ")";
         break;
     }
     case reg_ind_addition:
     {
         operand = registers[source_register_number] + instruction_payload;
-        cout << "reg ind add  (" << operand << ")";
+        emulator_output_file << "reg ind add  (" << operand << ")";
         break;
     }
     default:
@@ -807,36 +817,36 @@ bool EmulatorWrapper::set_operand_by_addressing_type(short value)
     }
     case reg_dir:
     {
-        cout << "reg_dir (" << registers[source_register_number];
+        emulator_output_file << "reg_dir (" << registers[source_register_number];
         registers[source_register_number] = value;
-        cout << "->" << registers[source_register_number] << ")";
+        emulator_output_file << "->" << registers[source_register_number] << ")";
         return true;
     }
     case reg_ind:
     {
         int address_as_operand = registers[source_register_number];
 
-        cout << "reg_ind (" << read_memory(registers[source_register_number], WORD, true);
+        emulator_output_file << "reg_ind (" << read_memory(registers[source_register_number], WORD, true);
         write_memory(value, registers[source_register_number], WORD, true);
-        cout << "->" << read_memory(registers[source_register_number], WORD, true) << ")";
+        emulator_output_file << "->" << read_memory(registers[source_register_number], WORD, true) << ")";
         return true;
     }
     case reg_ind_displ:
     {
         int address_as_operand = registers[source_register_number] + instruction_payload;
 
-        cout << "reg ind disp (" << read_memory(address_as_operand, WORD, true);
+        emulator_output_file << "reg ind disp (" << read_memory(address_as_operand, WORD, true);
         write_memory(value, address_as_operand, WORD, true);
-        cout << "->" << read_memory(address_as_operand, WORD, true) << ")";
+        emulator_output_file << "->" << read_memory(address_as_operand, WORD, true) << ")";
         return true;
     }
     case mem_dir:
     {
         int address_as_operand = instruction_payload;
 
-        cout << "mem dir (" << read_memory(address_as_operand, WORD, true);
+        emulator_output_file << "mem dir (" << read_memory(address_as_operand, WORD, true);
         write_memory(value, address_as_operand, WORD, true);
-        cout << "->" << read_memory(address_as_operand, WORD, true) << ")";
+        emulator_output_file << "->" << read_memory(address_as_operand, WORD, true) << ")";
 
         return true;
     }
@@ -861,7 +871,7 @@ bool EmulatorWrapper::instruction_execute()
     case halt:
     {
         // stop the further execution of the program
-        cout << "halt! ";
+        emulator_output_file << "halt! ";
         running = false;
         return true;
     } // end of case halt
@@ -871,12 +881,12 @@ bool EmulatorWrapper::instruction_execute()
         //* push pc
         //* push psw
         //* pc <= mem[(reg[Dest] mod 8 ) * 2];
-        cout << "int r" << destination_register_number << "(" << registers[destination_register_number] << ")";
+        emulator_output_file << "int r" << destination_register_number << "(" << registers[destination_register_number] << ")";
 
         // execute instruction:
         jump_on_interrupt_routine(registers[destination_register_number]);
 
-        cout << " #> pc:" << registers[pc] << "psw:" << registers[psw];
+        emulator_output_file << " #> pc:" << registers[pc] << "psw:" << registers[psw];
         // End of int instruction, everything passed well
         return true;
     }
@@ -884,13 +894,13 @@ bool EmulatorWrapper::instruction_execute()
     {
         //* pop psw
         //* pop pc
-        cout << "iret (psw:" << registers[psw] << ",pc:" << registers[pc] << ")";
+        emulator_output_file << "iret (psw:" << registers[psw] << ",pc:" << registers[pc] << ")";
 
         // execute instruction:
         rpsw = pop_from_stack();
         rpc = pop_from_stack();
 
-        cout << " #> psw:" << registers[psw] << ",pc:" << registers[pc];
+        emulator_output_file << " #> psw:" << registers[psw] << ",pc:" << registers[pc];
         // End of iret instruction, everything passed well
         return true;
     }
@@ -899,7 +909,7 @@ bool EmulatorWrapper::instruction_execute()
     {
         //* push pc;
         //* pc <= operand
-        cout << "call ";
+        emulator_output_file << "call ";
 
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
@@ -911,25 +921,25 @@ bool EmulatorWrapper::instruction_execute()
 
         // if the update type is post_ :
         update_after_address_fetch_source_register();
-        cout << " #> " << read_memory(rsp, WORD, true) << registers[pc];
+        emulator_output_file << " #> " << read_memory(rsp, WORD, true) << registers[pc];
         // End of call instruction, everything passed well
         return true;
     } // end of case call
     case ret:
     {
         //* pop pc
-        cout << "ret pc: " << rpc;
+        emulator_output_file << "ret pc: " << rpc;
 
         // execute instruction:
         rpc = pop_from_stack();
-        cout << " #> " << registers[pc];
+        emulator_output_file << " #> " << registers[pc];
         // End of ret instruction, everything passed well
         return true;
     }
     case jmp:
     {
         //* pc <= operand
-        cout << "jmp pc = " << rpc;
+        emulator_output_file << "jmp pc = " << rpc;
 
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
@@ -945,14 +955,14 @@ bool EmulatorWrapper::instruction_execute()
         // if the update type is post_ :
         update_after_address_fetch_source_register();
 
-        cout << " #> " << registers[pc];
+        emulator_output_file << " #> " << registers[pc];
         // End of jmp instruction, everything passed well
         return true;
     }
     case jeq:
     {
         //* if(equal) pc <= operand
-        cout << "jeq pc = " << rpc << " ?psw: " << rpsw;
+        emulator_output_file << "jeq pc = " << rpc << " ?psw: " << rpsw;
 
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
@@ -969,7 +979,7 @@ bool EmulatorWrapper::instruction_execute()
         // if the update type is post_ :
         update_after_address_fetch_source_register();
 
-        cout << " #> " << registers[pc];
+        emulator_output_file << " #> " << registers[pc];
         // End of jeq instruction, everything passed well
 
         return true;
@@ -978,7 +988,7 @@ bool EmulatorWrapper::instruction_execute()
     {
         //* if(not equal) pc <= operand
 
-        cout << "jne pc = " << rpc << " ?psw: " << rpsw;
+        emulator_output_file << "jne pc = " << rpc << " ?psw: " << rpsw;
 
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
@@ -995,7 +1005,7 @@ bool EmulatorWrapper::instruction_execute()
         // if the update type is post_ :
         update_after_address_fetch_source_register();
 
-        cout << " #> " << registers[pc];
+        emulator_output_file << " #> " << registers[pc];
         // End of jne instruction, everything passed well
 
         return true;
@@ -1004,7 +1014,7 @@ bool EmulatorWrapper::instruction_execute()
     {
         //* if(signed greater) pc <= operand
 
-        cout << "jgt pc = " << rpc << " ?psw: " << rpsw;
+        emulator_output_file << "jgt pc = " << rpc << " ?psw: " << rpsw;
 
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
@@ -1021,7 +1031,7 @@ bool EmulatorWrapper::instruction_execute()
         // if the update type is post_ :
         update_after_address_fetch_source_register();
 
-        cout << " #> " << registers[pc];
+        emulator_output_file << " #> " << registers[pc];
         // End of jgt instruction, everything passed well
 
         return true;
@@ -1030,16 +1040,16 @@ bool EmulatorWrapper::instruction_execute()
     {
         //* tmp <= reg[Dest]; reg[Dest] <= reg[Src];  reg[Src] <= tmp;
 
-        cout << "xchg r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " += r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "xchg r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " <-> r" << source_register_number << "(" << registers[source_register_number] << ")";
 
         // execute intruction
         short tmp = registers[destination_register_number];
         registers[destination_register_number] = registers[source_register_number];
         registers[source_register_number] = tmp;
 
-        cout << " #> r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " += r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << " #> r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " <-> r" << source_register_number << "(" << registers[source_register_number] << ")";
 
         // End of xchg instruction, everything passed well
         return true;
@@ -1048,22 +1058,22 @@ bool EmulatorWrapper::instruction_execute()
     case add:
     {
         //* reg[Dest] <= (reg[Dest] + reg[Src])
-        cout << "add r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " += r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "add r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " += r" << source_register_number << "(" << registers[source_register_number] << ")";
         registers[destination_register_number] = registers[destination_register_number] + registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
         // End of add instruction, everything passed well
         return true;
     }
     case sub:
     {
         //* reg[Dest] <= (reg[Dest] - reg[Src])
-        cout << "sub r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " -= r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "sub r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " -= r" << source_register_number << "(" << registers[source_register_number] << ")";
         registers[destination_register_number] = registers[destination_register_number] - registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of sub instruction, everything passed well
         return true;
@@ -1071,11 +1081,11 @@ bool EmulatorWrapper::instruction_execute()
     case mul:
     {
         //* reg[Dest] <= (reg[Dest] * reg[Src])
-        cout << "mul r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " *= r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "mul r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " *= r" << source_register_number << "(" << registers[source_register_number] << ")";
         registers[destination_register_number] = registers[destination_register_number] * registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of mul instruction, everything passed well
         return true;
@@ -1083,8 +1093,8 @@ bool EmulatorWrapper::instruction_execute()
     case div:
     {
         //* reg[Dest] <= (reg[Dest] / reg[Src])
-        cout << "div r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " /= r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "div r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " /= r" << source_register_number << "(" << registers[source_register_number] << ")";
         if (registers[source_register_number] == 0)
         {
             cout << "DIVISION WITH ZERO! ";
@@ -1092,7 +1102,7 @@ bool EmulatorWrapper::instruction_execute()
         }
         registers[destination_register_number] = registers[destination_register_number] / registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of div instruction, everything passed well
         return true;
@@ -1100,10 +1110,10 @@ bool EmulatorWrapper::instruction_execute()
     case cmp:
     {
         //* temp <= (reg[Dest] - reg[Src]); update_psw(NZCO)
-        cout << "cmp r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " ? r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "cmp r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " ? r" << source_register_number << "(" << registers[source_register_number] << ")";
 
-        cout << " #psw: " << rpsw;
+        emulator_output_file << " #psw: " << rpsw;
         short temp = registers[destination_register_number] - registers[source_register_number];
         if (temp == 0)
         {
@@ -1140,7 +1150,7 @@ bool EmulatorWrapper::instruction_execute()
             reset_flag(O);
         }
 
-        cout << " #> " << registers[psw];
+        emulator_output_file << " #> " << registers[psw];
         // End of cmp instruction, everything passed well
         return true;
     }
@@ -1149,11 +1159,11 @@ bool EmulatorWrapper::instruction_execute()
     {
         //* reg[Dest] <= ~reg[Dest]
 
-        cout << "not r" << destination_register_number << "(" << registers[destination_register_number] << ")";
+        emulator_output_file << "not r" << destination_register_number << "(" << registers[destination_register_number] << ")";
 
         registers[destination_register_number] = !registers[destination_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of not instruction, everything passed well
         return true;
@@ -1161,12 +1171,12 @@ bool EmulatorWrapper::instruction_execute()
     case and_i:
     {
         //* reg[Dest] <= (reg[Dest] & reg[Src])
-        cout << "and r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " &= r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "and r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " &= r" << source_register_number << "(" << registers[source_register_number] << ")";
 
         registers[destination_register_number] = registers[destination_register_number] & registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of and instruction, everything passed well
         return true;
@@ -1174,12 +1184,12 @@ bool EmulatorWrapper::instruction_execute()
     case or_i:
     {
         //* reg[Dest] <= (reg[Dest] | reg[Src])
-        cout << "and r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " |= r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "and r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " |= r" << source_register_number << "(" << registers[source_register_number] << ")";
 
         registers[destination_register_number] = registers[destination_register_number] | registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of and instruction, everything passed well
         return true;
@@ -1187,12 +1197,12 @@ bool EmulatorWrapper::instruction_execute()
     case xor_i:
     {
         //* reg[Dest] <= (reg[Dest] ^ reg[Src])
-        cout << "and r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " ^= r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "and r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " ^= r" << source_register_number << "(" << registers[source_register_number] << ")";
 
         registers[destination_register_number] = registers[destination_register_number] ^ registers[source_register_number];
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
 
         // End of and instruction, everything passed well
         return true;
@@ -1200,10 +1210,10 @@ bool EmulatorWrapper::instruction_execute()
     case test:
     {
         //* temp <= (reg[Dest] & reg[Src]); update_psw(NZ)
-        cout << "test r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " ? r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "test r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " ? r" << source_register_number << "(" << registers[source_register_number] << ")";
 
-        cout << " #psw: " << rpsw;
+        emulator_output_file << " #psw: " << rpsw;
         short temp = registers[destination_register_number] & registers[source_register_number];
         if (temp == 0)
         {
@@ -1222,17 +1232,17 @@ bool EmulatorWrapper::instruction_execute()
             reset_flag(N);
         }
 
-        cout << " #> " << registers[psw];
+        emulator_output_file << " #> " << registers[psw];
         // End of cmp instruction, everything passed well
         return true;
     }
     case shl:
     {
         //* reg[Dest] <= reg[Dest] << reg[Src]; update_psw(NZC)
-        cout << "shl r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " << = r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "shl r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " << = r" << source_register_number << "(" << registers[source_register_number] << ")";
 
-        cout << " #psw: " << rpsw;
+        emulator_output_file << " #psw: " << rpsw;
         short prev_dest = registers[destination_register_number];
         short prev_src = registers[source_register_number];
 
@@ -1264,17 +1274,17 @@ bool EmulatorWrapper::instruction_execute()
         {
             reset_flag(C);
         }
-        cout << " #> " << registers[psw] << ";" << registers[destination_register_number] << ";;";
+        emulator_output_file << " #> " << registers[psw] << ";" << registers[destination_register_number] << ";;";
         // End of shl instruction, everything passed well
         return true;
     }
     case shr:
     {
         //* reg[Dest] <= reg[Dest] >> reg[Src]; update_psw(NZC)
-        cout << "shr r" << destination_register_number << "(" << registers[destination_register_number] << ")"
-             << " >> = r" << source_register_number << "(" << registers[source_register_number] << ")";
+        emulator_output_file << "shr r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+                             << " >> = r" << source_register_number << "(" << registers[source_register_number] << ")";
 
-        cout << " #psw: " << rpsw;
+        emulator_output_file << " #psw: " << rpsw;
         short prev_dest = registers[destination_register_number];
         short prev_src = registers[source_register_number];
 
@@ -1306,7 +1316,7 @@ bool EmulatorWrapper::instruction_execute()
         {
             reset_flag(C);
         }
-        cout << " #> " << registers[psw] << ";" << registers[destination_register_number] << ";;";
+        emulator_output_file << " #> " << registers[psw] << ";" << registers[destination_register_number] << ";;";
         // End of shr instruction, everything passed well
         return true;
     }
@@ -1314,7 +1324,7 @@ bool EmulatorWrapper::instruction_execute()
     case ldr:
     {
         //* reg[Dest] <= operand
-        cout << "ldr r" << destination_register_number << "=" << registers[destination_register_number];
+        emulator_output_file << "ldr r" << destination_register_number << "=" << registers[destination_register_number];
 
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
@@ -1327,14 +1337,14 @@ bool EmulatorWrapper::instruction_execute()
         // if the update type is post_ :
         update_after_address_fetch_source_register();
 
-        cout << " #> " << registers[destination_register_number];
+        emulator_output_file << " #> " << registers[destination_register_number];
         // End of ldr instruction, everything passed well
         return true;
     } // end of case ldr
     case str:
     {
         //* operand <= reg[Dest]
-        cout << "str r" << destination_register_number << "=" << registers[destination_register_number];
+        emulator_output_file << "str r" << destination_register_number << "=" << registers[destination_register_number];
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
 
@@ -1361,9 +1371,9 @@ bool EmulatorWrapper::instruction_execute()
 
 void EmulatorWrapper::jump_on_interrupt_routine(short entry)
 {
-    cout << " jmp to int " << entry << " a:" << (entry % 8) * 2;
+    emulator_output_file << " jmp to int " << entry << " a:" << (entry % 8) * 2;
     short address = read_memory((entry % 8) * 2, WORD, true);
-    cout << "pc: " << address;
+    emulator_output_file << "pc: " << address;
 
     // This is proper enter to interrupt
     push_on_stack(rpc);
@@ -1373,11 +1383,12 @@ void EmulatorWrapper::jump_on_interrupt_routine(short entry)
 
     set_flag(I);
     set_flag(Tr);
+    set_flag(Tl);
 }
 
 void EmulatorWrapper::interrupt_requests_handler()
 {
-    cout << "Interrupt requests handler ";
+    emulator_output_file << "Interrupt requests handler ";
     if (get_flag(I) == 0)
     {
         // Interrupts from i/o devices are allowed
@@ -1391,14 +1402,14 @@ void EmulatorWrapper::interrupt_requests_handler()
                     if (get_flag(Tr) == 0)
                     {
                         // Interrupt from timer allowed
-                        cout << "Timer ";
+                        emulator_output_file << "Timer ";
                         interrupts_requests[interrupt_line_number] = false;
-                        jump_on_interrupt_routine(2);
+                        jump_on_interrupt_routine(TIMER_ENTRY);
                         break;
                     }
                     else
                     {
-                        cout << " Tr=MASKED";
+                        emulator_output_file << " Tr=MASKED";
                     }
                 }
                 else if (interrupt_line_number == TERMINAL_LINE_NUMBER)
@@ -1407,14 +1418,14 @@ void EmulatorWrapper::interrupt_requests_handler()
                     if (get_flag(Tl) == 0)
                     {
                         // Interrupt from terminal allowed
-                        cout << "Terminal ";
+                        emulator_output_file << "Terminal ";
                         interrupts_requests[interrupt_line_number] = false;
-                        jump_on_interrupt_routine(3);
+                        jump_on_interrupt_routine(TERMINAL_ENTRY);
                         break;
                     }
                     else
                     {
-                        cout << " Tr=MASKED";
+                        emulator_output_file << " Tr=MASKED";
                     }
                 }
             }
@@ -1422,21 +1433,21 @@ void EmulatorWrapper::interrupt_requests_handler()
     }
     else
     {
-        cout << " I=MASKED ";
+        emulator_output_file << " I=MASKED ";
     }
 }
 
 void EmulatorWrapper::set_interrupt_request_on_line(int interrupt_line_number)
 {
 
-    cout << "Set >" << interrupt_line_number << "< interrupt request psw:" << rpsw << ";";
+    emulator_output_file << "Set >" << interrupt_line_number << "< interrupt request psw:" << rpsw << ";";
     // Device can send request any time. On cpu's psw is whether this request will be accepted
     if (0 <= interrupt_line_number && interrupt_line_number < NUMBER_OF_PERIFERIES)
     {
         interrupts_requests[interrupt_line_number] = true;
         for (int ir : interrupts_requests)
         {
-            cout << ir;
+            emulator_output_file << ir;
         }
     }
 }
@@ -1446,24 +1457,24 @@ void EmulatorWrapper::timer_tick()
 
     current_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-    cout << "Current time: " << dec << current_time - previous_time << hex;
+    emulator_output_file << "Current time: " << dec << current_time - previous_time << hex;
     if (current_counting == true)
     {
         if (current_time - previous_time > timer_period)
         {
-            cout << " #enough:";
+            emulator_output_file << " #enough:";
             current_counting = false;
             set_interrupt_request_on_line(TIMER_LINE_NUMBER);
         }
     }
     if (current_counting == false)
     {
-        cout << " (" << timer_period_identificator << "->";
+        emulator_output_file << " (" << timer_period_identificator << "->";
         timer_period_identificator = read_memory(TIM_CFG, WORD, true);
-        cout << timer_period_identificator << ")";
-        cout << dec << " T=" << timer_period << "->" << hex;
+        emulator_output_file << timer_period_identificator << ")";
+        emulator_output_file << dec << " T=" << timer_period << "->" << hex;
         timer_period = fetch_duration_by_identifier(timer_period_identificator); // ms
-        cout << dec << "T=" << timer_period << ")" << hex;
+        emulator_output_file << dec << "T=" << timer_period << ")" << hex;
 
         current_counting = true;
         previous_time = current_time;
@@ -1477,37 +1488,37 @@ void EmulatorWrapper::reset_timer()
     timer_period = fetch_duration_by_identifier(timer_period_identificator); // ms
     current_counting = true;
 
-    cout << "Reset timer: " << current_counting << ";" << timer_period_identificator << endl;
+    emulator_output_file << "Reset timer: " << current_counting << ";" << timer_period_identificator << endl;
 }
 
 long long int EmulatorWrapper::fetch_duration_by_identifier(short id)
 {
-    cout << " T=" << timer_period << "-> (" << id << ")";
+    emulator_output_file << " T=" << timer_period << "-> (" << id << ")";
     switch (id)
     {
     case 0x0:
-        cout << dec << 500 << "ms " << hex;
+        emulator_output_file << dec << 500 << "ms " << hex;
         return 500000;
     case 0x1:
-        cout << dec << 1000 << "ms " << hex;
+        emulator_output_file << dec << 1000 << "ms " << hex;
         return 1000000;
     case 0x2:
-        cout << dec << 1500 << "ms " << hex;
+        emulator_output_file << dec << 1500 << "ms " << hex;
         return 1500000;
     case 0x3:
-        cout << dec << 2000 << "ms " << hex;
+        emulator_output_file << dec << 2000 << "ms " << hex;
         return 2000000;
     case 0x4:
-        cout << dec << 5000 << "ms " << hex;
+        emulator_output_file << dec << 5000 << "ms " << hex;
         return 5000000;
     case 0x5:
-        cout << dec << 10000 << "ms " << hex;
+        emulator_output_file << dec << 10000 << "ms " << hex;
         return 7000000; // 10s
     case 0x6:
-        cout << dec << 30000 << "ms " << hex;
+        emulator_output_file << dec << 30000 << "ms " << hex;
         return 30000000; // 30s
     case 0x7:
-        cout << dec << 60000 << "ms " << hex;
+        emulator_output_file << dec << 60000 << "ms " << hex;
         return 60000000; // 60s
 
     default:
@@ -1515,14 +1526,99 @@ long long int EmulatorWrapper::fetch_duration_by_identifier(short id)
     }
 }
 
-void EmulatorWrapper::configure_terminal()
+struct termios stdin_backup_settings; // backup for standard input; in order to save settings before emulator execution
+volatile bool user_interrupt_emulation = false;
+
+void backup_stdin_settings()
 {
-    //Terminal is in progress
+    // At the end of emulation, this function will return initial settings (before emulation)
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &stdin_backup_settings);
+    // TCSAFLUSH option makes that all changes waits for all characters to be written to STDIN (fd), but all characters waiting to be read will be discarded
+}
+
+void restore_settings_on_user_interrupt(int signal_number)
+{
+    // This function is handler for user interrupt exeption
+    user_interrupt_emulation = true; // flag for emulation to be killed
+    backup_stdin_settings();
+}
+
+bool EmulatorWrapper::configure_terminal()
+{
+    // fetch data from STDIN_FILENO to fill backup structure
+    if (tcgetattr(STDIN_FILENO, &stdin_backup_settings) < 0)
+    {
+        string error = "Cannot fetch settings from STDIN_FILENO to save them!";
+        error_messages.push_back(error);
+        return false;
+    }
+
+    // This settings will be changed. In backup_stdi_settings are data from STDIN_FILENO
+    static struct termios changed_settings = stdin_backup_settings;
+    // c_lflag - local model:
+    // canceled: ECHO - output and ECHONL - output new line on display is canceled because all output should be done in interrupt routine if user programm implies that
+    // canceled: ICANON - canonical form is canceled so the current form is noncanonical and no constaint is implemented (c_cc[VMIN] and c_cc[VTIME] need sto be set)
+    // canceled: IEXTEN - external mode
+    changed_settings.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
+    // those are set because of canceling ICANON
+    // this is called polling read -> read(int fd, void* buf, size_t count) is immediatelly called
+    changed_settings.c_cc[VMIN] = 0;  // minimal character that should be waited for read
+    changed_settings.c_cc[VTIME] = 0; // timeout between two character that should be waited (in decisecconds)
+
+    // c_cflag - control model:
+    // canceled: CSIZE - predefined size of mask (number of bits)
+    // set:      CS8 - defined size of mask to 8b
+    // canceled: PARENB - parity bits set and check
+    changed_settings.c_cflag &= ~(CSIZE | PARENB);
+    changed_settings.c_cflag |= CS8;
+
+    // Set function that is finished after exiting from emulator
+    // This function will restore settings from STDIN which were set before changes
+    if (atexit(backup_stdin_settings) != 0)
+    {
+        string error = "Cannot backup settings to STDIN_FILENO!";
+        error_messages.push_back(error);
+        return false;
+    }
+
+    atexit(backup_stdin_settings);
+    // SIGINT is interrupt number for user generate interrupts
+    // this will set handler for this interrupt which will restore settings calling backup_stdin_settings function and then set marker user_interrupt_emulation to true
+    signal(SIGINT, restore_settings_on_user_interrupt);
+
+    // at the end fill STDIN_FILENO with changed data
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &changed_settings))
+    {
+        string error = "Cannot set changed settings to STDIN_FILENO";
+        error_messages.push_back(error);
+        return false;
+    }
+    return true;
 }
 
 void EmulatorWrapper::reset_terminal()
 {
-    //Terminal is in progress
+    backup_stdin_settings();
+}
+
+void EmulatorWrapper::read_character_from_input()
+{
+    char c;
+
+    emulator_output_file << "Read from terminal : ";
+    if (read(STDIN_FILENO, &c, 1) == 1)
+    {
+        emulator_output_file << c;
+        write_memory(c, TERM_IN, WORD, true);
+        set_interrupt_request_on_line(TERMINAL_LINE_NUMBER);
+        emulator_output_file << " ..c=" << c;
+    }
+
+    if (user_interrupt_emulation == true)
+    {
+        emulator_output_file << "User interrupted emulation!";
+        exit(1);
+    }
 }
 
 void EmulatorWrapper::reset_flag(short flag)
@@ -1542,22 +1638,22 @@ bool EmulatorWrapper::get_flag(short flag)
 
 bool EmulatorWrapper::calculate_condition(short instruction)
 {
-    cout << " !condition (";
+    emulator_output_file << " !condition (";
     switch (instruction)
     {
     case jeq:
     {
-        cout << "jeq)? psw: " << rpsw;
+        emulator_output_file << "jeq)? psw: " << rpsw;
         return get_flag(Z);
     }
     case jne:
     {
-        cout << "jeq)? psw: " << rpsw;
+        emulator_output_file << "jeq)? psw: " << rpsw;
         return !get_flag(Z);
     }
     case jgt:
     {
-        cout << "jgt)? psw: " << rpsw;
+        emulator_output_file << "jgt)? psw: " << rpsw;
 
         return !(get_flag(N) ^ get_flag(O)) & !get_flag(Z);
     }
@@ -1567,17 +1663,17 @@ bool EmulatorWrapper::calculate_condition(short instruction)
 
 void EmulatorWrapper::push_on_stack(short value)
 {
-    cout << " #Push " << value << " on stack: ";
+    emulator_output_file << " #Push " << value << " on stack: ";
     rsp -= 2;
     write_memory(value, rsp, WORD, true);
-    cout << "# ";
+    emulator_output_file << "# ";
 }
 short EmulatorWrapper::pop_from_stack()
 {
     short value = read_memory(rsp, WORD, true);
-    cout << " #Pop " << value << " from stack (sp=" << rsp << "->";
+    emulator_output_file << " #Pop " << value << " from stack (sp=" << rsp << "->";
     rsp += 2;
-    cout << rsp << "# ";
+    emulator_output_file << rsp << "# ";
 
     return value;
 }

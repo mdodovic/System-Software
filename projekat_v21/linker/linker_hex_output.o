@@ -14,7 +14,7 @@ Section: ivt :{
 	}
 
 Section: text :{
-	# linker_input_projmain.o		text	linker_input_projmain.o:	7c [1000,107c)
+	# linker_input_projmain.o		text	linker_input_projmain.o:	8c [1000,108c)
 	}
 
 Section table
@@ -23,7 +23,7 @@ ffffffff	ABSOLUTE	0008	0000
 0	UNDEFINED	0000	0000
 1	data	0002	2000
 2	ivt	0010	0000
-3	text	007c	1000
+3	text	008c	1000
 
 Symbol table
 Value	Type	Section		Name		Id
@@ -35,14 +35,14 @@ Value	Type	Section		Name		Id
 102d	l		text		isr_terminal	0006
 1005	l		text		isr_timer	0007
 0000	l		ivt		ivt	0002
-102e	l		text		main	0008
+103e	l		text		main	0008
 2000	g		data		myCounter	0009
 ff02	l		ABSOLUTE		term_in	000a
 ff00	l		ABSOLUTE		term_out	000b
 1000	l		text		text	0003
 ff10	l		ABSOLUTE		tim_cfg	000c
-1033	l		text		tim_loop	000d
-104c	l		text		wait	000e
+1043	l		text		tim_loop	000d
+105c	l		text		wait	000e
 
 Relocation data
 Offset	Type		Dat/Ins	Symbol		Section name
@@ -58,11 +58,11 @@ Offset	Type		Dat/Ins	Symbol		Section name
 		linker_input_projmain.o
 001b	R_HYP_16_PC	i		myCounter		text
 		linker_input_projmain.o
-0046	R_HYP_16_PC	i		myCounter		text
+0056	R_HYP_16_PC	i		myCounter		text
 		linker_input_projmain.o
-0050	R_HYP_16	i		myCounter		text
+0060	R_HYP_16	i		myCounter		text
 		linker_input_projmain.o
-0063	R_HYP_16	i		text		text
+0073	R_HYP_16	i		text		text
 		linker_input_projmain.o
 
 Content:
@@ -82,20 +82,22 @@ Section data <ivt>:
 
 
 Section data <text>:
-1000   50 ff 00 10 2e b0 06 12 
+1000   50 ff 00 10 3e b0 06 12 
 1008   b0 36 12 a0 0f 04 20 00 
 1010   a0 3f 00 00 01 70 03 b0 
 1018   07 03 0f e4 a0 0f 00 00 
 1020   54 b0 0f 04 ff 00 a0 36 
-1028   42 a0 06 42 20 20 a0 1f 
-1030   00 00 05 a0 0f 00 00 53 
-1038   b0 0f 04 ff 00 a0 5f 00 
-1040   00 00 b0 57 03 0f b9 b0 
-1048   1f 04 ff 10 a0 0f 04 20 
-1050   00 a0 2f 00 00 02 a0 3f 
-1058   00 00 01 90 32 74 03 52 
-1060   ff 00 10 4c 60 31 a0 2f 
-1068   00 00 01 71 32 60 31 a0 
-1070   4f 00 00 00 74 14 53 f7 
-1078   05 ff b8 00 
+1028   42 a0 06 42 20 b0 06 12 
+1030   a0 0f 04 ff 02 b0 0f 04 
+1038   ff 00 a0 06 42 20 a0 1f 
+1040   00 00 05 a0 0f 00 00 53 
+1048   b0 0f 04 ff 00 a0 5f 00 
+1050   00 00 b0 57 03 0f a9 b0 
+1058   1f 04 ff 10 a0 0f 04 20 
+1060   00 a0 2f 00 00 02 a0 3f 
+1068   00 00 01 90 32 74 03 52 
+1070   ff 00 10 5c 60 31 a0 2f 
+1078   00 00 01 71 32 60 31 a0 
+1080   4f 00 00 00 74 14 53 f7 
+1088   05 ff b8 00 
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <chrono>
 
 #include "EmulatorWrapper.h"
 //#include "EmulatorConstants.h"
@@ -18,6 +19,10 @@ int EmulatorWrapper::ERROR_IN_PROGRAM_ENTRY = 1;      // entry in ivt error (inv
 int EmulatorWrapper::TIMER_ENTRY = 2;                 // entry in ivt for timer interrupts
 int EmulatorWrapper::TERMINAL_ENTRY = 3;              // entry in ivt for terminal interrupts
 
+int EmulatorWrapper::NUMBER_OF_PERIFERIES = 2; // number of periferies that can send interrupt request (=2 in this case)
+int EmulatorWrapper::TERMINAL_LINE_NUMBER = 0; // index of terminal line request
+int EmulatorWrapper::TIMER_LINE_NUMBER = 1;    // index of timer line request
+
 short EmulatorWrapper::TERM_OUT = 0xFF00; // data out register (data goes on displey)
 short EmulatorWrapper::TERM_IN = 0xFF02;  // data in register (data fetched from displey goes to this register)
 short EmulatorWrapper::TIM_CFG = 0xFF10;  // configure time register
@@ -25,8 +30,10 @@ short EmulatorWrapper::TIM_CFG = 0xFF10;  // configure time register
 EmulatorWrapper::EmulatorWrapper(string input_file_name_)
     : input_file_name(input_file_name_),
       memory(MEMORY_SIZE, 0), registers(REGISTER_NUMBER, 0),
-      running(false), emulator_output_file("emulator_useful_output.txt")
+      running(false), emulator_output_file("emulator_useful_output.txt"),
+      interrupts_requests(NUMBER_OF_PERIFERIES, false), current_counting(false)
 {
+    previous_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 bool EmulatorWrapper::collect_data_from_relocatible_files()
@@ -225,7 +232,7 @@ bool EmulatorWrapper::start_emulation()
     cout << "PSW:" << rpsw << endl;
 
     // Timer and terminal have to be set up before the beginning;
-    reset_timer();
+    reset_timer(); // establish initialy timer period
     reset_terminal();
 
     running = true;
@@ -252,9 +259,15 @@ bool EmulatorWrapper::start_emulation()
             cout << "OK_E!" << endl;
         }
 
-        // check interrupts:
+        timer_tick();
+        cout << endl;
+
         // from timer
         // from terminal
+        // check interrupts:
+
+        interrupt_requests_handler();
+        cout << endl;
 
         cout << endl;
     }
@@ -861,11 +874,9 @@ bool EmulatorWrapper::instruction_execute()
         cout << "int r" << destination_register_number << "(" << registers[destination_register_number] << ")";
 
         // execute instruction:
-        push_on_stack(rpc);
-        push_on_stack(rpsw);
-        rpc = read_memory((registers[destination_register_number] % 8) * 2, WORD, true);
+        jump_on_interrupt_routine(registers[destination_register_number]);
 
-        cout << " #> " << registers[pc];
+        cout << " #> pc:" << registers[pc] << "psw:" << registers[psw];
         // End of int instruction, everything passed well
         return true;
     }
@@ -1255,6 +1266,7 @@ bool EmulatorWrapper::instruction_execute()
         }
         cout << " #> " << registers[psw] << ";" << registers[destination_register_number] << ";;";
         // End of shl instruction, everything passed well
+        return true;
     }
     case shr:
     {
@@ -1296,6 +1308,7 @@ bool EmulatorWrapper::instruction_execute()
         }
         cout << " #> " << registers[psw] << ";" << registers[destination_register_number] << ";;";
         // End of shr instruction, everything passed well
+        return true;
     }
 
     case ldr:
@@ -1345,9 +1358,161 @@ bool EmulatorWrapper::instruction_execute()
     } // end of instruction switch
     return true;
 }
+
+void EmulatorWrapper::jump_on_interrupt_routine(short entry)
+{
+    cout << " jmp to int " << entry << " a:" << (entry % 8) * 2;
+    short address = read_memory((entry % 8) * 2, WORD, true);
+    cout << "pc: " << address;
+
+    // This is proper enter to interrupt
+    push_on_stack(rpc);
+    push_on_stack(rpsw);
+
+    rpc = read_memory((entry % 8) * 2, WORD, true);
+
+    set_flag(I);
+    set_flag(Tr);
+}
+
+void EmulatorWrapper::interrupt_requests_handler()
+{
+    cout << "Interrupt requests handler ";
+    if (get_flag(I) == 0)
+    {
+        // Interrupts from i/o devices are allowed
+        for (int interrupt_line_number = 0; interrupt_line_number < NUMBER_OF_PERIFERIES; interrupt_line_number++)
+        {
+            if (interrupts_requests[interrupt_line_number] == true)
+            {
+                if (interrupt_line_number == TIMER_LINE_NUMBER)
+                {
+                    // this is interrupt from timer: check if this interrupt is allowed
+                    if (get_flag(Tr) == 0)
+                    {
+                        // Interrupt from timer allowed
+                        cout << "Timer ";
+                        interrupts_requests[interrupt_line_number] = false;
+                        jump_on_interrupt_routine(2);
+                        break;
+                    }
+                    else
+                    {
+                        cout << " Tr=MASKED";
+                    }
+                }
+                else if (interrupt_line_number == TERMINAL_LINE_NUMBER)
+                {
+                    // this is interrupt from terminal: check if this interrupt is allowed
+                    if (get_flag(Tl) == 0)
+                    {
+                        // Interrupt from terminal allowed
+                        cout << "Terminal ";
+                        interrupts_requests[interrupt_line_number] = false;
+                        jump_on_interrupt_routine(3);
+                        break;
+                    }
+                    else
+                    {
+                        cout << " Tr=MASKED";
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        cout << " I=MASKED ";
+    }
+}
+
+void EmulatorWrapper::set_interrupt_request_on_line(int interrupt_line_number)
+{
+
+    cout << "Set >" << interrupt_line_number << "< interrupt request psw:" << rpsw << ";";
+    // Device can send request any time. On cpu's psw is whether this request will be accepted
+    if (0 <= interrupt_line_number && interrupt_line_number < NUMBER_OF_PERIFERIES)
+    {
+        interrupts_requests[interrupt_line_number] = true;
+        for (int ir : interrupts_requests)
+        {
+            cout << ir;
+        }
+    }
+}
+
+void EmulatorWrapper::timer_tick()
+{
+
+    current_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+    cout << "Current time: " << dec << current_time - previous_time << hex;
+    if (current_counting == true)
+    {
+        if (current_time - previous_time > timer_period)
+        {
+            cout << " #enough:";
+            current_counting = false;
+            set_interrupt_request_on_line(TIMER_LINE_NUMBER);
+        }
+    }
+    if (current_counting == false)
+    {
+        cout << " (" << timer_period_identificator << "->";
+        timer_period_identificator = read_memory(TIM_CFG, WORD, true);
+        cout << timer_period_identificator << ")";
+        cout << dec << " T=" << timer_period << "->" << hex;
+        timer_period = fetch_duration_by_identifier(timer_period_identificator); // ms
+        cout << dec << "T=" << timer_period << ")" << hex;
+
+        current_counting = true;
+        previous_time = current_time;
+    }
+}
+
 void EmulatorWrapper::reset_timer()
 {
     //Timer is in progress
+    timer_period_identificator = 0x0;
+    timer_period = fetch_duration_by_identifier(timer_period_identificator); // ms
+    current_counting = true;
+
+    cout << "Reset timer: " << current_counting << ";" << timer_period_identificator << endl;
+}
+
+long long int EmulatorWrapper::fetch_duration_by_identifier(short id)
+{
+    cout << " T=" << timer_period << "-> (" << id << ")";
+    switch (id)
+    {
+    case 0x0:
+        cout << dec << 500 << " " << hex;
+        return 500;
+    case 0x1:
+        cout << dec << 1000 << " " << hex;
+        return 1000;
+    case 0x2:
+        cout << dec << 1500 << " " << hex;
+        return 1500;
+    case 0x3:
+        cout << dec << 2000 << " " << hex;
+        return 2000;
+    case 0x4:
+        cout << dec << 5000 << " " << hex;
+        return 5000;
+    case 0x5:
+        cout << dec << 10000 << " " << hex;
+        return 10000; // 10s
+    case 0x6:
+        cout << dec << 30000 << " " << hex;
+        return 30000; // 30s
+    case 0x7:
+        cout << dec << 60000 << " " << hex;
+        return 60000; // 60s
+
+    default:
+        return 500;
+    }
 }
 
 void EmulatorWrapper::reset_terminal()

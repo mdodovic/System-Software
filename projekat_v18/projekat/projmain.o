@@ -6,7 +6,7 @@ Id	Name		Size
 0	UNDEFINED	0000
 3	data	0002
 1	ivt	0010
-2	text	0059
+2	text	0062
 
 
 Symbol table:
@@ -16,16 +16,16 @@ Value	Type	Section		Name		Id
 0054	l	ABSOLUTE	asciiCode	0003
 0000	l	data	data	000f
 0000	l	text	isr_reset	0009
-0005	l	text	isr_terminal	000a
-0020	l	text	isr_timer	000b
+0016	l	text	isr_terminal	000b
+0005	l	text	isr_timer	000a
 0000	l	ivt	ivt	0002
-0021	l	text	main	000c
+0017	l	text	main	000c
 0000	g	data	myCounter	0007
 ff02	l	ABSOLUTE	term_in	0005
 ff00	l	ABSOLUTE	term_out	0004
 0000	l	text	text	0008
 ff10	l	ABSOLUTE	tim_cfg	0006
-0026	l	text	tim_loop	000d
+001c	l	text	tim_loop	000d
 002b	l	text	wait	000e
 
 
@@ -59,41 +59,44 @@ Offset	Type		Dat/Ins	Symbol	Section name
 Section data <ivt>:
 0000: 00 00 
 0002: 00 00 
-0004: 20 00 
-0006: 05 00 
+0004: 05 00 
+0006: 16 00 
 0008: 00 00 00 00 00 00 00 00 
 
 Relocation data <text>:
 Offset	Type		Dat/Ins	Symbol	Section name
 0004	R_HYP_16	i	text	text
-0011	R_HYP_16	i	myCounter	text
+0025	R_HYP_16_PC	i	myCounter	text
 002f	R_HYP_16	i	myCounter	text
-0039	R_HYP_16_PC	i	myCounter	text
-0040	R_HYP_16	i	text	text
+003b	R_HYP_16_PC	i	myCounter	text
+0049	R_HYP_16	i	text	text
 
 Section data <text>:
-0000: 50 ff 00 00 21 
+0000: 50 ff 00 00 17 
 0005: b0 06 12 
-0008: a0 0f 00 00 01 
-000d: b0 0f 04 00 00 
-0012: a0 0f 00 00 54 
-0017: b0 0f 04 ff 00 
-001c: a0 06 42 
-001f: 20 
-0020: 20 
-0021: a0 1f 00 00 07 
+0008: a0 0f 00 00 54 
+000d: b0 0f 04 ff 00 
+0012: a0 06 42 
+0015: 20 
+0016: 20 
+0017: a0 1f 00 00 06 
+001c: a0 5f 00 00 00 
+0021: b0 57 03 ff fe 
 0026: b0 1f 04 ff 10 
 002b: a0 0f 04 00 00 
-0030: a0 3f 00 00 05 
-0035: b0 37 03 ff fe 
-003a: 74 03 
-003c: 52 ff 00 00 2b 
-0041: 60 31 
-0043: a0 2f 00 00 01 
-0048: 71 32 
+0030: a0 3f 00 00 01 
+0035: 70 03 
+0037: b0 07 03 ff fe 
+003c: a0 2f 00 00 03 
+0041: 90 32 
+0043: 74 03 
+0045: 52 ff 00 00 2b 
 004a: 60 31 
-004c: a0 4f 00 00 00 
-0051: 74 14 
-0053: 53 f7 05 ff ce 
-0058: 00 
+004c: a0 2f 00 00 01 
+0051: 71 32 
+0053: 60 31 
+0055: a0 4f 00 00 00 
+005a: 74 14 
+005c: 53 f7 05 ff bb 
+0061: 00 
 

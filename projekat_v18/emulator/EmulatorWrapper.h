@@ -144,8 +144,28 @@ class EmulatorWrapper
     bool get_flag(short);
     bool calculate_condition(short);
 
+    // Interrupts
+    vector<bool> interrupts_requests; // this simulates interrupt request lines from periferies to cpu
+                                      // there are only 2 periferies: terminal and timer
+                                      // priorities are terminal(0) and then timer(1) and that are the enties in this array
+
+    void set_interrupt_request_on_line(int); // set interrupt request from device
+    void interrupt_requests_handler();       // check if some i/o device send interrupt request
+    void jump_on_interrupt_routine(short);   // jump on interrupt routine with given ivt entry (first argument)
+                                             // push(pc); push(psw); pc = mem[(entry % 8) * 2];
+
     // Timer
+    short timer_period_identificator; // detemine which period should the timer reach
+    long long int timer_period;       // defined period by timer_period_identifier
+
+    bool current_counting; // if the timer is currently in counding period or new counting should start
+
+    long long int previous_time;
+    long long int current_time;
+
+    long long int fetch_duration_by_identifier(short); // return period in *ms* defermined by timer_period_identificator
     void reset_timer();
+    void timer_tick();
 
     // Terminal
     void reset_terminal();
@@ -170,6 +190,10 @@ public:
     static int ERROR_IN_PROGRAM_ENTRY;      // entry in ivt error (invalid instruction, invalid addressing type, zero division ...) happened
     static int TIMER_ENTRY;                 // entry in ivt for timer interrupts
     static int TERMINAL_ENTRY;              // entry in ivt for terminal interrupts
+
+    static int NUMBER_OF_PERIFERIES; // number of periferies that can send interrupt request (=2 in this case)
+    static int TERMINAL_LINE_NUMBER; // index of terminal line request
+    static int TIMER_LINE_NUMBER;    // index of timer line request
 
     static short TERM_OUT; // data out register (data goes on displey)
     static short TERM_IN;  // data in register (data fetched from displey goes to this register)

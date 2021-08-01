@@ -99,6 +99,18 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
+    if (linker.solve_relocations() == false)
+    {
+        linker.print_error_messages();
+        return -1;
+    }
+
+    if (linker.solve_content_of_sections() == false)
+    {
+        linker.print_error_messages();
+        return -1;
+    }
+
     linker.fill_output_file();
 
     // , place_file, mapped_section_address, hex_output, linkable_output different functions!

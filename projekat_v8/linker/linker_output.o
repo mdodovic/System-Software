@@ -1,0 +1,73 @@
+Linker output
+
+Helper info:
+Section: ABSOLUTE :{
+	# linker_input_projinterrupts.o		ABSOLUTE	linker_input_projinterrupts.o:	2 [2,4)
+	# linker_input_projmain.o		ABSOLUTE	linker_input_projmain.o:	2 [0,2)
+	}
+
+Section: data :{
+	# linker_input_projinterrupts.o		data	linker_input_projinterrupts.o:	16 [14,2a)
+	# linker_input_projmain.o		data	linker_input_projmain.o:	14 [0,14)
+	}
+
+Section: ivtp :{
+	# linker_input_projmain.o		ivtp	linker_input_projmain.o:	10 [0,10)
+	}
+
+Section: text :{
+	# linker_input_projinterrupts.o		text	linker_input_projinterrupts.o:	1c [43,5f)
+	# linker_input_projmain.o		text	linker_input_projmain.o:	43 [0,43)
+	}
+
+Section table
+Id	Name		Size	VA
+ffffffff	ABSOLUTE	0004	0000
+0	UNDEFINED	0000	0000
+0	data	002a	0000
+1	ivtp	0010	0000
+2	text	005f	0000
+
+Symbol table
+Value	Type	Section		Name		Id
+0000	l		ABSOLUTE		ABSOLUTE	ffff
+0014	g		data		A_location	0008
+0000	l		data		A_text	0003
+0016	g		data		B_text	0009
+0005	g		ABSOLUTE		B_value	000a
+ff00	g		ABSOLUTE		PRINT_REG	0004
+0000	l		UNDEFINED		UNDEFINED	0000
+0000	l		data		data	0000
+0000	l		ivtp		ivtp	0001
+0000	l		text		keyboard	0005
+0043	l		text		loop_print	000b
+0002	l		text		main	0006
+0043	g		text		print	000c
+0000	l		text		text	0002
+0001	l		text		timer	0007
+
+Relocation data
+Offset	Type		Dat/Ins	Symbol		Section name
+0000	R_HYP_16	d		text		ivtp
+		linker_input_projmain.o
+0004	R_HYP_16	d		text		ivtp
+		linker_input_projmain.o
+0006	R_HYP_16	d		text		ivtp
+		linker_input_projmain.o
+0006	R_HYP_16	i		data		text
+		linker_input_projmain.o
+000b	R_HYP_16	i		print		text
+		linker_input_projmain.o
+0010	R_HYP_16	i		A_location		text
+		linker_input_projmain.o
+0026	R_HYP_16	i		B_text		text
+		linker_input_projmain.o
+002b	R_HYP_16	i		print		text
+		linker_input_projmain.o
+0030	R_HYP_16	i		A_location		text
+		linker_input_projmain.o
+004a	R_HYP_16	i		PRINT_REG		text
+		linker_input_projinterrupts.o
+005d	R_HYP_16	i		text		text
+		linker_input_projinterrupts.o
+

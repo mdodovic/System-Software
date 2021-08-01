@@ -23,10 +23,16 @@ private:
     {
         bool is_data;        // is this relocation of data or of instruction
         string section_name; // where to relocate, current section!
-        int offset;          // which byte is the start byte for relocation
-        string type;         // type of relocation
-        string symbol_name;  // which symbol is relocated ! (for local symbol it is the section where it is defined)
-        int addend;          // unused, leaved here for eventually
+
+        //*** This is offset from the beginning of the aggregate section
+        int offset; // which byte is the start byte for relocation;
+
+        string type;        // type of relocation
+        string symbol_name; // which symbol is relocated ! (for local symbol it is the section where it is defined)
+        int addend;         // unused, leaved here for eventually
+
+        //This represents input file from which this relocation belongs to.
+        string filename; // used only for local symbols, when the section name is written in relocation data;
     };
     struct SectionTable
     {
@@ -46,9 +52,10 @@ private:
     };
 
     // contains symbols relocations and sections per input file
-    map<string, map<string, SymbolTable>> symbol_table_per_file;
+    // key is filename
+    map<string, map<string, SymbolTable>> symbol_table_per_file; // inner key is symbol name
     map<string, vector<RelocationTable>> relocation_table_per_file;
-    map<string, map<string, SectionTable>> section_table_per_file;
+    map<string, map<string, SectionTable>> section_table_per_file; // inner key is section name
 
     map<string, SymbolTable> output_symbol_table;
     vector<RelocationTable> output_relocation_table;
@@ -59,12 +66,18 @@ private:
 
     vector<string> error_messages;
 
-    map<string, vector<SectionAdditionalData>> section_additional_helper;
+    map<string, map<string, SectionAdditionalData>> section_additional_helper;
+    // helper info for linker to know where are the sections from input files
+    // first key is section name, and second key is the input file name
 
     bool linkable_output;
     map<string, int> mapped_section_address;
 
     int fetch_start_address_of_section(string);
+    bool solve_relocations_linkable();
+    bool solve_relocations_hex();
+    bool solve_content_of_sections_linkable();
+    bool solve_content_of_sections_hex();
 
 public:
     LinkerWrapper(string, vector<string>, bool, map<string, int>);
@@ -72,6 +85,8 @@ public:
     bool collect_data_from_relocatible_files();
     bool create_aggregate_sections();
     bool create_aggregate_symbol_table();
+    bool solve_relocations();
+    bool solve_content_of_sections();
 
     void print_error_messages();
 

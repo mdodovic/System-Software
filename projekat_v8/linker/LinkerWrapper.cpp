@@ -224,7 +224,7 @@ int LinkerWrapper::fetch_start_address_of_section(string section_name)
     {
         //    map<string, int> mapped_section_address;)
         cout << "This is in progress" << endl;
-        return -1;
+        exit(-1);
     }
 }
 
@@ -249,7 +249,7 @@ bool LinkerWrapper::create_aggregate_sections()
         for (map<string, SectionTable>::iterator it = section_table_per_file[filename].begin(); it != section_table_per_file[filename].end(); it++)
         {
             cout << it->second.id_section << "\t" << it->first << "=" << it->second.section_name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << endl;
-            if (it->second.section_name == "UNDEFINED" || it->second.section_name == "ABSOLUTE")
+            if (it->second.section_name == "UNDEFINED") // || it->second.section_name == "ABSOLUTE")
             {
                 continue;
             }
@@ -260,7 +260,7 @@ bool LinkerWrapper::create_aggregate_sections()
             additional_data.start_addres_in_aggregate_section = previous_end[it->second.section_name];
             previous_end[it->second.section_name] = previous_end[it->second.section_name] + additional_data.parent_section_size;
 
-            section_additional_helper[it->second.section_name].push_back(additional_data);
+            section_additional_helper[it->second.section_name][filename] = additional_data;
         }
     }
 
@@ -293,11 +293,16 @@ bool LinkerWrapper::create_aggregate_sections()
 
 bool LinkerWrapper::create_aggregate_symbol_table()
 {
+    int next_symbol_id = 0;
     for (map<string, SectionTable>::iterator it = output_section_table.begin();
          it != output_section_table.end(); it++)
     {
         SymbolTable symbol;
         symbol.id_symbol = it->second.id_section;
+        if (symbol.id_symbol > next_symbol_id)
+        {
+            next_symbol_id = symbol.id_symbol;
+        }
         symbol.is_defined = true;
         symbol.is_extern = false;
         symbol.is_local = true;
@@ -306,36 +311,206 @@ bool LinkerWrapper::create_aggregate_symbol_table()
         symbol.value = it->second.virtual_memory_address;
         output_symbol_table[symbol.name] = symbol;
     }
-    /*    for (string filename : files_to_be_linked)
+    next_symbol_id += 1;
+    map<string, SymbolTable> extern_symbols_from_every_file;
+
+    for (string filename : files_to_be_linked)
     {
-
         cout << "File: " << filename << endl;
-        map<string, SymbolTable> symbol_table = symbol_table_per_file[filename];
-
-        for (map<string, SymbolTable>::iterator it = symbol_table.begin(); it != symbol_table.end(); it++)
+        map<string, SymbolTable> symbol_table_of_file = symbol_table_per_file[filename];
+        for (map<string, SymbolTable>::iterator it = symbol_table_of_file.begin(); it != symbol_table_of_file.end(); it++)
         {
-            cout << hex << setfill('0') << setw(4) << (0xffff & it->second.value) << "\t";
-            // extern symbols?
-            if (it->second.is_local == true)
-                cout << "l\t";
+            if (it->second.name == it->second.section)
+            {
+                // sections are already in symbol table!
+                continue;
+            }
+            // check if the symbol is extern - put it sideward for further discussion!
+            if (it->second.is_extern == true)
+            {
+                cout << "Extern( " << filename << ": " << it->second.name << ")" << endl;
+                extern_symbols_from_every_file[it->first] = it->second;
+                continue;
+            }
+
+            // check if symbol is already in symbol table
+            // it can be undefined or defined
+            map<string, SymbolTable>::iterator sym = output_symbol_table.find(it->first);
+
+            if (sym != output_symbol_table.end())
+            {
+                // symbol exists in the symbol table
+                // and it is not extern => this is multiple definition!
+                string error_message = "Symbol " + sym->first + " is already defined!";
+                error_messages.push_back(error_message);
+                return false;
+            }
             else
             {
-                if (it->second.is_defined == true)
-                    cout << "g\t";
-                else
+                // symbol does not exists in the symbol table:
+                // add offset of the section in output file
+                // for -linkable this is just a position of the section into aggregate section
+                // for -hex this is offset into aggregate section and offset of the beginning of the aggregate section
+                // both increments are into section_additional_helper.start_address_in_aggregate_section
+                cout << "->" << it->first << "=" << it->second.name << ":" << it->second.is_defined << it->second.is_extern << endl;
+                it->second.id_symbol = next_symbol_id++;
+                cout << "Should be added: " << section_additional_helper[it->second.section][filename].start_addres_in_aggregate_section << endl;
+                if (it->second.section != "ABSOLUTE")
                 {
-                    if (it->second.is_extern)
-                        cout << "e\t";
-                    else
-                        cout << "u\t"; // undefined
+                    // if this is absolute symbol, no action needs, because this symbol has constant value
+                    it->second.value = it->second.value + section_additional_helper[it->second.section][filename].start_addres_in_aggregate_section;
                 }
+                output_symbol_table[it->first] = it->second;
             }
-            cout << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
+        }
+    }
+    for (map<string, SymbolTable>::iterator it = extern_symbols_from_every_file.begin();
+         it != extern_symbols_from_every_file.end(); it++)
+    {
+        map<string, SymbolTable>::iterator sym = output_symbol_table.find(it->first);
+
+        if (sym != output_symbol_table.end())
+        {
+            cout << "HERE: " << sym->first << "!" << endl;
+        }
+        else
+        {
+            cout << "EXTERNAL" << endl;
+            if (linkable_output == false)
+            {
+                cout << "This is in progress" << endl;
+                exit(-1);
+            }
+            else
+            {
+                it->second.id_symbol = next_symbol_id++;
+                output_symbol_table[it->first] = it->second;
+            }
+        }
+    }
+    return true;
+}
+
+bool LinkerWrapper::solve_relocations_linkable()
+{
+    // Output file should be linkable with others relocatible files.
+    // All necessary relocations remains in object file
+    for (string filename : files_to_be_linked)
+    {
+        vector<RelocationTable> relocation_table = relocation_table_per_file[filename];
+
+        for (RelocationTable rel_data : relocation_table)
+        {
+            cout << filename << ":" << rel_data.section_name;
+            cout << "(+" << section_additional_helper[rel_data.section_name][filename].start_addres_in_aggregate_section;
+            cout << "-" << output_section_table[rel_data.section_name].virtual_memory_address << ")"
+                 << "\t#";
+            cout << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
+            RelocationTable output_relocation_data;
+            output_relocation_data.addend = rel_data.addend;
+            output_relocation_data.is_data = rel_data.is_data;
+            // this offset is created:
+            // offset in initial section
+            // + offset of this initial section in the aggregate section
+            // - offset of this aggregate section in memory
+            // hence this offset is offset in aggregate section which starts at the position 0 in the memory
+            // Be careful to add aggregate section offset to this saved offset to reach exact byte!
+            output_relocation_data.offset = rel_data.offset + section_additional_helper[rel_data.section_name][filename].start_addres_in_aggregate_section - output_section_table[rel_data.section_name].virtual_memory_address;
+
+            output_relocation_data.section_name = rel_data.section_name;
+            output_relocation_data.symbol_name = rel_data.symbol_name;
+            output_relocation_data.type = rel_data.type;
+            output_relocation_data.filename = filename; // this is only useful when symbol is section name (relocation data related to local symbol)
+            output_relocation_table.push_back(output_relocation_data);
         }
         cout << dec;
     }
-    */
     return true;
+}
+
+bool LinkerWrapper::solve_relocations_hex()
+{
+    exit(-1);
+    return true;
+}
+
+bool LinkerWrapper::solve_relocations()
+{
+    if (linkable_output == true)
+        return solve_relocations_linkable();
+    else
+        return solve_relocations_hex();
+}
+
+bool LinkerWrapper::solve_content_of_sections_linkable()
+{
+    for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
+    {
+        string section_name = it->first;
+        cout << "Section: " << section_name << "(" << it->second.size << ")" << endl;
+        if (it->second.size == 0)
+        {
+            // If there is no data, nothing to be done with this section in this file!
+            continue;
+        }
+
+        for (string filename : files_to_be_linked)
+        {
+            cout << "File: " << filename << endl;
+            // Ovo ovde nije dobro, proveri da li ima fajla i sekcije u sec_tabl_p_file i onda dalje...
+            // ako ima i ako ima sta u sekciji (size > 0), tada citaj data
+            /*
+            vector<int> section_file_offsets = this->section_table_per_file[filename][section_name].offsets;
+            cout << this->section_table_per_file[filename][section_name].size << endl;
+            if (this->section_table_per_file[filename][section_name].size == 0)
+{
+    //if there is no data in section per file
+                continue;
+        }cout << section_file_offsets.size() << endl;
+            cout << (0 < section_file_offsets.size() - 1) << endl;
+            for (int i = 0; i < section_file_offsets.size() - 1; i++)
+            {
+                cout << "Hi" << endl;
+                int current_offset = section_file_offsets[i];
+                int next_offset = section_file_offsets[i + 1];
+                cout << ":" << current_offset << "->" << next_offset << endl;
+                cout << hex << setfill('0') << setw(4) << (0xffff & (current_offset + section_additional_helper[section_name][filename].start_addres_in_aggregate_section)) << ": ";
+                for (int j = current_offset; j < next_offset; j++)
+                {
+                    char c = this->section_table_per_file[filename][section_name].data[j];
+                    cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+                }
+                cout << endl;
+            }
+            cout << dec;
+            // Last directive which is in memory
+            int current_offset = offsets[offsets.size() - 1];
+            int next_offset = this->section_table_per_file[filename][section_name].data.size();
+            cout << hex << setfill('0') << setw(4) << (0xffff & (current_offset + section_additional_helper[section_name][filename].start_addres_in_aggregate_section)) << ": ";
+            for (int j = current_offset; j < next_offset; j++)
+            {
+                char c = this->section_table_per_file[filename][section_name].data[j];
+                cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            }
+            cout << endl;
+            */
+        }
+    }
+    return true;
+}
+
+bool LinkerWrapper::solve_content_of_sections_hex()
+{
+    exit(-1);
+    return true;
+}
+
+bool LinkerWrapper::solve_content_of_sections()
+{
+    if (linkable_output == true)
+        return solve_content_of_sections_linkable();
+    else
+        return solve_content_of_sections_hex();
 }
 
 void LinkerWrapper::print_error_messages()
@@ -449,17 +624,25 @@ void LinkerWrapper::fill_output_file()
     text_output_file << "Helper info:" << endl;
     text_output_file << hex;
 
-    for (map<string, vector<SectionAdditionalData>>::iterator it = section_additional_helper.begin();
-         it != section_additional_helper.end(); it++)
+    for (map<string, map<string, SectionAdditionalData>>::iterator it_section = section_additional_helper.begin();
+         it_section != section_additional_helper.end(); it_section++)
     {
-        text_output_file << "Section: " << it->first << endl;
-        for (SectionAdditionalData additional_data : it->second)
+        text_output_file << "Section: " << it_section->first << " :{" << endl;
+        for (map<string, SectionAdditionalData>::iterator it_filename = it_section->second.begin();
+             it_filename != it_section->second.end(); it_filename++)
         {
-            text_output_file << "\t" << additional_data.section_name << "\t" << additional_data.parent_file_name;
+            text_output_file << "\t"
+                             << "# " << it_filename->first;
+            SectionAdditionalData additional_data = it_filename->second;
+
+            text_output_file << "\t\t" << additional_data.section_name << "\t" << additional_data.parent_file_name;
             text_output_file << ":\t" << additional_data.parent_section_size;
             text_output_file << " [" << additional_data.start_addres_in_aggregate_section << ",";
-            text_output_file << additional_data.start_addres_in_aggregate_section + additional_data.parent_section_size << ")" << endl;
+            text_output_file << additional_data.start_addres_in_aggregate_section + additional_data.parent_section_size << ")";
+
+            text_output_file << endl;
         }
+        text_output_file << "\t}" << endl;
         text_output_file << endl;
     }
 
@@ -494,8 +677,21 @@ void LinkerWrapper::fill_output_file()
                     text_output_file << "u\t"; // undefined
             }
         }
-        text_output_file << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
+        text_output_file << "\t" << it->second.section << "\t\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
     }
 
     text_output_file << dec;
+    text_output_file << endl;
+    text_output_file << "Relocation data" << endl;
+    text_output_file << "Offset\tType\t\tDat/Ins\tSymbol\t\tSection name" << endl;
+
+    for (RelocationTable rel_data : output_relocation_table)
+    {
+        text_output_file << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset);
+        text_output_file << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t";
+        text_output_file << "\t" << rel_data.symbol_name << "\t\t" << rel_data.section_name << endl;
+        text_output_file << "\t\t" << rel_data.filename << endl;
+    }
+    text_output_file << dec;
+    text_output_file << endl;
 }

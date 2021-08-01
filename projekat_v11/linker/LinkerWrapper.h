@@ -76,6 +76,11 @@ private:
     bool move_sections_to_virtual_address();
     bool intersect_of_two_sections(int, int, int, int);
     bool check_places_of_sections();
+    bool solve_relocations_on_data_linkable();
+    bool solve_relocations_on_data_hex();
+
+    void fill_output_text_file();
+    void fill_output_binary_file();
 
 public:
     static int MEMORY_MAPPED_REGISTERS;

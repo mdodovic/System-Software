@@ -109,14 +109,13 @@ int main(int argc, const char *argv[])
         linker.print_error_messages();
         return -1;
     }
-    /*
 
     if (linker.solve_relocations_on_data() == false)
     {
         linker.print_error_messages();
         return -1;
     }
-*/
+
     linker.fill_output_file();
 
     // , place_file, mapped_section_address, hex_output, linkable_output different functions!

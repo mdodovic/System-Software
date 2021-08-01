@@ -1,0 +1,106 @@
+Linker output
+
+Helper info:
+Section: ABSOLUTE :{
+	# linker_input_linker_linkable_output.o		ABSOLUTE	linker_input_linker_linkable_output.o:	4 [0,4)
+	}
+
+Section: data :{
+	# linker_input_linker_linkable_output.o		data	linker_input_linker_linkable_output.o:	2a [105a,1084)
+	}
+
+Section: ivtp :{
+	# linker_input_linker_linkable_output.o		ivtp	linker_input_linker_linkable_output.o:	10 [100,110)
+	}
+
+Section: text :{
+	# linker_input_linker_linkable_output.o		text	linker_input_linker_linkable_output.o:	5a [1000,105a)
+	}
+
+Section table
+Id	Name		Size	VA
+ffffffff	ABSOLUTE	0004	0000
+0	UNDEFINED	0000	0000
+1	data	002a	105a
+2	ivtp	0010	0100
+3	text	005a	1000
+
+Symbol table
+Value	Type	Section		Name		Id
+0000	l		ABSOLUTE		ABSOLUTE	ffff
+106e	g		data		A_location	0004
+105a	l		data		A_text	0005
+1070	g		data		B_text	0006
+0005	g		ABSOLUTE		B_value	0007
+ff00	g		ABSOLUTE		PRINT_REG	0008
+0000	l		UNDEFINED		UNDEFINED	0000
+105a	l		data		data	0001
+0100	l		ivtp		ivtp	0002
+1000	l		text		keyboard	0009
+103e	l		text		loop_print	000a
+1002	l		text		main	000b
+103e	g		text		print	000c
+1000	l		text		text	0003
+1001	l		text		timer	000d
+
+Relocation data
+Offset	Type		Dat/Ins	Symbol		Section name
+0000	R_HYP_16	d		text		ivtp
+		linker_input_linker_linkable_output.o
+0004	R_HYP_16	d		text		ivtp
+		linker_input_linker_linkable_output.o
+0006	R_HYP_16	d		text		ivtp
+		linker_input_linker_linkable_output.o
+0006	R_HYP_16	i		data		text
+		linker_input_linker_linkable_output.o
+000b	R_HYP_16	i		print		text
+		linker_input_linker_linkable_output.o
+0010	R_HYP_16	i		A_location		text
+		linker_input_linker_linkable_output.o
+0015	R_HYP_16_PC	i		A_location		text
+		linker_input_linker_linkable_output.o
+0026	R_HYP_16	i		B_text		text
+		linker_input_linker_linkable_output.o
+002b	R_HYP_16_PC	i		print		text
+		linker_input_linker_linkable_output.o
+0030	R_HYP_16	i		B_value		text
+		linker_input_linker_linkable_output.o
+0045	R_HYP_16	i		PRINT_REG		text
+		linker_input_linker_linkable_output.o
+0058	R_HYP_16	i		text		text
+		linker_input_linker_linkable_output.o
+
+Content:
+Section data <ABSOLUTE>:
+0000   00 ff 05 00 
+
+Section data <UNDEFINED>:
+
+
+Section data <data>:
+105a   41 00 20 00 56 00 41 00 
+1062   4c 00 55 00 45 00 3a 00 
+106a   20 00 00 00 04 00 42 00 
+1072   20 00 56 00 41 00 4c 00 
+107a   55 00 45 00 3a 00 20 00 
+1082   00 00 
+
+Section data <ivtp>:
+0100   02 10 00 00 01 10 00 10 
+0108   00 00 00 00 00 00 00 00 
+
+
+Section data <text>:
+1000   20 20 a0 2f 00 10 5a 30 
+1008   ff 00 10 3e a0 3f 04 10 
+1010   6e a0 37 03 00 58 a0 1f 
+1018   00 00 30 70 31 b0 3f 04 
+1020   ff 00 a0 2f 00 10 70 30 
+1028   f7 05 00 12 a0 3f 04 00 
+1030   05 a0 1f 00 00 30 70 31 
+1038   b0 3f 04 ff 00 00 a0 32 
+1040   02 b0 3f 04 ff 00 a0 1f 
+1048   00 00 05 70 21 a0 1f 00 
+1050   00 00 74 21 52 ff 00 10 
+1058   3e 40 
+

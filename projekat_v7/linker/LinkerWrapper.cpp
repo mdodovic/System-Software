@@ -212,26 +212,41 @@ bool LinkerWrapper::collect_data_from_relocatible_files()
     return true;
 }
 
+int LinkerWrapper::fetch_start_address_of_section(string section_name)
+{
+    if (linkable_output)
+    {
+        // This option ingores every -place options and set all sections on offset 0
+        // this also means that the output of -linkable option is relocatible file which can be linked again
+        return 0;
+    }
+    else
+    {
+        //    map<string, int> mapped_section_address;)
+        cout << "This is in progress" << endl;
+        return -1;
+    }
+}
+
 bool LinkerWrapper::create_aggregate_sections()
 {
 
     map<string, int> previous_end;
-
-    for (map<string, map<string, SectionTable>>::iterator it_pf = section_table_per_file.begin();
-         it_pf != section_table_per_file.end(); it_pf++)
+    for (string filename : files_to_be_linked)
     {
-        for (map<string, SectionTable>::iterator it = it_pf->second.begin(); it != it_pf->second.end(); it++)
+        cout << "File: " << filename << endl;
+        for (map<string, SectionTable>::iterator it = section_table_per_file[filename].begin(); it != section_table_per_file[filename].end(); it++)
         {
             previous_end[it->second.section_name] = 0;
         }
     }
 
-    for (map<string, map<string, SectionTable>>::iterator it_pf = section_table_per_file.begin();
-         it_pf != section_table_per_file.end(); it_pf++)
+    for (string filename : files_to_be_linked)
     {
-        cout << "File: " << it_pf->first << endl;
 
-        for (map<string, SectionTable>::iterator it = it_pf->second.begin(); it != it_pf->second.end(); it++)
+        cout << "File: " << filename << endl;
+
+        for (map<string, SectionTable>::iterator it = section_table_per_file[filename].begin(); it != section_table_per_file[filename].end(); it++)
         {
             cout << it->second.id_section << "\t" << it->first << "=" << it->second.section_name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << endl;
             if (it->second.section_name == "UNDEFINED" || it->second.section_name == "ABSOLUTE")
@@ -239,7 +254,7 @@ bool LinkerWrapper::create_aggregate_sections()
                 continue;
             }
             SectionAdditionalData additional_data;
-            additional_data.parent_file_name = it_pf->first; // this is file where this section is present!
+            additional_data.parent_file_name = filename; // this is file where this section is present!
             additional_data.parent_section_size = it->second.size;
             additional_data.section_name = it->second.section_name;
             additional_data.start_addres_in_aggregate_section = previous_end[it->second.section_name];
@@ -249,19 +264,77 @@ bool LinkerWrapper::create_aggregate_sections()
         }
     }
 
-    int id_section = 1;
+    int id_section = 0;
     for (map<string, int>::iterator it = previous_end.begin();
          it != previous_end.end(); it++)
     {
         SectionTable next_section_table;
-        next_section_table.id_section = id_section++;
         next_section_table.section_name = it->first;
+        if (it->first == "UNDEFINED")
+        {
+            next_section_table.id_section = 0;
+        }
+        else if (it->first == "ABSOLUTE")
+        {
+            next_section_table.id_section = -1;
+        }
+        else
+        {
+            next_section_table.id_section = id_section++;
+        }
         next_section_table.size = it->second;
-        next_section_table.virtual_memory_address = 0;
+        next_section_table.virtual_memory_address = fetch_start_address_of_section(next_section_table.section_name);
 
         this->output_section_table[it->first] = next_section_table;
     }
 
+    return true;
+}
+
+bool LinkerWrapper::create_aggregate_symbol_table()
+{
+    for (map<string, SectionTable>::iterator it = output_section_table.begin();
+         it != output_section_table.end(); it++)
+    {
+        SymbolTable symbol;
+        symbol.id_symbol = it->second.id_section;
+        symbol.is_defined = true;
+        symbol.is_extern = false;
+        symbol.is_local = true;
+        symbol.name = it->second.section_name;
+        symbol.section = it->second.section_name;
+        symbol.value = it->second.virtual_memory_address;
+        output_symbol_table[symbol.name] = symbol;
+    }
+    /*    for (string filename : files_to_be_linked)
+    {
+
+        cout << "File: " << filename << endl;
+        map<string, SymbolTable> symbol_table = symbol_table_per_file[filename];
+
+        for (map<string, SymbolTable>::iterator it = symbol_table.begin(); it != symbol_table.end(); it++)
+        {
+            cout << hex << setfill('0') << setw(4) << (0xffff & it->second.value) << "\t";
+            // extern symbols?
+            if (it->second.is_local == true)
+                cout << "l\t";
+            else
+            {
+                if (it->second.is_defined == true)
+                    cout << "g\t";
+                else
+                {
+                    if (it->second.is_extern)
+                        cout << "e\t";
+                    else
+                        cout << "u\t"; // undefined
+                }
+            }
+            cout << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
+        }
+        cout << dec;
+    }
+    */
     return true;
 }
 
@@ -391,10 +464,37 @@ void LinkerWrapper::fill_output_file()
     }
 
     text_output_file << "Section table" << endl;
-    text_output_file << "Id\tName\t\tSize" << endl;
+    text_output_file << "Id\tName\t\tSize\tVA" << endl;
     for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
     {
-        text_output_file << it->second.id_section << "\t" << it->second.section_name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << endl;
+        text_output_file << it->second.id_section << "\t" << it->second.section_name << "\t";
+        text_output_file << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << "\t";
+        text_output_file << hex << setfill('0') << setw(4) << (0xffff & it->second.virtual_memory_address) << endl;
+    }
+
+    text_output_file << dec;
+    text_output_file << endl;
+    text_output_file << "Symbol table" << endl;
+    text_output_file << "Value\tType\tSection\t\tName\t\tId" << endl;
+    for (map<string, SymbolTable>::iterator it = output_symbol_table.begin(); it != output_symbol_table.end(); it++)
+    {
+        text_output_file << hex << setfill('0') << setw(4) << (0xffff & it->second.value) << "\t";
+        // extern symbols?
+        if (it->second.is_local == true)
+            text_output_file << "l\t";
+        else
+        {
+            if (it->second.is_defined == true)
+                text_output_file << "g\t";
+            else
+            {
+                if (it->second.is_extern)
+                    text_output_file << "e\t";
+                else
+                    text_output_file << "u\t"; // undefined
+            }
+        }
+        text_output_file << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
     }
 
     text_output_file << dec;

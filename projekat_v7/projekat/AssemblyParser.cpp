@@ -1953,12 +1953,15 @@ void AssemblyParser::print_section_data()
          << endl;
     for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
     {
-        if (it->first == "UNDEFINED")
+        //if (it->first == "UNDEFINED")
+        //    continue;
+        //        if (it->first == "ABSOLUTE")
+        //            continue;
+        cout << "Section: " << it->first << "(" << it->second.size << ")" << endl;
+        if (it->second.size == 0)
+        {
             continue;
-        if (it->first == "ABSOLUTE")
-            continue;
-        cout << "Section: " << it->first << endl;
-
+        }
         SectionTable s_table = it->second;
         int counter = 0;
         cout << "?" << s_table.data.size() << "=" << s_table.offsets.size() << endl;

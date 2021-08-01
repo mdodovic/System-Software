@@ -64,11 +64,14 @@ private:
     bool linkable_output;
     map<string, int> mapped_section_address;
 
+    int fetch_start_address_of_section(string);
+
 public:
     LinkerWrapper(string, vector<string>, bool, map<string, int>);
 
     bool collect_data_from_relocatible_files();
     bool create_aggregate_sections();
+    bool create_aggregate_symbol_table();
 
     void print_error_messages();
 

@@ -93,6 +93,11 @@ int main(int argc, const char *argv[])
         linker.print_error_messages();
         return -1;
     }
+    if (linker.create_aggregate_symbol_table() == false)
+    {
+        linker.print_error_messages();
+        return -1;
+    }
 
     linker.fill_output_file();
 

@@ -18,10 +18,10 @@ regex rx_find_columns_spaces(" ?: ?");
 // Odavde treba proveriti nadole:
 
 // helper strings
-string sh_literal_decimal = "-?[0-9]+";     // this is a decimal number (positive or negative)
-string sh_literal_hexadecimal = "0x[0-9]+"; // this is a hexadecimal number
-string sh_symbol = "[a-zA-Z][a-zA-Z0-9_]*"; // symbol can start only with letter and can contain letters, digits and _
-string sh_register_range = "[0-7]";         // there are 8 registers: r0 - r7
+string sh_literal_decimal = "-?[0-9]+";        // this is a decimal number (positive or negative)
+string sh_literal_hexadecimal = "0x[0-9A-F]+"; // this is a hexadecimal number
+string sh_symbol = "[a-zA-Z][a-zA-Z0-9_]*";    // symbol can start only with letter and can contain letters, digits and _
+string sh_register_range = "[0-7]";            // there are 8 registers: r0 - r7
 
 // combined helper strings
 string sh_symbol_or_literal = sh_symbol + "|" + sh_literal_decimal + "|" + sh_literal_hexadecimal;
@@ -30,7 +30,7 @@ string sh_symbol_or_literal = sh_symbol + "|" + sh_literal_decimal + "|" + sh_li
 regex rx_global_directive("^\\.global (" + sh_symbol + "(," + sh_symbol + ")*)$");
 regex rx_extern_directive("^\\.extern (" + sh_symbol + "(," + sh_symbol + ")*)$");
 regex rx_section_directive("^\\.section (" + sh_symbol + ")$");
-regex rx_word_directive("^\\.word (" + sh_symbol_or_literal + "(," + sh_symbol_or_literal + ")*)$");
+regex rx_word_directive("^\\.word ((" + sh_symbol_or_literal + ")(,(" + sh_symbol_or_literal + "))*)$");
 regex rx_skip_directive("^\\.skip (" + sh_literal_decimal + "|" + sh_literal_hexadecimal + ")$");
 regex rx_equ_directive("^\\.equ (" + sh_symbol + "),(" + sh_literal_decimal + "|" + sh_literal_hexadecimal + ")$");
 regex rx_end_directive("^\\.end$");
@@ -41,4 +41,11 @@ regex rx_end_directive("^\\.end$");
 regex rx_label_only("^(" + sh_symbol + "):$");             // nothing is after label
 regex rx_label_with_command("^(" + sh_symbol + "):(.*)$"); // something is after label
 
+// data - symbols and numbers - regexes
+regex rx_symbol("^(" + sh_symbol + ")$");
+regex rx_literal_decimal("^(" + sh_literal_decimal + ")$");
+regex rx_literal_hexadecimal("^(" + sh_literal_hexadecimal + ")$");
+
+regex rx_no_operand_instruction("^(halt|iret|ret)$");
+//regex rx_one_operand_data_instruction("^()$")
 #endif //ASSEMBLY_REGEXES_H

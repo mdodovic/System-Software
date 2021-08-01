@@ -29,23 +29,24 @@ private:
     };
     struct RelocationTable
     {
-        string section_name;
-        int offset;
-        string type;
-        int number_in_symbol_table;
-        int addend; // unused
+        string section_name; // where to relocate, current section!
+        int offset;          // which byte is the start byte for relocation
+        string type;         // type of relocation
+        string symbol_name;  // which symbol is relocated ! (for local symbol it is the section where it is defined)
+        int addend;          // unused, leaved here for eventually
     };
-    struct SectionData
+    /*struct SectionData
     {
         int offset;                         // offset: location counter from second pass
         vector<char> binary_representation; // data for the output file byte-per-byte
-    };
+    };*/
     struct SectionTable
     {
-        int id_section;           // sequence number of section
-        string section_name;      // name of section
-        int size;                 // size of section
-        vector<SectionData> data; // Encapsulated data (offset, data)
+        int id_section;      // sequence number of section
+        string section_name; // name of section
+        int size;            // size of section
+        vector<int> offsets; // beginning of data -> location_counter
+        vector<char> data;   // data at offset in vector offsets
     };
 
     int location_counter;
@@ -59,9 +60,21 @@ private:
     bool process_section(string);
     bool process_global_symbol(string);
     bool process_extern_symbol(string);
+    bool process_equ_symbol(string, string);
+    bool process_skip_first_pass(string);
+    bool process_skip_second_pass(string);
+    bool process_word_first_pass(string);
+    bool process_word_second_pass(string);
+
+    bool process_instruction_first_pass(string);
+    bool process_instruction_second_pass(string);
+
+    int fetch_decimal_value_from_literal(string);
+    string get_hexadecimal_value_from_decimal(int);
 
     bool clear_input_file();
     bool first_assembly_pass();
+    bool second_assembly_pass();
 
 public:
     AssemblyParser(string);
@@ -70,5 +83,6 @@ public:
     void print_relocation_table();
     void print_section_table();
     void print_section_data();
+    void print_error_messages();
 };
 #endif //ASSEMBLY_H

@@ -1,0 +1,313 @@
+    1  gnu --version
+    2  gcc --version
+    3  ls
+    4  cd Desktop/
+    5  ls
+    6  cd ss_vezbanje/
+    7  ls
+    8  mkdir v01-vezbanje
+    9  sudo snap install vlc
+   10  ls
+   11  cd Desktop/
+   12  ls
+   13  cd ss_vezbanje/
+   14  ls
+   15  cd v01-vezbanje/02_hello/
+   16  ls
+   17  cd ..
+   18  ls
+   19  mv -r 02_hello/ 02_symbols
+   20  ls
+   21  ./run.sh 
+   22  gcc -o symbol symbol.c  symbol_definition.s 
+   23  ./symbol 
+   24  gcc -o symbol symbol.c  symbol_definition.s 
+   25  ./run.sh 
+   26  clear
+   27  ./run.sh 
+   28  gcc -o hello.o hello.c
+   29  cd v01-vezbanje/
+   30  gcc -o hello.o hello.c
+   31  ls
+   32  clear
+   33  ./hello.o 
+   34  gcc -o hello.o hello.c
+   35  ./hello.o 
+   36  gcc man
+   37  gcc -m
+   38  clear
+   39  rm hello.o 
+   40  gcc -o hello hello.c
+   41  ls
+   42  ./hello 
+   43  objdump --disassemble --syms -Mintel hello > disassemble.txt
+   44  touch run.ch
+   45  nano run.ch 
+   46  open run.ch 
+   47  mov run.ch run.sh
+   48  mv run.ch run.sh
+   49  ls
+   50  chmor u+x run.sh 
+   51  chmod u+x run.sh 
+   52  ./run.sh 
+   53  cd 01_hello/
+   54  ./run.sh 
+   55  cd ..
+   56  cd 02_hello/
+   57  ls
+   58  touch symbol_definition.s
+   59  touch symbol.c
+   60  clear
+   61  touch run.sh
+   62  chmod u+x run.sh 
+   63  ./run.sh 
+   64  ls
+   65  cd v01-assembly-x86-64-primeri/
+   66  ls
+   67  cd 03-stack-smashing/
+   68  ls
+   69  gcc -o executable stack_smashing.c 
+   70  ./executable 
+   71  gcc -o executable -fno-stack-protector stack_smashing.c 
+   72  ./executable 
+   73  gcc -g -o executable -fno-stack-protector stack_smashing.c 
+   74  ./executable 
+   75  ls
+   76  gcc -g -o executable -fno-stack-protector stack_smashing.c 
+   77  ./executable 
+   78  gdb executable 
+   79  cd ..
+   80  cd 05-convention-memory-representation/
+   81  ls
+   82  ./run.sh 
+   83  ./executable 
+   84  cd ..
+   85  cd 06-convention-argument-passing/
+   86  ./run.sh 
+   87  cd Desktop/
+   88  cd ss_vezbanje/
+   89  ls
+   90  cd v01-vezbanje/
+   91  ls
+   92  cd 03_stack/
+   93  ls
+   94  nano run.sh
+   95  chmod u+x run.sh 
+   96  ./run.sh 
+   97  emacs -nw run.sh 
+   98  nano run.sh
+   99  ./run.sh 
+  100  ls
+  101  ./exec 
+  102  ./run.sh 
+  103  ./exec 
+  104  cd ..
+  105  ls
+  106  cd v01-assembly-x86-64-primeri/
+  107  ls
+  108  cd 03-stack-smashing/
+  109  ls
+  110  nano run.sh 
+  111  ./run.sh 
+  112  ./executable 
+  113  nano run.sh 
+  114  ./run.sh 
+  115  ./executable 
+  116  nano run.sh 
+  117  ./run.sh 
+  118  ./executable 
+  119  echo ./run.sh 
+  120  cat ./run.sh 
+  121  nano run.sh 
+  122  cat ./run.sh 
+  123  ./run.sh 
+  124  ./executable 
+  125  nano run.sh 
+  126  ./run.sh 
+  127  cat run.sh 
+  128  ./executable 
+  129  nano run.sh 
+  130  ./run.sh 
+  131  ./executable 
+  132  cd ..
+  133  ls
+  134  cd v01-assembly-x86-64-primeri/
+  135  ls
+  136  cd 05-convention-memory-representation/
+  137  ls
+  138  cd //
+  139  cd ..
+  140  ls
+  141  cd home/
+  142  cd ss/
+  143  ls
+  144  cd
+  145  ls
+  146  cd Desktop/
+  147  cd ss_vezbanje/
+  148  cd v01-assembly-x86-64-primeri/
+  149  ls
+  150  cd 06-convention-argument-passing/
+  151  ls
+  152  echo __NR_write | cpp --include sys/syscall.h
+  153  man towrite
+  154  man toWrite
+  155  man 2 write
+  156  man 2 exit
+  157  echo __NR_exit | cpp --include sys/syscall.h
+  158  man 2 exit
+  159  ls
+  160  cd v01-vezbanje/
+  161  ls
+  162  cd 07_syscall/
+  163  ls
+  164  as -o syscall.o syscall.s 
+  165  ld -o exec syscall.o
+  166  as -o syscall.o syscall.s 
+  167  ld -o exec syscall.o
+  168  ls
+  169  ./exec 
+  170  as -o syscall.o syscall.s 
+  171  ld -o exec syscall.o
+  172  ./exec 
+  173  as -o syscall.o syscall.s 
+  174  ld -o exec syscall.o
+  175  ./exec 
+  176  cd ..
+  177  ls
+  178  cd 08_syscall_wraper/
+  179  ls
+  180  as -o syscall_wrapers.o syscall_wrapers.s 
+  181  ld -o exec --dynamic-linker /lib/x86-64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapers.o --library c
+  182  ./exec 
+  183  ls
+  184  as -o syscall_wrapers.o syscall_wrapers.s 
+  185  ld -o executable --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapper.o --library c
+  186  ls
+  187  rm exec 
+  188  ls
+  189  as -o syscall_wrapper.o syscall_wrapers.syscall_wrapper.s
+  190  as -o syscall_wrapper.o syscall_wrapers.s
+  191  ls
+  192  rm *.o
+  193  as -o syscall_wrapper.o syscall_wrapers.s
+  194  ls
+  195  ld -o executable syscall_wrap--dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapsyscall_wrapper.o syscall_wrap--library c
+  196  ld -o exec  --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrap.o --library c
+  197  ld -o exec  --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wraper.o --library c
+  198  ld -o exec  --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapper.o --library c
+  199  ./exec 
+  200  ls
+  201  chmod u+x run.sh 
+  202  ./run.sh 
+  203  ls
+  204  ./exec 
+  205  rm exec 
+  206  rm syscall_wrapper.o 
+  207  ls
+  208  ./run.sh 
+  209  ls
+  210  ./run.sh 
+  211  ls
+  212  ./executable 
+  213  cd ..
+  214  cd 09_syscall_crt/
+  215  chmod u+x run.sh 
+  216  ./run.sh 
+  217  ls
+  218  ./executable 
+  219  ls
+  220  cd jun_2020/
+  221  ls
+  222  gcc -o foo.exe foo.c 
+  223  ls
+  224  objdump --disassemble --syms -Mintel foo.exe > foo.s
+  225  gcc -o foo.exe foo.c 
+  226  gcc -o foo.s -s foo.c 
+  227  gcc -o foo.o -c foo.c
+  228  objdump --disassemble -Mintel foo.o > foo.s
+  229  gcc -g0 -o foo.o -c foo.c
+  230  objdump --disassemble -Mintel foo.o > foo.s
+  231  gcc -g2 -o foo.o -c foo.c
+  232  objdump --disassemble -Mintel foo.o > foo.s
+  233  gcc -g2 -o foo.o -c foo.c
+  234  objdump --disassemble -Mintel foo.o > foo.s
+  235  gcc -o foo.o -c foo.c
+  236  objdump --disassemble -Mintel foo.o > foo.s
+  237  gcc -g6 -o foo.o -c foo.c
+  238  gcc -g5 -o foo.o -c foo.c
+  239  gcc -g4 -o foo.o -c foo.c
+  240  gcc -g3 -o foo.o -c foo.c
+  241  objdump --disassemble -Mintel foo.o > foo3.s
+  242  touch 1.s
+  243  ls
+  244  nano 1.s
+  245  ls
+  246  g++ -o main.exe main.cpp Klasa.cpp 
+  247  ./main.exe 
+  248  ./main.exe test_simple_labels.s 
+  249  notepad-plus-plus -v
+  250  ls
+  251  gcc man
+  252  man gcc
+  253  g++ -o main.exe main.cpp 
+  254  ./main.exe 
+  255  g++ -o main.exe main.cpp 
+  256  ./main.exe 
+  257  g++ -o main.exe main.cpp 
+  258  g++ -o main.exe main.cpp Klasa.cpp 
+  259  ./main.exe 
+  260  g++ -o main.exe main.cpp Klasa.cpp 
+  261  ./main.exe 
+  262  ./main.exe test_simple_labels.s
+  263  g++ -o main.exe main.cpp Klasa.cpp 
+  264  ./main.exe test_simple_labels.s
+  265  g++ -o main.exe main.cpp Klasa.cpp 
+  266  ./main.exe test_simple_labels.s
+  267  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  268  ./main.exe 
+  269  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  270  ./main.exe 
+  271  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  272  ./main.exe ./tests/proba.s 
+  273  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  274  ./main.exe ./tests/proba.s 
+  275  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  276  ./main.exe ./tests/proba.s 
+  277  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  278  ./main.exe ./tests/proba.s 
+  279  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  280  ./main.exe ./tests/proba.s 
+  281  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  282  ./main.exe ./tests/proba.s 
+  283  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  284  ./main.exe ./tests/proba.s 
+  285  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  286  ./main.exe ./tests/proba.s 
+  287  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  288  ./main.exe ./tests/proba.s 
+  289  as -o ./tests/proba.o ./tests/proba.s 
+  290  objdump -hstr ./tests/proba.o 
+  291  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  292  ./main.exe ./tests/proba.s 
+  293  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  294  ./main.exe ./tests/proba.s 
+  295  ./main.exe ./tests/proba1.s 
+  296  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  297  ./main.exe ./tests/proba1.s 
+  298  ./main.exe ./tests/proba.s 
+  299  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  300  ./main.exe ./tests/proba1.s 
+  301  ./main.exe ./tests/proba.s 
+  302  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  303  ./main.exe ./tests/proba.s 
+  304  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  305  ./main.exe ./tests/proba.s 
+  306  as -o ./tests/proba.o ./tests/proba.s 
+  307  objdump -hstr ./tests/proba.o 
+  308  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  309  objdump -hstr ./tests/proba.o 
+  310  ./main.exe ./tests/proba.s 
+  311  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  312  history 
+  313  history > history1

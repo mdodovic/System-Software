@@ -74,14 +74,12 @@ private:
     map<string, int> mapped_section_address;
 
     bool move_sections_to_virtual_address();
-    int fetch_start_address_of_section(string);
-    bool create_aggregate_relocations_linkable();
-    bool create_aggregate_relocations_hex();
-    bool create_aggregate_content_of_sections_linkable();
-    bool create_aggregate_content_of_sections_hex();
+    bool intersect_of_two_sections(int, int, int, int);
     bool check_places_of_sections();
 
 public:
+    static int MEMORY_MAPPED_REGISTERS;
+
     LinkerWrapper(string, vector<string>, bool, map<string, int>);
 
     bool collect_data_from_relocatible_files();

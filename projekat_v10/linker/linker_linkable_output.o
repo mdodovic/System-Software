@@ -1,0 +1,137 @@
+Linker output
+
+Helper info:
+Section: ABSOLUTE :{
+	# linker_input_projinterrupts.o		ABSOLUTE	linker_input_projinterrupts.o:	2 [2,4)
+	# linker_input_projmain.o		ABSOLUTE	linker_input_projmain.o:	2 [0,2)
+	}
+
+Section: data :{
+	# linker_input_projinterrupts.o		data	linker_input_projinterrupts.o:	16 [14,2a)
+	# linker_input_projmain.o		data	linker_input_projmain.o:	14 [0,14)
+	}
+
+Section: ivtp :{
+	# linker_input_projmain.o		ivtp	linker_input_projmain.o:	10 [0,10)
+	}
+
+Section: text :{
+	# linker_input_projinterrupts.o		text	linker_input_projinterrupts.o:	1c [3e,5a)
+	# linker_input_projmain.o		text	linker_input_projmain.o:	3e [0,3e)
+	}
+
+Section table
+Id	Name		Size	VA
+ffffffff	ABSOLUTE	0004	0000
+0	UNDEFINED	0000	0000
+1	data	002a	0000
+2	ivtp	0010	0000
+3	text	005a	0000
+
+Symbol table
+Value	Type	Section		Name		Id
+0000	l		ABSOLUTE		ABSOLUTE	ffff
+0014	g		data		A_location	0009
+0000	l		data		A_text	0004
+0016	g		data		B_text	000a
+0005	g		ABSOLUTE		B_value	000b
+ff00	g		ABSOLUTE		PRINT_REG	0005
+0000	l		UNDEFINED		UNDEFINED	0000
+0000	l		data		data	0001
+0000	l		ivtp		ivtp	0002
+0000	l		text		keyboard	0006
+003e	l		text		loop_print	000c
+0002	l		text		main	0007
+003e	g		text		print	000d
+0000	l		text		text	0003
+0001	l		text		timer	0008
+
+Relocation data
+Offset	Type		Dat/Ins	Symbol		Section name
+0000	R_HYP_16	d		text		ivtp
+		linker_input_projmain.o
+0004	R_HYP_16	d		text		ivtp
+		linker_input_projmain.o
+0006	R_HYP_16	d		text		ivtp
+		linker_input_projmain.o
+0006	R_HYP_16	i		data		text
+		linker_input_projmain.o
+000b	R_HYP_16	i		print		text
+		linker_input_projmain.o
+0010	R_HYP_16	i		A_location		text
+		linker_input_projmain.o
+0015	R_HYP_16_PC	i		A_location		text
+		linker_input_projmain.o
+0026	R_HYP_16	i		B_text		text
+		linker_input_projmain.o
+002b	R_HYP_16_PC	i		print		text
+		linker_input_projmain.o
+0030	R_HYP_16	i		B_value		text
+		linker_input_projmain.o
+0045	R_HYP_16	i		PRINT_REG		text
+		linker_input_projinterrupts.o
+0058	R_HYP_16	i		text		text
+		linker_input_projinterrupts.o
+
+Content:
+Section <ABSOLUTE(4)>:
+0000: 00 ff 
+0002: 05 00 
+
+Section <UNDEFINED(0)>:
+Section <data(42)>:
+0000: 41 00 
+0002: 20 00 
+0004: 56 00 
+0006: 41 00 
+0008: 4c 00 
+000a: 55 00 
+000c: 45 00 
+000e: 3a 00 
+0010: 20 00 
+0012: 00 00 
+0014: 04 00 
+0016: 42 00 
+0018: 20 00 
+001a: 56 00 
+001c: 41 00 
+001e: 4c 00 
+0020: 55 00 
+0022: 45 00 
+0024: 3a 00 
+0026: 20 00 
+0028: 00 00 
+
+Section <ivtp(16)>:
+0000: 02 00 
+0002: 00 00 
+0004: 01 00 
+0006: 00 00 
+0008: 00 00 00 00 00 00 00 00 
+
+Section <text(90)>:
+0000: 20 
+0001: 20 
+0002: a0 2f 00 00 00 
+0007: 30 ff 00 00 00 
+000c: a0 3f 04 00 00 
+0011: a0 37 03 ff fe 
+0016: a0 1f 00 00 30 
+001b: 70 31 
+001d: b0 3f 04 ff 00 
+0022: a0 2f 00 00 00 
+0027: 30 f7 05 ff fe 
+002c: a0 3f 04 00 00 
+0031: a0 1f 00 00 30 
+0036: 70 31 
+0038: b0 3f 04 ff 00 
+003d: 00 
+003e: a0 32 02 
+0041: b0 3f 04 00 00 
+0046: a0 1f 00 00 05 
+004b: 70 21 
+004d: a0 1f 00 00 00 
+0052: 74 21 
+0054: 52 ff 00 00 00 
+0059: 40 
+

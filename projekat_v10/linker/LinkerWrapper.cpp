@@ -6,6 +6,8 @@
 
 using namespace std;
 
+int LinkerWrapper::MEMORY_MAPPED_REGISTERS = 0xFF00;
+
 LinkerWrapper::LinkerWrapper(string output_file_name_, vector<string> files_to_be_linked_, bool linkable_output_, map<string, int> mapped_section_address_)
     : output_file_name(output_file_name_), files_to_be_linked(files_to_be_linked_), linkable_output(linkable_output_), mapped_section_address(mapped_section_address_)
 {
@@ -212,34 +214,127 @@ bool LinkerWrapper::collect_data_from_relocatible_files()
     return true;
 }
 
+bool LinkerWrapper::intersect_of_two_sections(int left_1, int right_1, int left_2, int right_2)
+{
+    // this should return the intersect of 2 intervals shaped: [a,b)
+    cout << "[" << left_1 << "," << right_1 << ")"
+         << "?"
+         << "[" << left_2 << "," << right_2 << ")"
+         << ">max:" << max(left_1, left_2) << ";min:" << min(right_1, right_2) << endl;
+    return max(left_1, left_2) < min(right_1, right_2);
+}
+
 bool LinkerWrapper::move_sections_to_virtual_address()
 {
-    if (linkable_output == true)
-    {
-        return true;
-    }
     // this is -hex option and all -place options are taken into consideration
     // all sections not mentined in -place comes after the last section from -place list
+
     int next_address_for_nonmentioned_sections = 0;
     for (map<string, int>::iterator it_place = mapped_section_address.begin();
          it_place != mapped_section_address.end(); it_place++)
     {
+        // In this -place option, there is not ABSOLUTE and UNDEFINED section
         cout << it_place->first << ":" << it_place->second << endl;
+
+        // this will set the virtual address of section (it was 0 before)
+        output_section_table.find(it_place->first)->second.virtual_memory_address = it_place->second;
 
         for (map<string, SectionAdditionalData>::iterator it_filename = section_additional_helper[it_place->first].begin();
              it_filename != section_additional_helper[it_place->first].end(); it_filename++)
         {
+            // this will set partial sections beginning and end in aggregate sections
             cout << "F: " << it_filename->first << " :" << it_filename->second.start_addres_in_aggregate_section << endl;
             it_filename->second.start_addres_in_aggregate_section += it_place->second;
             if (it_filename->second.start_addres_in_aggregate_section + it_filename->second.parent_section_size > next_address_for_nonmentioned_sections)
             {
+                // fetch the highest address in memory for non mentioned sections
                 next_address_for_nonmentioned_sections = it_filename->second.start_addres_in_aggregate_section + it_filename->second.parent_section_size;
             }
         }
     }
+    for (map<string, SectionTable>::iterator it_outer_output_sections = output_section_table.begin();
+         it_outer_output_sections != output_section_table.end(); it_outer_output_sections++)
+    {
+        if (it_outer_output_sections->first == "UNDEFINED" || it_outer_output_sections->first == "ABSOLUTE")
+        {
+            // those sections are ghost sections, not really write in memory
+            continue;
+        }
+
+        int left_address = it_outer_output_sections->second.virtual_memory_address;
+        int right_address = it_outer_output_sections->second.virtual_memory_address + it_outer_output_sections->second.size;
+
+        if (right_address > MEMORY_MAPPED_REGISTERS)
+        {
+            string error_message = "Section " + it_outer_output_sections->first + " has memory end (caused by -place options) that intersects the memory reserved places!";
+            error_messages.push_back(error_message);
+            return false;
+        }
+
+        cout << it_outer_output_sections->first << "[" << left_address << "," << right_address << "]" << endl;
+
+        for (map<string, SectionTable>::iterator it_output_sections = output_section_table.begin();
+             it_output_sections != output_section_table.end(); it_output_sections++)
+        {
+            if (it_output_sections->first == "UNDEFINED" || it_output_sections->first == "ABSOLUTE")
+            {
+                // those sections are ghost sections, not really write in memory
+                continue;
+            }
+            if (it_output_sections->first == it_outer_output_sections->first)
+            {
+                // this section is currently processed, so cannot be intersect with itself
+                continue;
+            }
+            if (intersect_of_two_sections(left_address, right_address,
+                                          it_output_sections->second.virtual_memory_address,
+                                          it_output_sections->second.virtual_memory_address + it_output_sections->second.size) == true)
+            {
+                string error_message = "Sections " + it_outer_output_sections->first + " and " + it_output_sections->first + " has memory positions (-place options) intersected!";
+                error_messages.push_back(error_message);
+                return false;
+            }
+        }
+    }
+    cout << "NEXT ADDRESS: " << next_address_for_nonmentioned_sections << endl;
+
+    for (map<string, SectionTable>::iterator it_output_sections = output_section_table.begin();
+         it_output_sections != output_section_table.end(); it_output_sections++)
+    {
+        // those sections that are not mentioned in -place should be addressed at the following address after the last mentioned section
+        if (it_output_sections->first == "UNDEFINED" || it_output_sections->first == "ABSOLUTE")
+        {
+            continue;
+        }
+        map<string, int>::iterator it_place = mapped_section_address.find(it_output_sections->first);
+        if (it_place == mapped_section_address.end())
+        {
+
+            cout << "sec: " << it_output_sections->first << endl;
+            cout << "VA_b: " << it_output_sections->second.virtual_memory_address << endl;
+
+            // this will set the virtual address of section (it was 0 before)
+            it_output_sections->second.virtual_memory_address = next_address_for_nonmentioned_sections;
+            cout << "VA_b: " << it_output_sections->second.virtual_memory_address << endl;
+
+            for (map<string, SectionAdditionalData>::iterator it_of_section_per_filename = section_additional_helper[it_output_sections->first].begin();
+                 it_of_section_per_filename != section_additional_helper[it_output_sections->first].end(); it_of_section_per_filename++)
+            {
+                // this will set partial sections beginning and end in aggregate sections
+                cout << "F: " << it_of_section_per_filename->first << " :" << it_of_section_per_filename->second.start_addres_in_aggregate_section << endl;
+                it_of_section_per_filename->second.start_addres_in_aggregate_section += next_address_for_nonmentioned_sections;
+            }
+            next_address_for_nonmentioned_sections += it_output_sections->second.size;
+        }
+        if (next_address_for_nonmentioned_sections > MEMORY_MAPPED_REGISTERS)
+        {
+            string error_message = "Section " + it_output_sections->second.section_name + " has memory end (caused by -place options) that intersects the memory reserved places!";
+            error_messages.push_back(error_message);
+            return false;
+        }
+    }
     cout << "NEXT ADDRESS: " << next_address_for_nonmentioned_sections << endl;
     //section_additional_helper
-
     cout << "Linker output" << endl
          << endl;
     cout << "Helper info:" << endl;
@@ -268,22 +363,6 @@ bool LinkerWrapper::move_sections_to_virtual_address()
     }
 
     return true;
-}
-
-int LinkerWrapper::fetch_start_address_of_section(string section_name)
-{
-    if (linkable_output)
-    {
-        // This option ingores every -place options and set all sections on offset 0
-        // this also means that the output of -linkable option is relocatible file which can be linked again
-        return 0;
-    }
-    else
-    {
-        //    map<string, int> mapped_section_address;)
-        cout << "This is in progress" << endl;
-        exit(-1);
-    }
 }
 
 bool LinkerWrapper::create_aggregate_sections()
@@ -322,12 +401,7 @@ bool LinkerWrapper::create_aggregate_sections()
         }
     }
 
-    if (move_sections_to_virtual_address() == false)
-    {
-        return false;
-    }
-
-    int id_section = 0;
+    int id_section = 1;
     for (map<string, int>::iterator it = previous_end.begin();
          it != previous_end.end(); it++)
     {
@@ -346,11 +420,19 @@ bool LinkerWrapper::create_aggregate_sections()
             next_section_table.id_section = id_section++;
         }
         next_section_table.size = it->second;
-        next_section_table.virtual_memory_address = fetch_start_address_of_section(next_section_table.section_name);
+        next_section_table.virtual_memory_address = 0; // initiially it will be 0
+        // if -hex option is set, then after this, output_section_table will be changed according to -place options
 
         this->output_section_table[it->first] = next_section_table;
     }
 
+    if (linkable_output == false)
+    {
+        if (move_sections_to_virtual_address() == false)
+        {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -360,6 +442,7 @@ bool LinkerWrapper::create_aggregate_symbol_table()
     for (map<string, SectionTable>::iterator it = output_section_table.begin();
          it != output_section_table.end(); it++)
     {
+        // This will fill the first coupe of entries with sections (as they are symbols)
         SymbolTable symbol;
         symbol.id_symbol = it->second.id_section;
         if (symbol.id_symbol > next_symbol_id)
@@ -414,7 +497,8 @@ bool LinkerWrapper::create_aggregate_symbol_table()
                 // add offset of the section in output file
                 // for -linkable this is just a position of the section into aggregate section
                 // for -hex this is offset into aggregate section and offset of the beginning of the aggregate section
-                // both increments are into section_additional_helper.start_address_in_aggregate_section
+                // both increments are into section_additional_helper.start_addres_in_aggregate_section
+
                 cout << "->" << it->first << "=" << it->second.name << ":" << it->second.is_defined << it->second.is_extern << endl;
                 it->second.id_symbol = next_symbol_id++;
                 cout << "Should be added: " << section_additional_helper[it->second.section][filename].start_addres_in_aggregate_section << endl;
@@ -441,8 +525,9 @@ bool LinkerWrapper::create_aggregate_symbol_table()
             cout << "EXTERNAL" << endl;
             if (linkable_output == false)
             {
-                cout << "This is in progress" << endl;
-                exit(-1);
+                string error_message = "Symbol " + it->first + " is not defined in neither of files!";
+                error_messages.push_back(error_message);
+                return false;
             }
             else
             {
@@ -454,10 +539,11 @@ bool LinkerWrapper::create_aggregate_symbol_table()
     return true;
 }
 
-bool LinkerWrapper::create_aggregate_relocations_linkable()
+bool LinkerWrapper::create_aggregate_relocations()
 {
     // Output file should be linkable with others relocatible files.
     // All necessary relocations remains in object file
+    cout << hex;
     for (string filename : files_to_be_linked)
     {
         vector<RelocationTable> relocation_table = relocation_table_per_file[filename];
@@ -468,7 +554,7 @@ bool LinkerWrapper::create_aggregate_relocations_linkable()
             cout << "(+" << section_additional_helper[rel_data.section_name][filename].start_addres_in_aggregate_section;
             cout << "-" << output_section_table[rel_data.section_name].virtual_memory_address << ")"
                  << "\t#";
-            cout << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
+            cout << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
             RelocationTable output_relocation_data;
             output_relocation_data.addend = rel_data.addend;
             output_relocation_data.is_data = rel_data.is_data;
@@ -477,7 +563,7 @@ bool LinkerWrapper::create_aggregate_relocations_linkable()
             // + offset of this initial section in the aggregate section
             // - offset of this aggregate section in memory
             // hence this offset is offset in aggregate section which starts at the position 0 in the memory
-            // Be careful to add aggregate section offset to this saved offset to reach exact byte!
+            // Be careful to add aggregate section offset to this saved offset to reach exact byte! in situation -hex
             output_relocation_data.offset = rel_data.offset + section_additional_helper[rel_data.section_name][filename].start_addres_in_aggregate_section - output_section_table[rel_data.section_name].virtual_memory_address;
 
             output_relocation_data.section_name = rel_data.section_name;
@@ -486,34 +572,20 @@ bool LinkerWrapper::create_aggregate_relocations_linkable()
             output_relocation_data.filename = filename; // this is only useful when symbol is section name (relocation data related to local symbol)
             output_relocation_table.push_back(output_relocation_data);
         }
-        cout << dec;
     }
+    cout << dec;
     return true;
 }
 
-bool LinkerWrapper::create_aggregate_relocations_hex()
-{
-    exit(-1);
-    return true;
-}
-
-bool LinkerWrapper::create_aggregate_relocations()
-{
-    if (linkable_output == true)
-        return create_aggregate_relocations_linkable();
-    else
-        return create_aggregate_relocations_hex();
-}
-
-bool LinkerWrapper::create_aggregate_content_of_sections_linkable()
+bool LinkerWrapper::create_aggregate_content_of_sections()
 {
     for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
     {
         string section_name = it->first;
-        cout << "Section: " << section_name << "(" << it->second.size << ")" << endl;
+        cout << "Section <" << section_name << "(" << it->second.size << ")>:" << endl;
         if (it->second.size == 0)
         {
-            // If there is no data, nothing to be done with this section in this file!
+            // If there is no data in section, nothing to be done with this section!
             continue;
         }
 
@@ -523,6 +595,7 @@ bool LinkerWrapper::create_aggregate_content_of_sections_linkable()
             map<string, SectionAdditionalData>::iterator it_section_additional_data = section_additional_helper[it->first].find(filename);
             if (it_section_additional_data == section_additional_helper[it->first].end())
             {
+                // If there is not a specific (it->first => section_name) section in specific file, nothing should be done with this section
                 continue;
             }
 
@@ -560,23 +633,15 @@ bool LinkerWrapper::create_aggregate_content_of_sections_linkable()
                 it->second.data.push_back(c);
             }
             cout << endl;
+            // in array .data are sections' content and it can be indexed by the position
+            // in array .offsets are offsets of data, that is from the beginning of the file
+            // (in case of -linkable, the difference between the beginning of the file and the beginning of the section
+            //  -is 0 for all sections)
+            // (in case of -hex option, the difference between the beginning of the file and the beginning of the section
+            // is defined with -place options)
         }
     }
     return true;
-}
-
-bool LinkerWrapper::create_aggregate_content_of_sections_hex()
-{
-    exit(-1);
-    return true;
-}
-
-bool LinkerWrapper::create_aggregate_content_of_sections()
-{
-    if (linkable_output == true)
-        return create_aggregate_content_of_sections_linkable();
-    else
-        return create_aggregate_content_of_sections_hex();
 }
 
 bool LinkerWrapper::solve_relocations_on_data()
@@ -892,7 +957,7 @@ void LinkerWrapper::fill_output_file()
             //    continue;
             //        if (it->first == "ABSOLUTE")
             //            continue;
-            text_output_file << "Section: " << it->first << "(" << it->second.size << ")" << endl;
+            text_output_file << "Section <" << it->first << "(" << it->second.size << ")>:" << endl;
             if (it->second.size == 0)
             {
                 continue;
@@ -913,6 +978,50 @@ void LinkerWrapper::fill_output_file()
             }
             // Last directive which is in memory
             int current_offset = s_table.offsets[s_table.offsets.size() - 1];
+            int next_offset = s_table.data.size();
+            text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+            for (int j = current_offset; j < next_offset; j++)
+            {
+                char c = s_table.data[j];
+                text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            }
+            text_output_file << endl;
+
+            text_output_file << dec;
+            text_output_file << endl;
+        }
+    }
+    else
+    {
+
+        text_output_file << "Content:" << endl;
+        for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
+        {
+            //if (it->first == "UNDEFINED")
+            //    continue;
+            //        if (it->first == "ABSOLUTE")
+            //            continue;
+            text_output_file << "Section <" << it->first << "(" << it->second.size << ")>:" << endl;
+            if (it->second.size == 0)
+            {
+                continue;
+            }
+            SectionTable s_table = it->second;
+            for (int i = 0; i < s_table.offsets.size() - 1; i++)
+            {
+
+                int current_offset = s_table.offsets[i] - s_table.virtual_memory_address;
+                int next_offset = s_table.offsets[i + 1] - s_table.virtual_memory_address;
+                text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+                for (int j = current_offset; j < next_offset; j++)
+                {
+                    char c = s_table.data[j];
+                    text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+                }
+                text_output_file << endl;
+            }
+            // Last directive which is in memory
+            int current_offset = s_table.offsets[s_table.offsets.size() - 1] - s_table.virtual_memory_address;
             int next_offset = s_table.data.size();
             text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
             for (int j = current_offset; j < next_offset; j++)

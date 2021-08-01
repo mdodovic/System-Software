@@ -93,7 +93,7 @@ int main(int argc, const char *argv[])
         linker.print_error_messages();
         return -1;
     }
-    /*if (linker.create_aggregate_symbol_table() == false)
+    if (linker.create_aggregate_symbol_table() == false)
     {
         linker.print_error_messages();
         return -1;
@@ -104,21 +104,21 @@ int main(int argc, const char *argv[])
         linker.print_error_messages();
         return -1;
     }
-
     if (linker.create_aggregate_content_of_sections() == false)
     {
         linker.print_error_messages();
         return -1;
     }
+    /*
 
     if (linker.solve_relocations_on_data() == false)
     {
         linker.print_error_messages();
         return -1;
     }
-
-    linker.fill_output_file();
 */
+    linker.fill_output_file();
+
     // , place_file, mapped_section_address, hex_output, linkable_output different functions!
     return 0;
 }

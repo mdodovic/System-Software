@@ -1,0 +1,888 @@
+    1  gnu --version
+    2  gcc --version
+    3  ls
+    4  cd Desktop/
+    5  ls
+    6  cd ss_vezbanje/
+    7  ls
+    8  mkdir v01-vezbanje
+    9  sudo snap install vlc
+   10  ls
+   11  cd Desktop/
+   12  ls
+   13  cd ss_vezbanje/
+   14  ls
+   15  cd v01-vezbanje/02_hello/
+   16  ls
+   17  cd ..
+   18  ls
+   19  mv -r 02_hello/ 02_symbols
+   20  ls
+   21  ./run.sh 
+   22  gcc -o symbol symbol.c  symbol_definition.s 
+   23  ./symbol 
+   24  gcc -o symbol symbol.c  symbol_definition.s 
+   25  ./run.sh 
+   26  clear
+   27  ./run.sh 
+   28  gcc -o hello.o hello.c
+   29  cd v01-vezbanje/
+   30  gcc -o hello.o hello.c
+   31  ls
+   32  clear
+   33  ./hello.o 
+   34  gcc -o hello.o hello.c
+   35  ./hello.o 
+   36  gcc man
+   37  gcc -m
+   38  clear
+   39  rm hello.o 
+   40  gcc -o hello hello.c
+   41  ls
+   42  ./hello 
+   43  objdump --disassemble --syms -Mintel hello > disassemble.txt
+   44  touch run.ch
+   45  nano run.ch 
+   46  open run.ch 
+   47  mov run.ch run.sh
+   48  mv run.ch run.sh
+   49  ls
+   50  chmor u+x run.sh 
+   51  chmod u+x run.sh 
+   52  ./run.sh 
+   53  cd 01_hello/
+   54  ./run.sh 
+   55  cd ..
+   56  cd 02_hello/
+   57  ls
+   58  touch symbol_definition.s
+   59  touch symbol.c
+   60  clear
+   61  touch run.sh
+   62  chmod u+x run.sh 
+   63  ./run.sh 
+   64  ls
+   65  cd v01-assembly-x86-64-primeri/
+   66  ls
+   67  cd 03-stack-smashing/
+   68  ls
+   69  gcc -o executable stack_smashing.c 
+   70  ./executable 
+   71  gcc -o executable -fno-stack-protector stack_smashing.c 
+   72  ./executable 
+   73  gcc -g -o executable -fno-stack-protector stack_smashing.c 
+   74  ./executable 
+   75  ls
+   76  gcc -g -o executable -fno-stack-protector stack_smashing.c 
+   77  ./executable 
+   78  gdb executable 
+   79  cd ..
+   80  cd 05-convention-memory-representation/
+   81  ls
+   82  ./run.sh 
+   83  ./executable 
+   84  cd ..
+   85  cd 06-convention-argument-passing/
+   86  ./run.sh 
+   87  cd Desktop/
+   88  cd ss_vezbanje/
+   89  ls
+   90  cd v01-vezbanje/
+   91  ls
+   92  cd 03_stack/
+   93  ls
+   94  nano run.sh
+   95  chmod u+x run.sh 
+   96  ./run.sh 
+   97  emacs -nw run.sh 
+   98  nano run.sh
+   99  ./run.sh 
+  100  ls
+  101  ./exec 
+  102  ./run.sh 
+  103  ./exec 
+  104  cd ..
+  105  ls
+  106  cd v01-assembly-x86-64-primeri/
+  107  ls
+  108  cd 03-stack-smashing/
+  109  ls
+  110  nano run.sh 
+  111  ./run.sh 
+  112  ./executable 
+  113  nano run.sh 
+  114  ./run.sh 
+  115  ./executable 
+  116  nano run.sh 
+  117  ./run.sh 
+  118  ./executable 
+  119  echo ./run.sh 
+  120  cat ./run.sh 
+  121  nano run.sh 
+  122  cat ./run.sh 
+  123  ./run.sh 
+  124  ./executable 
+  125  nano run.sh 
+  126  ./run.sh 
+  127  cat run.sh 
+  128  ./executable 
+  129  nano run.sh 
+  130  ./run.sh 
+  131  ./executable 
+  132  cd ..
+  133  ls
+  134  cd v01-assembly-x86-64-primeri/
+  135  ls
+  136  cd 05-convention-memory-representation/
+  137  ls
+  138  cd //
+  139  cd ..
+  140  ls
+  141  cd home/
+  142  cd ss/
+  143  ls
+  144  cd
+  145  ls
+  146  cd Desktop/
+  147  cd ss_vezbanje/
+  148  cd v01-assembly-x86-64-primeri/
+  149  ls
+  150  cd 06-convention-argument-passing/
+  151  ls
+  152  echo __NR_write | cpp --include sys/syscall.h
+  153  man towrite
+  154  man toWrite
+  155  man 2 write
+  156  man 2 exit
+  157  echo __NR_exit | cpp --include sys/syscall.h
+  158  man 2 exit
+  159  ls
+  160  cd v01-vezbanje/
+  161  ls
+  162  cd 07_syscall/
+  163  ls
+  164  as -o syscall.o syscall.s 
+  165  ld -o exec syscall.o
+  166  as -o syscall.o syscall.s 
+  167  ld -o exec syscall.o
+  168  ls
+  169  ./exec 
+  170  as -o syscall.o syscall.s 
+  171  ld -o exec syscall.o
+  172  ./exec 
+  173  as -o syscall.o syscall.s 
+  174  ld -o exec syscall.o
+  175  ./exec 
+  176  cd ..
+  177  ls
+  178  cd 08_syscall_wraper/
+  179  ls
+  180  as -o syscall_wrapers.o syscall_wrapers.s 
+  181  ld -o exec --dynamic-linker /lib/x86-64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapers.o --library c
+  182  ./exec 
+  183  ls
+  184  as -o syscall_wrapers.o syscall_wrapers.s 
+  185  ld -o executable --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapper.o --library c
+  186  ls
+  187  rm exec 
+  188  ls
+  189  as -o syscall_wrapper.o syscall_wrapers.syscall_wrapper.s
+  190  as -o syscall_wrapper.o syscall_wrapers.s
+  191  ls
+  192  rm *.o
+  193  as -o syscall_wrapper.o syscall_wrapers.s
+  194  ls
+  195  ld -o executable syscall_wrap--dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapsyscall_wrapper.o syscall_wrap--library c
+  196  ld -o exec  --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrap.o --library c
+  197  ld -o exec  --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wraper.o --library c
+  198  ld -o exec  --dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 syscall_wrapper.o --library c
+  199  ./exec 
+  200  ls
+  201  chmod u+x run.sh 
+  202  ./run.sh 
+  203  ls
+  204  ./exec 
+  205  rm exec 
+  206  rm syscall_wrapper.o 
+  207  ls
+  208  ./run.sh 
+  209  ls
+  210  ./run.sh 
+  211  ls
+  212  ./executable 
+  213  cd ..
+  214  cd 09_syscall_crt/
+  215  chmod u+x run.sh 
+  216  ./run.sh 
+  217  ls
+  218  ./executable 
+  219  ls
+  220  cd jun_2020/
+  221  ls
+  222  gcc -o foo.exe foo.c 
+  223  ls
+  224  objdump --disassemble --syms -Mintel foo.exe > foo.s
+  225  gcc -o foo.exe foo.c 
+  226  gcc -o foo.s -s foo.c 
+  227  gcc -o foo.o -c foo.c
+  228  objdump --disassemble -Mintel foo.o > foo.s
+  229  gcc -g0 -o foo.o -c foo.c
+  230  objdump --disassemble -Mintel foo.o > foo.s
+  231  gcc -g2 -o foo.o -c foo.c
+  232  objdump --disassemble -Mintel foo.o > foo.s
+  233  gcc -g2 -o foo.o -c foo.c
+  234  objdump --disassemble -Mintel foo.o > foo.s
+  235  gcc -o foo.o -c foo.c
+  236  objdump --disassemble -Mintel foo.o > foo.s
+  237  gcc -g6 -o foo.o -c foo.c
+  238  gcc -g5 -o foo.o -c foo.c
+  239  gcc -g4 -o foo.o -c foo.c
+  240  gcc -g3 -o foo.o -c foo.c
+  241  objdump --disassemble -Mintel foo.o > foo3.s
+  242  touch 1.s
+  243  ls
+  244  nano 1.s
+  245  ls
+  246  g++ -o main.exe main.cpp Klasa.cpp 
+  247  ./main.exe 
+  248  ./main.exe test_simple_labels.s 
+  249  notepad-plus-plus -v
+  250  ls
+  251  gcc man
+  252  man gcc
+  253  g++ -o main.exe main.cpp 
+  254  ./main.exe 
+  255  g++ -o main.exe main.cpp 
+  256  ./main.exe 
+  257  g++ -o main.exe main.cpp 
+  258  g++ -o main.exe main.cpp Klasa.cpp 
+  259  ./main.exe 
+  260  g++ -o main.exe main.cpp Klasa.cpp 
+  261  ./main.exe 
+  262  ./main.exe test_simple_labels.s
+  263  g++ -o main.exe main.cpp Klasa.cpp 
+  264  ./main.exe test_simple_labels.s
+  265  g++ -o main.exe main.cpp Klasa.cpp 
+  266  ./main.exe test_simple_labels.s
+  267  vcd ..
+  268  cd ..
+  269  ls
+  270  cd testiranje/
+  271  ls
+  272  gcc -o proba.exe proba.c 
+  273  ./proba.exe 
+  274  objdump --disassemble -Mintel proba.exe 
+  275  objdump -htrs -Mintel proba.exe 
+  276  as -o proba.o proba.s 
+  277  ls
+  278  objdump -htrs -Mintel proba.o 
+  279  g++ -o reg_test.exe regex_main.cpp 
+  280  ./reg_test.exe 
+  281  g++ -o reg_test.exe regex_main.cpp 
+  282  ./reg_test.exe 
+  283  g++ -o reg_test.exe regex_main.cpp 
+  284  ./reg_test.exe 
+  285  g++ -o reg_test.exe regex_main.cpp 
+  286  ./reg_test.exe 
+  287  g++ -o reg_test.exe regex_main.cpp 
+  288  ./reg_test.exe 
+  289  g++ -o reg_test.exe regex_main.cpp 
+  290  ./reg_test.exe 
+  291  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  292  ./main.exe 
+  293  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  294  ./main.exe 
+  295  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  296  ./main.exe ./tests/proba.s 
+  297  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  298  ./main.exe ./tests/proba.s 
+  299  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  300  ./main.exe ./tests/proba.s 
+  301  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  302  ./main.exe ./tests/proba.s 
+  303  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  304  ./main.exe ./tests/proba.s 
+  305  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  306  ./main.exe ./tests/proba.s 
+  307  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  308  ./main.exe ./tests/proba.s 
+  309  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  310  ./main.exe ./tests/proba.s 
+  311  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  312  ./main.exe ./tests/proba.s 
+  313  as -o ./tests/proba.o ./tests/proba.s 
+  314  objdump -hstr ./tests/proba.o 
+  315  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  316  ./main.exe ./tests/proba.s 
+  317  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  318  ./main.exe ./tests/proba.s 
+  319  ./main.exe ./tests/proba1.s 
+  320  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  321  ./main.exe ./tests/proba1.s 
+  322  ./main.exe ./tests/proba.s 
+  323  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  324  ./main.exe ./tests/proba1.s 
+  325  ./main.exe ./tests/proba.s 
+  326  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  327  ./main.exe ./tests/proba.s 
+  328  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  329  ./main.exe ./tests/proba.s 
+  330  as -o ./tests/proba.o ./tests/proba.s 
+  331  objdump -hstr ./tests/proba.o 
+  332  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  333  objdump -hstr ./tests/proba.o 
+  334  ./main.exe ./tests/proba.s 
+  335  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  336  history 
+  337  history > history1
+  338  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  339  ./main.exe ./tests/proba.s 
+  340  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  341  ./main.exe ./tests/proba.s 
+  342  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  343  ./main.exe ./tests/proba.s 
+  344  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  345  ./main.exe ./tests/proba.s 
+  346  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  347  ./main.exe ./tests/proba.s 
+  348  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  349  ./main.exe ./tests/proba.s 
+  350  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  351  ./main.exe ./tests/proba.s 
+  352  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  353  ./main.exe ./tests/proba.s 
+  354  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  355  ./main.exe ./tests/proba.s 
+  356  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  357  ./main.exe ./tests/proba.s 
+  358  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  359  ./main.exe ./tests/proba.s 
+  360  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  361  ./main.exe ./tests/proba.s 
+  362  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  363  ./main.exe ./tests/proba.s 
+  364  as -o ./tests/proba.o ./tests/proba.s 
+  365  objdump -hstr ./tests/proba.o 
+  366  as -o ./tests/proba.o ./tests/proba.s 
+  367  objdump -hstr ./tests/proba.o 
+  368  as -o ./tests/proba.o ./tests/proba.s 
+  369  objdump -hstr ./tests/proba.o 
+  370  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  371  ./main.exe ./tests/proba.s 
+  372  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  373  ./main.exe ./tests/proba.s 
+  374  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  375  ./main.exe ./tests/proba.s 
+  376  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  377  ./main.exe ./tests/proba.s 
+  378  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  379  ./main.exe ./tests/proba.s 
+  380  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  381  ./main.exe ./tests/proba.s 
+  382  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  383  ./main.exe ./tests/proba.s 
+  384  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  385  ./main.exe ./tests/proba.s 
+  386  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  387  ./main.exe ./tests/proba.s 
+  388  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  389  ./main.exe ./tests/proba.s 
+  390  as -o ./tests/proba.o ./tests/proba.s 
+  391  objdump -hstr ./tests/proba.o 
+  392  as -o ./tests/proba.o ./tests/proba.s 
+  393  objdump -hstr ./tests/proba.o 
+  394  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  395  ./main.exe ./tests/proba.s 
+  396  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  397  ./main.exe ./tests/proba.s 
+  398  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  399  ./main.exe ./tests/proba.s 
+  400  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  401  ./main.exe ./tests/proba.s 
+  402  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  403  ./main.exe ./tests/proba.s 
+  404  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  405  ./main.exe ./tests/proba.s 
+  406  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  407  ./main.exe ./tests/proba.s 
+  408  as -o ./tests/proba.o ./tests/proba.s 
+  409  objdump -hstr ./tests/proba.o 
+  410  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  411  ./main.exe ./tests/proba.s 
+  412  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  413  ./main.exe ./tests/proba.s 
+  414  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  415  ./main.exe ./tests/proba.s 
+  416  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  417  ./main.exe ./tests/proba.s 
+  418  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  419  ./main.exe ./tests/proba.s 
+  420  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  421  ./main.exe ./tests/proba.s 
+  422  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  423  ./main.exe ./tests/proba.s 
+  424  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  425  ./main.exe ./tests/proba.s 
+  426  as -o ./tests/proba.o ./tests/proba.s 
+  427  objdump -hstr ./tests/proba.o 
+  428  as -o ./tests/proba.o ./tests/proba.s 
+  429  objdump -hstr ./tests/proba.o 
+  430  as -o ./tests/proba.o ./tests/proba.s 
+  431  objdump -hstr ./tests/proba.o 
+  432  as -o ./tests/proba.o ./tests/proba.s 
+  433  objdump -hstr ./tests/proba.o 
+  434  as -o ./tests/proba.o ./tests/proba.s 
+  435  objdump -hstr ./tests/proba.o 
+  436  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  437  ./main.exe ./tests/proba.s 
+  438  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  439  ./main.exe ./tests/proba.s 
+  440  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  441  ./main.exe ./tests/proba.s 
+  442  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  443  ./main.exe ./tests/proba.s 
+  444  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  445  ./main.exe ./tests/proba.s 
+  446  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  447  ./main.exe ./tests/proba.s 
+  448  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  449  ./main.exe ./tests/proba.s 
+  450  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  451  ./main.exe ./tests/proba.s 
+  452  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  453  ./main.exe ./tests/proba.s 
+  454  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  455  ./main.exe ./tests/proba.s 
+  456  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  457  ./main.exe ./tests/proba.s 
+  458  as -o ./tests/proba.o ./tests/proba.s 
+  459  objdump -hstr ./tests/proba.o 
+  460  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  461  as -o ./tests/proba.o ./tests/proba.s 
+  462  objdump -hstr ./tests/proba.o 
+  463  as -o ./tests/proba.o ./tests/proba.s 
+  464  objdump -hstr ./tests/proba.o 
+  465  as -o ./tests/proba.o ./tests/proba.s 
+  466  objdump -hstr ./tests/proba.o 
+  467  as -o ./tests/proba.o ./tests/proba.s 
+  468  objdump -hstr ./tests/proba.o 
+  469  as -o ./tests/proba.o ./tests/proba.s 
+  470  objdump -hstr ./tests/proba.o 
+  471  as -o ./tests/proba.o ./tests/proba.s 
+  472  objdump -hstr ./tests/proba.o 
+  473  as -o ./tests/proba.o ./tests/proba.s 
+  474  objdump -hstr ./tests/proba.o 
+  475  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  476  ./main.exe ./tests/proba.s 
+  477  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  478  ./main.exe ./tests/proba.s 
+  479  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  480  ./main.exe ./tests/proba.s 
+  481  as -o ./tests/proba.o ./tests/proba.s 
+  482  objdump -hstr ./tests/proba.o 
+  483  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  484  ./main.exe ./tests/proba.s 
+  485  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  486  ./main.exe ./tests/proba.s 
+  487  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  488  ./main.exe ./tests/proba.s 
+  489  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  490  ./main.exe ./tests/proba.s 
+  491  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  492  ./main.exe ./tests/proba.s 
+  493  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  494  ./main.exe ./tests/proba.s 
+  495  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  496  ./main.exe ./tests/proba.s 
+  497  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  498  ./main.exe ./tests/proba.s 
+  499  as -o ./tests/proba.o ./tests/proba.s 
+  500  objdump -hstr ./tests/proba.o 
+  501  as -o ./tests/proba.o ./tests/proba.s 
+  502  objdump -hstr ./tests/proba.o 
+  503  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  504  ./main.exe ./tests/proba.s 
+  505  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  506  ./main.exe ./tests/proba.s 
+  507  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  508  ./main.exe ./tests/proba.s 
+  509  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  510  ./main.exe ./tests/proba.s 
+  511  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  512  ./main.exe ./tests/proba.s 
+  513  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  514  ./main.exe ./tests/proba.s 
+  515  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  516  ./main.exe ./tests/proba.s 
+  517  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  518  ./main.exe ./tests/proba.s 
+  519  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  520  ./main.exe ./tests/proba.s 
+  521  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  522  ./main.exe ./tests/proba.s 
+  523  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  524  ./main.exe ./tests/proba.s 
+  525  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  526  ./main.exe ./tests/proba.s 
+  527  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  528  ./main.exe ./tests/proba.s 
+  529  ./main.exe ./tests/test_simple_equ.0 
+  530  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  531  ./main.exe ./tests/test_simple_equ.s
+  532  ./main.exe ./tests/proba.s
+  533  ./main.exe ./tests/test_simple_equ.s
+  534  ./main.exe ./tests/proba.s
+  535  ./main.exe ./tests/proba2.s
+  536  ./main.exe ./tests/probaEQU.s
+  537  ./main.exe ./tests/proba3.s
+  538  ./main.exe ./tests/proba2.s
+  539  ./main.exe ./tests/probaEQU.s 
+  540  ./main.exe ./tests/proba.s
+  541  ./main.exe ./tests/proba3.s
+  542  ./main.exe ./tests/probaEQU.s
+  543  ./main.exe ./tests/proba.s
+  544  ./main.exe ./tests/proba3.s
+  545  ./main.exe ./tests/equs.s 
+  546  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  547  ./main.exe ./tests/equs.s 
+  548  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  549  ./main.exe ./tests/equs.s 
+  550  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  551  ./main.exe ./tests/equs.s 
+  552  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  553  ./main.exe ./tests/equs.s 
+  554  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  555  ./main.exe ./tests/equs.s 
+  556  ./main.exe ./tests/projmain.s 
+  557  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  558  ./main.exe ./tests/projmain.s 
+  559  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  560  ./main.exe ./tests/projmain.s 
+  561  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  562  ./main.exe ./tests/projmain.s 
+  563  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  564  ./main.exe ./tests/projmain.s 
+  565  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  566  ./main.exe ./tests/projmain.s 
+  567  at$ objdump -hstr ./tests/ 
+  568  objdump -hstr ./tests/proba.o 
+  569  as -o ./tests/test_simple_equ.0 ./tests/test_simple_equ.s 
+  570  objdump -hstr ./tests/test_simple_equ.o
+  571  objdump -hstr ./tests/test_simple_equ.0
+  572  objdump -hstr ./tests/probaEQU.s 
+  573  objdump -hstr ./tests/equs.s 
+  574  as -o ./tests/equs.o ./tests/equs.s 
+  575  objdump -hstr ./tests/equs.o
+  576  as -o ./tests/equs.o ./tests/equs.s 
+  577  objdump -hstr ./tests/equs.o
+  578  as -o ./tests/projmain.o ./tests/projmain.s 
+  579  objdump -hstr ./tests/projmain.
+  580  objdump -hstr ./tests/projmain.o
+  581  as -o ./tests/projmain.o ./tests/projmain.s 
+  582  objdump -hstr ./tests/projmain.o
+  583  as -o ./tests/projmain.o ./tests/projmain.s 
+  584  objdump -hstr ./tests/projmain.o
+  585  as -o ./tests/projmain.o ./tests/projmain.s 
+  586  objdump -hstr ./tests/projmain.o
+  587  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  588  ./main.exe ./tests/projmain.s 
+  589  ./main.exe ./tests/projinterrupts.s 
+  590  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  591  ./main.exe ./tests/projinterrupts.s 
+  592  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  593  ./main.exe ./tests/projmain.s 
+  594  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  595  ./main.exe ./tests/projmain.s 
+  596  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  597  ./main.exe ./tests/projmain.s 
+  598  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  599  ./main.exe ./tests/projmain.s 
+  600  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  601  ./main.exe ./tests/projmain.s 
+  602  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  603  ./main.exe ./tests/projmain.s 
+  604  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  605  ./main.exe ./tests/projmain.s 
+  606  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  607  ./main.exe ./tests/projmain.s 
+  608  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  609  ./main.exe ./tests/projmain.s 
+  610  ./main.exe ./tests/projinterrupts.s
+  611  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  612  ./main.exe ./tests/projinterrupts.s
+  613  ./main.exe ./tests/projmain.s 
+  614  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  615  ./main.exe ./tests/projmain.s 
+  616  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  617  ./main.exe ./tests/jumps_lists.s 
+  618  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  619  ./main.exe ./tests/jumps_lists.s 
+  620  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  621  ./main.exe ./tests/jumps_lists.s 
+  622  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  623  ./main.exe ./tests/jumps_lists.s 
+  624  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  625  ./main.exe ./tests/jumps_lists.s 
+  626  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  627  ./main.exe ./tests/jumps_lists.s 
+  628  g++ -o main.exe main.cpp AssemblyParser.cpp 
+  629  as -o ./tests/projinterrupts.o ./tests/projinterrupts.s 
+  630  objdump -hstr ./tests/projinterrupts.
+  631  objdump -hstr ./tests/projinterrupts.o 
+  632  as -o ./tests/projinterrupts.o ./tests/projinterrupts.s 
+  633  objdump -hstr ./tests/projinterrupts.o 
+  634  as -o ./tests/projinterrupts.o ./tests/projinterrupts.s 
+  635  objdump -hstr ./tests/projinterrupts.o 
+  636  as -o ./tests/projinterrupts.o ./tests/projinterrupts.s 
+  637  objdump -hstr ./tests/projinterrupts.o 
+  638  as -o ./tests/projinterrupts.o ./tests/projinterrupts.s 
+  639  objdump -hstr ./tests/projinterrupts.o 
+  640  as -o ./tests/projmain.o ./tests/projmain.s 
+  641  objdump -hstr ./tests/projmain.o
+  642  as -o ./tests/projmain.o ./tests/projmain.s 
+  643  objdump -hstr ./tests/projmain.o
+  644  as -o ./tests/projmain.o ./tests/projmain.s 
+  645  objdump -hstr ./tests/projmain.o
+  646  as -o ./tests/projinterrupts.o ./tests/projinterrupts.s 
+  647  g++ -o linker LinkerWrapper.cpp main.cpp 
+  648  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  649  g++ -o linker LinkerWrapper.cpp main.cpp 
+  650  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  651  g++ -o linker LinkerWrapper.cpp main.cpp 
+  652  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  653  g++ -o linker LinkerWrapper.cpp main.cpp 
+  654  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  655  g++ -o linker LinkerWrapper.cpp main.cpp 
+  656  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  657  g++ -o linker LinkerWrapper.cpp main.cpp 
+  658  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  659  g++ -o linker LinkerWrapper.cpp main.cpp 
+  660  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  661  g++ -o linker LinkerWrapper.cpp main.cpp 
+  662  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  663  g++ -o linker LinkerWrapper.cpp main.cpp 
+  664  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  665  g++ -o linker LinkerWrapper.cpp main.cpp 
+  666  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  667  g++ -o linker LinkerWrapper.cpp main.cpp 
+  668  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  669  g++ -o linker LinkerWrapper.cpp main.cpp 
+  670  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  671  g++ -o linker LinkerWrapper.cpp main.cpp 
+  672  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  673  g++ -o linker LinkerWrapper.cpp main.cpp 
+  674  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  675  g++ -o linker LinkerWrapper.cpp main.cpp 
+  676  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  677  clear
+  678  g++ -o linker LinkerWrapper.cpp main.cpp 
+  679  clear
+  680  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  681  g++ -o linker LinkerWrapper.cpp main.cpp 
+  682  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  683  g++ -o linker LinkerWrapper.cpp main.cpp 
+  684  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  685  g++ -o linker LinkerWrapper.cpp main.cpp 
+  686  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  687  g++ -o linker LinkerWrapper.cpp main.cpp 
+  688  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  689  g++ -o linker LinkerWrapper.cpp main.cpp 
+  690  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  691  g++ -o linker LinkerWrapper.cpp main.cpp 
+  692  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  693  g++ -o linker LinkerWrapper.cpp main.cpp 
+  694  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  695  g++ -o linker LinkerWrapper.cpp main.cpp 
+  696  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  697  g++ -o linker LinkerWrapper.cpp main.cpp 
+  698  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  699  g++ -o linker LinkerWrapper.cpp main.cpp 
+  700  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  701  g++ -o linker LinkerWrapper.cpp main.cpp 
+  702  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  703  g++ -o linker LinkerWrapper.cpp main.cpp 
+  704  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  705  g++ -o linker LinkerWrapper.cpp main.cpp 
+  706  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  707  g++ -o linker LinkerWrapper.cpp main.cpp 
+  708  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  709  g++ -o linker LinkerWrapper.cpp main.cpp 
+  710  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  711  g++ -o linker LinkerWrapper.cpp main.cpp 
+  712  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  713  g++ -o linker LinkerWrapper.cpp main.cpp 
+  714  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  715  g++ -o linker LinkerWrapper.cpp main.cpp 
+  716  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  717  g++ -o linker LinkerWrapper.cpp main.cpp 
+  718  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  719  g++ -o linker LinkerWrapper.cpp main.cpp 
+  720  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  721  g++ -o linker LinkerWrapper.cpp main.cpp 
+  722  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  723  g++ -o linker LinkerWrapper.cpp main.cpp 
+  724  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  725  g++ -o linker LinkerWrapper.cpp main.cpp 
+  726  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  727  g++ -o linker LinkerWrapper.cpp main.cpp 
+  728  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  729  g++ -o linker LinkerWrapper.cpp main.cpp 
+  730  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  731  g++ -o linker LinkerWrapper.cpp main.cpp 
+  732  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  733  g++ -o linker LinkerWrapper.cpp main.cpp 
+  734  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  735  g++ -o linker LinkerWrapper.cpp main.cpp 
+  736  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  737  g++ -o linker LinkerWrapper.cpp main.cpp 
+  738  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  739  g++ -o linker LinkerWrapper.cpp main.cpp 
+  740  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  741  g++ -o linker LinkerWrapper.cpp main.cpp 
+  742  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  743  g++ -o linker LinkerWrapper.cpp main.cpp 
+  744  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  745  g++ -o linker LinkerWrapper.cpp main.cpp 
+  746  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  747  g++ -o linker LinkerWrapper.cpp main.cpp 
+  748  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  749  g++ -o linker LinkerWrapper.cpp main.cpp 
+  750  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  751  g++ -o linker LinkerWrapper.cpp main.cpp 
+  752  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  753  g++ -o linker LinkerWrapper.cpp main.cpp 
+  754  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  755  g++ -o linker LinkerWrapper.cpp main.cpp 
+  756  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  757  g++ -o linker LinkerWrapper.cpp main.cpp 
+  758  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  759  g++ -o linker LinkerWrapper.cpp main.cpp 
+  760  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  761  g++ -o linker LinkerWrapper.cpp main.cpp 
+  762  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  763  g++ -o linker LinkerWrapper.cpp main.cpp 
+  764  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  765  g++ -o linker LinkerWrapper.cpp main.cpp 
+  766  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  767  g++ -o linker LinkerWrapper.cpp main.cpp 
+  768  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  769  g++ -o linker LinkerWrapper.cpp main.cpp 
+  770  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  771  g++ -o linker LinkerWrapper.cpp main.cpp 
+  772  ./linker -o linker_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  773* ./linker -o linker_hex_output.o -hex -place linker_input_projmain.o linker_input_projinterrupts.o 
+  774  ./linker -o linker_hex_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  775  g++ -o linker LinkerWrapper.cpp main.cpp 
+  776  ./linker -o linker_hex_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  777  g++ -o linker LinkerWrapper.cpp main.cpp 
+  778  ./linker -o linker_hex_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  779  g++ -o linker LinkerWrapper.cpp main.cpp 
+  780  ./linker -o linker_hex_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  781* g++ -o linker LinkerWra
+  782  ./linker -o linker_hex_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  783  g++ -o linker LinkerWrapper.cpp main.cpp 
+  784  ./linker -o linker_hex_output.o -linkable linker_input_projmain.o linker_input_projinterrupts.o 
+  785  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=text@1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  786  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  787  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=text@1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  788  g++ -o linker LinkerWrapper.cpp main.cpp 
+  789  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  790  g++ -o linker LinkerWrapper.cpp main.cpp 
+  791  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  792  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@998 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  793  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0x998 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  794  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  795  g++ -o linker LinkerWrapper.cpp main.cpp 
+  796  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  797  g++ -o linker LinkerWrapper.cpp main.cpp 
+  798  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  799  g++ -o linker LinkerWrapper.cpp main.cpp 
+  800  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  801  g++ -o linker LinkerWrapper.cpp main.cpp 
+  802  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  803  g++ -o linker LinkerWrapper.cpp main.cpp 
+  804  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  805  g++ -o linker LinkerWrapper.cpp main.cpp 
+  806  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  807  g++ -o linker LinkerWrapper.cpp main.cpp 
+  808  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  809  g++ -o linker LinkerWrapper.cpp main.cpp 
+  810  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  811  g++ -o linker LinkerWrapper.cpp main.cpp 
+  812  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  813  g++ -o linker LinkerWrapper.cpp main.cpp 
+  814  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  815  g++ -o linker LinkerWrapper.cpp main.cpp 
+  816  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  817  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  818  g++ -o linker LinkerWrapper.cpp main.cpp 
+  819  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  820  g++ -o linker LinkerWrapper.cpp main.cpp 
+  821  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  822  g++ -o linker LinkerWrapper.cpp main.cpp 
+  823  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  824  g++ -o linker LinkerWrapper.cpp main.cpp 
+  825  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  826  g++ -o linker LinkerWrapper.cpp main.cpp 
+  827  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  828  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x2FF2 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  829  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x1002 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  830  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x105A -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  831  g++ -o linker LinkerWrapper.cpp main.cpp 
+  832  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x105A -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  833  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xEFFF -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  834  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFEFF -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  835  g++ -o linker LinkerWrapper.cpp main.cpp 
+  836  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFEFF -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  837  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  838* ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000  -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  839  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0x2000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  840  g++ -o linker LinkerWrapper.cpp main.cpp 
+  841  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0x2000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  842  g++ -o linker LinkerWrapper.cpp main.cpp 
+  843  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0x2000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  844  g++ -o linker LinkerWrapper.cpp main.cpp 
+  845  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0000 -place=data@0x2000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  846  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x2000 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  847  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x1002 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  848  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFFF8 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  849  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x9FF8 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  850  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0x0FF8 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  851  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=data@0xFEFF -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  852  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  853  g++ -o linker LinkerWrapper.cpp main.cpp 
+  854  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  855  g++ -o linker LinkerWrapper.cpp main.cpp 
+  856  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  857  g++ -o linker LinkerWrapper.cpp main.cpp 
+  858  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  859  g++ -o linker LinkerWrapper.cpp main.cpp 
+  860  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  861  g++ -o linker LinkerWrapper.cpp main.cpp 
+  862  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  863  g++ -o linker LinkerWrapper.cpp main.cpp 
+  864  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  865  g++ -o linker LinkerWrapper.cpp main.cpp 
+  866  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  867  g++ -o linker LinkerWrapper.cpp main.cpp 
+  868  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  869  g++ -o linker LinkerWrapper.cpp main.cpp 
+  870  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  871  g++ -o linker LinkerWrapper.cpp main.cpp 
+  872  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  873  g++ -o linker LinkerWrapper.cpp main.cpp 
+  874  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  875  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFE00 linker_input_projmain.o linker_input_projinterrupts.o 
+  876  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFEFA linker_input_projmain.o linker_input_projinterrupts.o 
+  877  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFEAA linker_input_projmain.o linker_input_projinterrupts.o 
+  878  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFE0A linker_input_projmain.o linker_input_projinterrupts.o 
+  879  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFE00 linker_input_projmain.o linker_input_projinterrupts.o 
+  880  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFE7B linker_input_projmain.o linker_input_projinterrupts.o 
+  881  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFE7C linker_input_projmain.o linker_input_projinterrupts.o 
+  882  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0xFE7D linker_input_projmain.o linker_input_projinterrupts.o 
+  883  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  884  g++ -o linker LinkerWrapper.cpp main.cpp 
+  885  ./linker -o linker_hex_output.o -hex -place=ivtp@0x0100 -place=text@0x1000 linker_input_projmain.o linker_input_projinterrupts.o 
+  886  history 
+  887  history | grep linker_linkable
+  888  history > hist.txt

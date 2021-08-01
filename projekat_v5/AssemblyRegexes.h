@@ -46,26 +46,33 @@ regex rx_symbol("^(" + sh_symbol + ")$");
 regex rx_literal_decimal("^(" + sh_literal_decimal + ")$");
 regex rx_literal_hexadecimal("^(" + sh_literal_hexadecimal + ")$");
 
-// instructions
+// instructions:
+// instructions that operate only with registers
 regex rx_no_operand_instruction("^(halt|iret|ret)$");
 regex rx_one_operand_register_instruction("^(push|pop|int|not) (r[0-7]|psw)$");
+regex rx_two_operand_register_instruction("^(xchg|add|sub|mul|div|cmp|and|or|xor|test|shl|shr) (r[0-7]|psw),(r[0-7]|psw)$");
 
 // instructions with operand (all kind)
-// TO be tested:
+// jumps
 regex rx_one_operand_all_kind_addressing_jumps("^(call|jmp|jeq|jne|jgt) (.*)$");
-
-//#regex rx_two_operand_all_kind_addressing_load_store("^(ldr|str) (.*)$");
-
-// instructions that operate only with registers
-//#regex rx_two_operand_register_instruction("^(xchg|add|sub|mul|div|cmp|and|or|xor|test|shl|shr) (r[0-7]|psw),(r[0-7]|psw)$");
+// load/store
+regex rx_two_operand_all_kind_addressing_load_store("^(ldr|str) (r[0-7]|psw),(.*)$");
 
 // syntax notation for operand in instruction for jumps
-regex rx_address_syntax_notation_absolute("^(" + sh_symbol_or_literal + ")$");
-regex rx_address_syntax_notation_memdir("^\\*(" + sh_symbol_or_literal + ")$");
-regex rx_address_syntax_notation_symbol_pc_relative("^%(" + sh_symbol + ")$");
-regex rx_address_syntax_notation_regdir("^\\*(r[0-7]|psw)$");
-regex rx_address_syntax_notation_regind("^\\*\\[(r[0-7]|psw)\\]$");
-regex rx_address_syntax_notation_regind_with_displacement("^\\*\\[(r[0-7]|psw) \\+ (" + sh_symbol_or_literal + ")\\]$");
+regex rx_jmp_address_syntax_notation_absolute("^(" + sh_symbol_or_literal + ")$");
+regex rx_jmp_address_syntax_notation_memdir("^\\*(" + sh_symbol_or_literal + ")$");
+regex rx_jmp_address_syntax_notation_symbol_pc_relative("^%(" + sh_symbol + ")$");
+regex rx_jmp_address_syntax_notation_regdir("^\\*(r[0-7]|psw)$");
+regex rx_jmp_address_syntax_notation_regind("^\\*\\[(r[0-7]|psw)\\]$");
+regex rx_jmp_address_syntax_notation_regind_with_displacement("^\\*\\[(r[0-7]|psw) \\+ (" + sh_symbol_or_literal + ")\\]$");
+
+// syntax notation for operand in instruction for load/store
+regex rx_load_store_address_syntax_notation_absolute("^\\$(" + sh_symbol_or_literal + ")$");
+regex rx_load_store_address_syntax_notation_memdir("^(" + sh_symbol_or_literal + ")$");
+regex rx_load_store_address_syntax_notation_pc_relative("^%(" + sh_symbol + ")$");
+regex rx_load_store_address_syntax_notation_regdir("^(r[0-7]|psw)$");
+regex rx_load_store_address_syntax_notation_regind("^\\[(r[0-7]|psw)\\]$");
+regex rx_load_store_address_syntax_notation_regind_with_displacement("^\\[(r[0-7]|psw) \\+ (" + sh_symbol_or_literal + ")\\]$");
 
 // syntax notation for operand in instruction for load or store
 

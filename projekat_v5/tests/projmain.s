@@ -4,18 +4,16 @@
 .section myCode
 .equ tim_cfg, 0xFF10
 myStart:
-    .skip 5
-    .skip 5
-    iret
+    ldr r0, $0x1
+    str r0, tim_cfg
 wait:
-    .word -1
-#    .word 0
-    ret
-     .skip 2
-    .word -3
+    ldr r0, myCounter
+    ldr r1, $5
+    cmp r0, r1
+    jne wait
+    halt
 .section myData
 myCounter:
     .word 0
-    ret
 .end
     

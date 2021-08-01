@@ -644,7 +644,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         string operand = catch_parts.str(2);
         smatch catch_operand;
         cout << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
-        if (regex_search(operand, catch_operand, rx_address_syntax_notation_absolute))
+        if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_absolute))
         {
             // this is form: jmp 5 or jmp label
             // there is payload:
@@ -652,7 +652,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             location_counter += 5;
             section_table[current_section].size += 5;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_symbol_pc_relative))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_symbol_pc_relative))
         {
             // this is form: jmp %label
             // there is payload: because of pc relative addressing
@@ -660,7 +660,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             location_counter += 5;
             section_table[current_section].size += 5;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regdir))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_regdir))
         {
             // this is form: jmp *r0
             // there is not payload:
@@ -668,7 +668,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             location_counter += 3;
             section_table[current_section].size += 3;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_regind))
         {
 
             // this is form: jmp *[r0]
@@ -677,7 +677,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             location_counter += 3;
             section_table[current_section].size += 3;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind_with_displacement))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_regind_with_displacement))
         {
             // this is form: jmp *[r0 + label] or jmp *[r0 + 5]
             // there is payload:
@@ -685,7 +685,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             location_counter += 5;
             section_table[current_section].size += 5;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_memdir))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_memdir))
         {
             // this is form: jmp *5 or jmp *label
             // there is payload:
@@ -700,6 +700,77 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             return false;
         }
         return true;
+    }
+    else if (regex_search(line_with_instruction, catch_parts, rx_two_operand_all_kind_addressing_load_store))
+    {
+        string instruction_mnemonic = catch_parts.str(1);
+        string regD = catch_parts.str(2);
+        string operand = catch_parts.str(3);
+        smatch catch_operand;
+        cout << "Ld/St: ldr str:#" << instruction_mnemonic << "#reg:#" << regD << "#operand:#" << operand << endl;
+        if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_absolute))
+        {
+            // this is form: ld ri, $5 or ld ri, $label
+            // there is payload:
+            cout << "$label or $literal" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_pc_relative))
+        {
+            // this is form: ld ri, %label
+            // there is payload:
+            cout << "%label" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_regdir))
+        {
+            // this is form: ld ri, rj
+            // there is not payload:
+            cout << "rj" << endl;
+            location_counter += 3;
+            section_table[current_section].size += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_regind))
+        {
+            // this is form: ld ri, [rj]
+            // there is not payload:
+            cout << "[rj]" << endl;
+            location_counter += 3;
+            section_table[current_section].size += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_regind_with_displacement))
+        {
+            // this is form: ld ri, [rj + label / 5]
+            // there is payload:
+            cout << "[rj + label / 5]" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_memdir))
+        {
+            // this is form: ld ri, 5 or ld ri, label
+            // there is payload:
+            cout << "label or literal" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else
+        {
+            error_messages[current_line_number] = "Addressing type is invalid";
+            return false;
+        }
+    }
+    else if (regex_search(line_with_instruction, catch_parts, rx_two_operand_register_instruction))
+    {
+        string instruction_mnemonic = catch_parts.str(1);
+        string regD = catch_parts.str(2);
+        string regS = catch_parts.str(3);
+        smatch catch_operand;
+        cout << "Aritmethical/Logical:#" << instruction_mnemonic << "#regD:#" << regD << "#regS:#" << regS << endl;
+        location_counter += 2;
+        section_table[current_section].size += 2;
     }
     else
     {
@@ -828,7 +899,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         {
             instr_descr = 0x53;
         }
-        if (regex_search(operand, catch_operand, rx_address_syntax_notation_absolute))
+        if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_absolute))
         {
             // this is form: jmp 5 or jmp label
             // there is payload:
@@ -869,8 +940,9 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
                 location_counter += 5;
             }
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_symbol_pc_relative))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_symbol_pc_relative))
         {
+            // CHECK THIS AGAIN!!!
             operand = catch_operand.str(1);
             // this is form: jmp %label
             // there is payload: because of pc relative addressing
@@ -894,7 +966,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
             location_counter += 5;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regdir))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_regdir))
         {
             // this is form: jmp *r0
             // there is not payload:
@@ -918,7 +990,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             section_table[current_section].data.push_back(adr_mode);
             location_counter += 3;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_regind))
         {
 
             // this is form: jmp *[r0]
@@ -944,7 +1016,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             section_table[current_section].data.push_back(adr_mode);
             location_counter += 3;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind_with_displacement))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_regind_with_displacement))
         {
             // this is form: jmp *[r0 + label] or jmp *[r0 + 5]
             // there is payload:
@@ -983,7 +1055,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
             location_counter += 5;
         }
-        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_memdir))
+        else if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_memdir))
         {
 
             // this is form: jmp *5 or jmp *label
@@ -1016,7 +1088,307 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             location_counter += 5;
         }
     }
+    else if (regex_search(line_with_instruction, catch_parts, rx_two_operand_all_kind_addressing_load_store))
+    {
+        string instruction_mnemonic = catch_parts.str(1);
+        string regD = catch_parts.str(2);
+        string operand = catch_parts.str(3);
+        smatch catch_operand;
+        cout << "Ld/St: ldr str:#" << instruction_mnemonic << "#reg:#" << regD << "#operand:#" << operand << endl;
 
+        int instr_descr;
+        int reg_descr;
+        int adr_mode;
+        if (instruction_mnemonic == "ldr")
+        {
+            instr_descr = 0xA0;
+        }
+        else if (instruction_mnemonic == "str")
+        {
+            instr_descr = 0xB0;
+        }
+        if (regD == "psw")
+        {
+            reg_descr = 0x8;
+        }
+        else
+        {
+            reg_descr = regD.at(1) - '0';
+        }
+        reg_descr <<= 4;
+        cout << "I:#" << instr_descr << "#" << reg_descr << "#" << endl;
+        if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_absolute))
+        {
+            // this is form: ld ri, $5 or ld ri, $label
+            // there is payload:
+            operand = catch_operand.str(1);
+            cout << "$label or $literal:" << endl;
+            if (regex_match(operand, rx_symbol))
+            {
+                // this is immediate addressing: Need relocation table and everything!
+                // source_reg = F - unimportant
+                cout << "label" << operand << endl;
+                reg_descr += 0xF;
+                // address_mode: ua = 00
+                adr_mode = 0;
+                int value_to_be_written = process_absolute_addressing_symbol(operand);
+                section_table[current_section].offsets.push_back(location_counter);
+                section_table[current_section].data.push_back(instr_descr);
+                section_table[current_section].data.push_back(reg_descr);
+                section_table[current_section].data.push_back(adr_mode);
+                section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+                section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+                location_counter += 5;
+            }
+            else
+            {
+                cout << "literal" << operand << endl;
+                int value = fetch_decimal_value_from_literal(operand);
+                cout << "literal#" << value << endl;
+                // this is immediate addressing:
+                // source_reg = F - unimportant
+                reg_descr += 0xF;
+                // address_mode: ua = 00
+                adr_mode = 0;
+                section_table[current_section].offsets.push_back(location_counter);
+                section_table[current_section].data.push_back(instr_descr);
+                section_table[current_section].data.push_back(reg_descr);
+                section_table[current_section].data.push_back(adr_mode);
+                section_table[current_section].data.push_back(0xff & (value >> 8));
+                section_table[current_section].data.push_back(0xff & (value));
+                location_counter += 5;
+            }
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_pc_relative))
+        {
+            // this is form: ld ri, %label
+            // there is payload: because of pc relative addressing
+            operand = catch_operand.str(1);
+            cout << "%label - pc relative" << operand << endl;
+            // source_reg = pc: 7 is number of pc
+            reg_descr += 0x7;
+            // this is pc relative with displacement!:
+            // address_mode: ua = 03 - regind with displacement!
+            adr_mode = 0x03;
+
+            // return value for memory and also create relocation data!
+            int value_to_be_written = process_pc_relative_addressing_symbol(operand);
+
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+            section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+            location_counter += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_regdir))
+        {
+            // this is form: ld ri, rj
+            // there is not payload:
+            int register_number;
+            if (catch_operand.str(1) == "psw")
+            {
+                register_number = 8;
+            }
+            else
+            {
+                register_number = catch_operand.str(1).at(1) - '0';
+            }
+            cout << " reg dir: " << register_number << endl;
+            // source_reg: s = 0-8
+            reg_descr += register_number;
+            // address_mode: ua = 01 - reg dir!
+            adr_mode = 0x01;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            location_counter += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_regind))
+        {
+            // this is form: ld ri, [rj]
+            // there is not payload:
+            cout << "[rj]" << endl;
+            int register_number;
+            if (catch_operand.str(1) == "psw")
+            {
+                register_number = 8;
+            }
+            else
+            {
+                register_number = catch_operand.str(1).at(1) - '0';
+            }
+            cout << " reg ind: " << register_number << endl;
+            // source_reg: s = 0-8
+            reg_descr += register_number;
+            // address_mode: ua = 02 - reg ind!
+            adr_mode = 0x02;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            location_counter += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_regind_with_displacement))
+        {
+            // this is form: ld ri, [rj + label / 5]
+            // there is payload:
+            cout << "[rj + label / 5]" << endl;
+            string displacement = catch_operand.str(2);
+            int register_number;
+            if (catch_operand.str(1) == "psw")
+            {
+                register_number = 8;
+            }
+            else
+            {
+                register_number = catch_operand.str(1).at(1) - '0';
+            }
+            cout << " reg ind with displacement " << register_number << " " << displacement << endl;
+            // source_reg: s = 0-8
+            reg_descr += register_number;
+            // address_mode: ua = 03 - regind with displacement
+            adr_mode = 0x03;
+            int value_to_be_written;
+            if (regex_match(displacement, rx_symbol))
+            {
+                cout << "Symbol: " << endl;
+                value_to_be_written = process_absolute_addressing_symbol(displacement);
+            }
+            else
+            {
+                cout << "Literal: " << endl;
+                value_to_be_written = fetch_decimal_value_from_literal(displacement);
+            }
+            cout << value_to_be_written << endl;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+            section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+            location_counter += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_memdir))
+        {
+            // this is form: ld ri, 5 or ld ri, label
+            // there is payload:
+            cout << "label or literal#" << operand << endl;
+            // source_reg F - unimportant
+            reg_descr += 0xF;
+            // address_mode: ua = 04 - memory
+            adr_mode = 0x04;
+            int value_to_be_written;
+            if (regex_match(operand, rx_symbol))
+            {
+                cout << "Symbol: " << endl;
+                value_to_be_written = process_absolute_addressing_symbol(operand);
+            }
+            else
+            {
+                cout << "Literal: " << endl;
+                value_to_be_written = fetch_decimal_value_from_literal(operand);
+            }
+            cout << value_to_be_written << endl;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+            section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+            location_counter += 5;
+        }
+        else
+        {
+            error_messages[current_line_number] = "Addressing type is invalid";
+            return false;
+        }
+    }
+    else if (regex_search(line_with_instruction, catch_parts, rx_two_operand_register_instruction))
+    {
+        string instruction_mnemonic = catch_parts.str(1);
+        string regD = catch_parts.str(2);
+        string regS = catch_parts.str(3);
+        smatch catch_operand;
+        cout << "Aritmethical/Logical:#" << instruction_mnemonic << "#regD:#" << regD << "#regS:#" << regS << endl;
+        int instr_descr;
+        int reg_descr;
+
+        if (instruction_mnemonic == "xchg")
+        {
+            instr_descr = 0x60;
+        }
+        else if (instruction_mnemonic == "add")
+        {
+            instr_descr = 0x70;
+        }
+        else if (instruction_mnemonic == "sub")
+        {
+            instr_descr = 0x71;
+        }
+        else if (instruction_mnemonic == "mul")
+        {
+            instr_descr = 0x72;
+        }
+        else if (instruction_mnemonic == "div")
+        {
+            instr_descr = 0x73;
+        }
+        else if (instruction_mnemonic == "cmp")
+        {
+            instr_descr = 0x74;
+        }
+        else if (instruction_mnemonic == "and")
+        {
+            instr_descr = 0x81;
+        }
+        else if (instruction_mnemonic == "or")
+        {
+            instr_descr = 0x82;
+        }
+        else if (instruction_mnemonic == "xor")
+        {
+            instr_descr = 0x83;
+        }
+        else if (instruction_mnemonic == "test")
+        {
+            instr_descr = 0x84;
+        }
+        else if (instruction_mnemonic == "shl")
+        {
+            instr_descr = 0x90;
+        }
+        else if (instruction_mnemonic == "shr")
+        {
+            instr_descr = 0x91;
+        }
+
+        if (regD == "psw")
+        {
+            reg_descr = 0x8;
+        }
+        else
+        {
+            reg_descr = regD.at(1) - '0';
+        }
+        reg_descr <<= 4;
+        if (regS == "psw")
+        {
+            reg_descr += 0x8;
+        }
+        else
+        {
+            reg_descr += regS.at(1) - '0';
+        }
+        cout << hex << "I:#" << instr_descr << "#" << reg_descr << "#" << endl;
+        cout << dec;
+        section_table[current_section].offsets.push_back(location_counter);
+        section_table[current_section].data.push_back(instr_descr);
+        section_table[current_section].data.push_back(reg_descr);
+        location_counter += 2;
+    }
     else
     {
         error_messages[current_line_number] = "Instruction does not exists";

@@ -6,7 +6,7 @@ Id	Name		Size
 0	UNDEFINED	0000
 3	data	0014
 1	ivtp	0010
-2	text	0043
+2	text	003e
 
 
 Symbol table:
@@ -31,7 +31,7 @@ Relocation data <ABSOLUTE>:
 Offset	Type		Dat/Ins	Symbol	Section name
 
 Section data <ABSOLUTE>:
-0000   00 ff 
+0000: 00 ff 
 
 Relocation data <UNDEFINED>:
 Offset	Type		Dat/Ins	Symbol	Section name
@@ -43,9 +43,16 @@ Relocation data <data>:
 Offset	Type		Dat/Ins	Symbol	Section name
 
 Section data <data>:
-0000   41 00 20 00 56 00 41 00 
-0008   4c 00 55 00 45 00 3a 00 
-0010   20 00 00 00 
+0000: 41 00 
+0002: 20 00 
+0004: 56 00 
+0006: 41 00 
+0008: 4c 00 
+000a: 55 00 
+000c: 45 00 
+000e: 3a 00 
+0010: 20 00 
+0012: 00 00 
 
 Relocation data <ivtp>:
 Offset	Type		Dat/Ins	Symbol	Section name
@@ -54,27 +61,37 @@ Offset	Type		Dat/Ins	Symbol	Section name
 0006	R_HYP_16	d	text	ivtp
 
 Section data <ivtp>:
-0000   02 00 00 00 01 00 00 00 
-0008   00 00 00 00 00 00 00 00 
-
+0000: 02 00 
+0002: 00 00 
+0004: 01 00 
+0006: 00 00 
+0008: 00 00 00 00 00 00 00 00 
 
 Relocation data <text>:
 Offset	Type		Dat/Ins	Symbol	Section name
 0006	R_HYP_16	i	data	text
 000b	R_HYP_16	i	print	text
 0010	R_HYP_16	i	A_location	text
+0015	R_HYP_16_PC	i	A_location	text
 0026	R_HYP_16	i	B_text	text
-002b	R_HYP_16	i	print	text
-0030	R_HYP_16	i	A_location	text
+002b	R_HYP_16_PC	i	print	text
+0030	R_HYP_16	i	B_value	text
 
 Section data <text>:
-0000   20 20 a0 2f 00 00 00 30 
-0008   ff 00 00 00 a0 3f 04 00 
-0010   00 a0 1f 00 00 30 70 31 
-0018   b0 3f 04 ff 00 b0 3f 04 
-0020   ff 00 a0 2f 00 00 00 30 
-0028   ff 00 00 00 a0 3f 04 00 
-0030   00 a0 1f 00 00 30 70 31 
-0038   b0 3f 04 ff 00 b0 3f 04 
-0040   ff 00 00 
+0000: 20 
+0001: 20 
+0002: a0 2f 00 00 00 
+0007: 30 ff 00 00 00 
+000c: a0 3f 04 00 00 
+0011: a0 37 03 ff fe 
+0016: a0 1f 00 00 30 
+001b: 70 31 
+001d: b0 3f 04 ff 00 
+0022: a0 2f 00 00 00 
+0027: 30 f7 05 ff fe 
+002c: a0 3f 04 00 00 
+0031: a0 1f 00 00 30 
+0036: 70 31 
+0038: b0 3f 04 ff 00 
+003d: 00 
 

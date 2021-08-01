@@ -73,11 +73,13 @@ private:
     bool linkable_output;
     map<string, int> mapped_section_address;
 
+    bool move_sections_to_virtual_address();
     int fetch_start_address_of_section(string);
-    bool solve_relocations_linkable();
-    bool solve_relocations_hex();
-    bool solve_content_of_sections_linkable();
-    bool solve_content_of_sections_hex();
+    bool create_aggregate_relocations_linkable();
+    bool create_aggregate_relocations_hex();
+    bool create_aggregate_content_of_sections_linkable();
+    bool create_aggregate_content_of_sections_hex();
+    bool check_places_of_sections();
 
 public:
     LinkerWrapper(string, vector<string>, bool, map<string, int>);
@@ -85,8 +87,9 @@ public:
     bool collect_data_from_relocatible_files();
     bool create_aggregate_sections();
     bool create_aggregate_symbol_table();
-    bool solve_relocations();
-    bool solve_content_of_sections();
+    bool create_aggregate_relocations();
+    bool create_aggregate_content_of_sections();
+    bool solve_relocations_on_data();
 
     void print_error_messages();
 

@@ -212,6 +212,64 @@ bool LinkerWrapper::collect_data_from_relocatible_files()
     return true;
 }
 
+bool LinkerWrapper::move_sections_to_virtual_address()
+{
+    if (linkable_output == true)
+    {
+        return true;
+    }
+    // this is -hex option and all -place options are taken into consideration
+    // all sections not mentined in -place comes after the last section from -place list
+    int next_address_for_nonmentioned_sections = 0;
+    for (map<string, int>::iterator it_place = mapped_section_address.begin();
+         it_place != mapped_section_address.end(); it_place++)
+    {
+        cout << it_place->first << ":" << it_place->second << endl;
+
+        for (map<string, SectionAdditionalData>::iterator it_filename = section_additional_helper[it_place->first].begin();
+             it_filename != section_additional_helper[it_place->first].end(); it_filename++)
+        {
+            cout << "F: " << it_filename->first << " :" << it_filename->second.start_addres_in_aggregate_section << endl;
+            it_filename->second.start_addres_in_aggregate_section += it_place->second;
+            if (it_filename->second.start_addres_in_aggregate_section + it_filename->second.parent_section_size > next_address_for_nonmentioned_sections)
+            {
+                next_address_for_nonmentioned_sections = it_filename->second.start_addres_in_aggregate_section + it_filename->second.parent_section_size;
+            }
+        }
+    }
+    cout << "NEXT ADDRESS: " << next_address_for_nonmentioned_sections << endl;
+    //section_additional_helper
+
+    cout << "Linker output" << endl
+         << endl;
+    cout << "Helper info:" << endl;
+    cout << hex;
+
+    for (map<string, map<string, SectionAdditionalData>>::iterator it_section = section_additional_helper.begin();
+         it_section != section_additional_helper.end(); it_section++)
+    {
+        cout << "Section: " << it_section->first << " :{" << endl;
+        for (map<string, SectionAdditionalData>::iterator it_filename = it_section->second.begin();
+             it_filename != it_section->second.end(); it_filename++)
+        {
+            cout << "\t"
+                 << "# " << it_filename->first;
+            SectionAdditionalData additional_data = it_filename->second;
+
+            cout << "\t\t" << additional_data.section_name << "\t" << additional_data.parent_file_name;
+            cout << ":\t" << additional_data.parent_section_size;
+            cout << " [" << additional_data.start_addres_in_aggregate_section << ",";
+            cout << additional_data.start_addres_in_aggregate_section + additional_data.parent_section_size << ")";
+
+            cout << endl;
+        }
+        cout << "\t}" << endl;
+        cout << endl;
+    }
+
+    return true;
+}
+
 int LinkerWrapper::fetch_start_address_of_section(string section_name)
 {
     if (linkable_output)
@@ -262,6 +320,11 @@ bool LinkerWrapper::create_aggregate_sections()
 
             section_additional_helper[it->second.section_name][filename] = additional_data;
         }
+    }
+
+    if (move_sections_to_virtual_address() == false)
+    {
+        return false;
     }
 
     int id_section = 0;
@@ -391,7 +454,7 @@ bool LinkerWrapper::create_aggregate_symbol_table()
     return true;
 }
 
-bool LinkerWrapper::solve_relocations_linkable()
+bool LinkerWrapper::create_aggregate_relocations_linkable()
 {
     // Output file should be linkable with others relocatible files.
     // All necessary relocations remains in object file
@@ -428,21 +491,21 @@ bool LinkerWrapper::solve_relocations_linkable()
     return true;
 }
 
-bool LinkerWrapper::solve_relocations_hex()
+bool LinkerWrapper::create_aggregate_relocations_hex()
 {
     exit(-1);
     return true;
 }
 
-bool LinkerWrapper::solve_relocations()
+bool LinkerWrapper::create_aggregate_relocations()
 {
     if (linkable_output == true)
-        return solve_relocations_linkable();
+        return create_aggregate_relocations_linkable();
     else
-        return solve_relocations_hex();
+        return create_aggregate_relocations_hex();
 }
 
-bool LinkerWrapper::solve_content_of_sections_linkable()
+bool LinkerWrapper::create_aggregate_content_of_sections_linkable()
 {
     for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
     {
@@ -457,62 +520,184 @@ bool LinkerWrapper::solve_content_of_sections_linkable()
         for (string filename : files_to_be_linked)
         {
             cout << "File: " << filename << endl;
-            // Ovo ovde nije dobro, proveri da li ima fajla i sekcije u sec_tabl_p_file i onda dalje...
-            // ako ima i ako ima sta u sekciji (size > 0), tada citaj data
-            /*
-            vector<int> section_file_offsets = this->section_table_per_file[filename][section_name].offsets;
-            cout << this->section_table_per_file[filename][section_name].size << endl;
-            if (this->section_table_per_file[filename][section_name].size == 0)
-{
-    //if there is no data in section per file
+            map<string, SectionAdditionalData>::iterator it_section_additional_data = section_additional_helper[it->first].find(filename);
+            if (it_section_additional_data == section_additional_helper[it->first].end())
+            {
                 continue;
-        }cout << section_file_offsets.size() << endl;
-            cout << (0 < section_file_offsets.size() - 1) << endl;
+            }
+
+            SectionAdditionalData section_additional_data = it_section_additional_data->second;
+            cout << "S:" << section_additional_data.section_name << " F:" << section_additional_data.parent_file_name << endl;
+            vector<int> section_file_offsets = this->section_table_per_file[filename][section_name].offsets;
+            vector<char> section_file_data = this->section_table_per_file[filename][section_name].data;
+            cout << section_file_offsets.size() << "?" << section_file_data.size() << endl;
+
             for (int i = 0; i < section_file_offsets.size() - 1; i++)
             {
-                cout << "Hi" << endl;
                 int current_offset = section_file_offsets[i];
                 int next_offset = section_file_offsets[i + 1];
-                cout << ":" << current_offset << "->" << next_offset << endl;
+                //cout << ":" << current_offset << "->" << next_offset << endl;
                 cout << hex << setfill('0') << setw(4) << (0xffff & (current_offset + section_additional_helper[section_name][filename].start_addres_in_aggregate_section)) << ": ";
+                it->second.offsets.push_back(current_offset + section_additional_helper[section_name][filename].start_addres_in_aggregate_section);
                 for (int j = current_offset; j < next_offset; j++)
                 {
-                    char c = this->section_table_per_file[filename][section_name].data[j];
+                    char c = section_file_data[j];
                     cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+                    it->second.data.push_back(c);
                 }
                 cout << endl;
             }
             cout << dec;
             // Last directive which is in memory
-            int current_offset = offsets[offsets.size() - 1];
-            int next_offset = this->section_table_per_file[filename][section_name].data.size();
+            int current_offset = section_file_offsets[section_file_offsets.size() - 1];
+            int next_offset = section_file_data.size();
             cout << hex << setfill('0') << setw(4) << (0xffff & (current_offset + section_additional_helper[section_name][filename].start_addres_in_aggregate_section)) << ": ";
+            it->second.offsets.push_back(current_offset + section_additional_helper[section_name][filename].start_addres_in_aggregate_section);
             for (int j = current_offset; j < next_offset; j++)
             {
-                char c = this->section_table_per_file[filename][section_name].data[j];
+                char c = section_file_data[j];
                 cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+                it->second.data.push_back(c);
             }
             cout << endl;
-            */
         }
     }
     return true;
 }
 
-bool LinkerWrapper::solve_content_of_sections_hex()
+bool LinkerWrapper::create_aggregate_content_of_sections_hex()
 {
     exit(-1);
     return true;
 }
 
-bool LinkerWrapper::solve_content_of_sections()
+bool LinkerWrapper::create_aggregate_content_of_sections()
 {
     if (linkable_output == true)
-        return solve_content_of_sections_linkable();
+        return create_aggregate_content_of_sections_linkable();
     else
-        return solve_content_of_sections_hex();
+        return create_aggregate_content_of_sections_hex();
 }
 
+bool LinkerWrapper::solve_relocations_on_data()
+{
+    // data can be accessed directly by indexing the array of data!
+    // rel_data.offset always show on less byte of 2B address
+    vector<int> relocation_indexes_for_removal;
+    int index_of_relocation_data = 0;
+    for (RelocationTable rel_data : output_relocation_table)
+    {
+        bool do_not_change_data = false;
+        bool remove_local_pc_relative = false;
+        //cout << dec;
+
+        cout << rel_data.offset << "[" << rel_data.type << "," << rel_data.is_data << "]"
+             << " <- " << rel_data.symbol_name << " (" << rel_data.section_name << ")" << endl;
+
+        // fetch the value of symbol, to add it on the value for memory
+        map<string, SectionTable>::iterator it = output_section_table.find(rel_data.symbol_name);
+        int additional_value;
+        if (it == output_section_table.end())
+        {
+            // symbol is the real symbol and it is in symbol table
+            additional_value = output_symbol_table.find(rel_data.symbol_name)->second.value;
+            cout << " symbol + " << additional_value << " ! ";
+        }
+        else
+        {
+            // symbol is the section (because it is local symbol in its asm file)
+            // fetch symbol offset by file in helper data
+            additional_value = section_additional_helper.find(rel_data.symbol_name)->second.find(rel_data.filename)->second.start_addres_in_aggregate_section;
+            cout << " section + " << additional_value << " ! ";
+        }
+
+        // fetch the position of relocation data to substitute it from the value for memory
+        int pc_rel_offset_data = 0;
+        if (rel_data.type == "R_HYP_16_PC")
+        {
+            // BE VERY CAREULL!!!!!!!!!!!
+            // CHECK THE OFFSET !!!
+
+            if (output_symbol_table.find(rel_data.symbol_name)->second.section == rel_data.section_name)
+            {
+                // this relocation data will be deleted because this symbol will become local for the section
+                // so displacement between offset and destination cannot be changed
+                pc_rel_offset_data = rel_data.offset;
+                if (rel_data.is_data == false)
+                {
+                    // this is instruction relocation data, so big endian is present
+                    // need to be decremented because (-2) + offset - 1 + offset(symbol) will give exact address
+                    pc_rel_offset_data -= 1;
+                }
+                cout << " PC REL (DELETE IT)- " << pc_rel_offset_data << " ! ";
+                remove_local_pc_relative = true;
+                relocation_indexes_for_removal.push_back(index_of_relocation_data);
+            }
+            else
+            {
+                if (linkable_output)
+                {
+                    // this relocation will remain the same
+                    // because we do not know where the final address of the symbol in section will be
+                    cout << " PC REL UNCHANGED  ! " << endl;
+                    do_not_change_data = true;
+                }
+                else
+                {
+                    cout << "NOT COVERED YET" << endl;
+                    exit(-1);
+                }
+            }
+        }
+        if (do_not_change_data)
+        {
+            index_of_relocation_data++;
+            continue;
+        }
+        if (rel_data.is_data)
+        {
+            // this relocation data is about data where the endianinty is little
+            // it is always about 2B address:
+            // [L H] is the representation in memory
+            int lower_value = output_section_table.find(rel_data.section_name)->second.data[rel_data.offset];
+            int higher_value = output_section_table.find(rel_data.section_name)->second.data[rel_data.offset + 1];
+            cout << higher_value << " " << lower_value << endl;
+            int value = /*(0xffff &*/ (int)((higher_value << 8) + (0xff & lower_value));
+            cout << " :" << value << " + " << additional_value << " - " << pc_rel_offset_data;
+            value += additional_value - pc_rel_offset_data;
+            cout << " -> " << value << endl;
+
+            output_section_table[rel_data.section_name].data[rel_data.offset] = (0xff & (value));
+            output_section_table[rel_data.section_name].data[rel_data.offset + 1] = (0xff & (value >> 8));
+        }
+        else
+        {
+            // this relocation data is about data where the endianinty is big
+            // it is always about 2B address:
+            // [H L] is the representation in memory
+            int lower_value = output_section_table.find(rel_data.section_name)->second.data[rel_data.offset];
+            int higher_value = output_section_table.find(rel_data.section_name)->second.data[rel_data.offset - 1];
+            cout << higher_value << " " << lower_value << endl;
+            int value = /*(0xffff &*/ (int)((higher_value << 8) + (0xff & lower_value));
+            cout << " :" << value << " + " << additional_value << " - " << pc_rel_offset_data;
+            value += additional_value - pc_rel_offset_data;
+            cout << " -> " << value << endl;
+
+            output_section_table[rel_data.section_name].data[rel_data.offset] = (0xff & (value));
+            output_section_table[rel_data.section_name].data[rel_data.offset - 1] = (0xff & (value >> 8));
+        }
+        index_of_relocation_data++;
+    }
+
+    for (int index : relocation_indexes_for_removal)
+    {
+        output_relocation_table.erase(output_relocation_table.begin() + index);
+    }
+
+    return true;
+}
+
+// Down is output part
 void LinkerWrapper::print_error_messages()
 {
     for (string err : error_messages)
@@ -694,4 +879,51 @@ void LinkerWrapper::fill_output_file()
     }
     text_output_file << dec;
     text_output_file << endl;
+
+    // Output section contents depends on option
+    // if -linkable is set, output will be like assembly output
+    // if -hex is set, output will be prepared for the memory
+    if (linkable_output)
+    {
+        text_output_file << "Content:" << endl;
+        for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
+        {
+            //if (it->first == "UNDEFINED")
+            //    continue;
+            //        if (it->first == "ABSOLUTE")
+            //            continue;
+            text_output_file << "Section: " << it->first << "(" << it->second.size << ")" << endl;
+            if (it->second.size == 0)
+            {
+                continue;
+            }
+            SectionTable s_table = it->second;
+            for (int i = 0; i < s_table.offsets.size() - 1; i++)
+            {
+
+                int current_offset = s_table.offsets[i];
+                int next_offset = s_table.offsets[i + 1];
+                text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+                for (int j = current_offset; j < next_offset; j++)
+                {
+                    char c = s_table.data[j];
+                    text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+                }
+                text_output_file << endl;
+            }
+            // Last directive which is in memory
+            int current_offset = s_table.offsets[s_table.offsets.size() - 1];
+            int next_offset = s_table.data.size();
+            text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+            for (int j = current_offset; j < next_offset; j++)
+            {
+                char c = s_table.data[j];
+                text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            }
+            text_output_file << endl;
+
+            text_output_file << dec;
+            text_output_file << endl;
+        }
+    }
 }

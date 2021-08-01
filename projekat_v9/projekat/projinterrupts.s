@@ -11,6 +11,8 @@
     loop_print:
     ldr r3, [r2]
     str r3, PRINT_REG
+    #str r3, %PRINT_REG # ovo bi bilo zgodno da moze jer ime smisla da neko rokne ovako
+
 	ldr r1, $5
   	add r2, r1
   	ldr r1, $0

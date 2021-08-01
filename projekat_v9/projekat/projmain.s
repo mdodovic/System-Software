@@ -23,18 +23,19 @@
 	ldr r2, $A_text
     call print
 	ldr r3, A_location
+	ldr r3, %A_location # dodata uduplana naredba pc relativnim da bi probali
 	ldr r1, $48
 	add r3, r1
-	str r3, PRINT_REG
-	str r3, PRINT_REG
+	str r3, PRINT_REG  
+	#str r3, %PRINT_REG # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
 	# gotov A
 	ldr r2, $B_text
-    call print
-	ldr r3, A_location
+    call %print   # stavljeno pc relativno radi probe
+	ldr r3, B_value # ispravljeno u B_value iz A_location
 	ldr r1, $48
 	add r3, r1
 	str r3, PRINT_REG
-	str r3, PRINT_REG
+	#str r3, %PRINT_REG  # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
 	# gotov B
     halt
 

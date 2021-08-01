@@ -116,9 +116,39 @@ void AssemblyParser::create_txt_file()
         text_output_file << "Section data <" << it->first << ">:" << endl;
 
         SectionTable s_table = it->second;
+        if (s_table.size == 0)
+        {
+            text_output_file << dec;
+            text_output_file << endl
+                             << endl;
+            continue;
+        }
         int counter = 0;
 
-        for (int i = 0; i < s_table.data.size(); i++)
+        for (int i = 0; i < s_table.offsets.size() - 1; i++)
+        {
+
+            int current_offset = s_table.offsets[i];
+            int next_offset = s_table.offsets[i + 1];
+            text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+            for (int j = current_offset; j < next_offset; j++)
+            {
+                char c = s_table.data[j];
+                text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            }
+            text_output_file << endl;
+        }
+        // Last directive which is in memory
+        int current_offset = s_table.offsets[s_table.offsets.size() - 1];
+        int next_offset = s_table.data.size();
+        text_output_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+        for (int j = current_offset; j < next_offset; j++)
+        {
+            char c = s_table.data[j];
+            text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+        }
+
+        /*        for (int i = 0; i < s_table.data.size(); i++)
         {
             char c = s_table.data[i];
             if (counter % 8 == 0)
@@ -132,6 +162,7 @@ void AssemblyParser::create_txt_file()
                 text_output_file << endl;
             }
         }
+*/
         text_output_file << dec;
         text_output_file << endl
                          << endl;
@@ -752,7 +783,7 @@ int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
         int addend = -2;
         if (s_from_table.section == "ABSOLUTE")
         {
-            cout << "EQU CALCULATIONS:#" << s_from_table.value << endl;
+            cout << "EQU CALCULATIONS:#" << s_from_table.value << "->" << (addend + s_from_table.value) << endl;
             // ? TO BE SEEN
             return addend + s_from_table.value;
         }

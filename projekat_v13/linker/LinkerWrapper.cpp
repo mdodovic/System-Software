@@ -1224,6 +1224,19 @@ void LinkerWrapper::fill_output_binary_file()
 
         // This will represent how many segments in memory emulator will have
         int number_of_sections = output_section_table.size();
+
+        map<string, SectionTable>::iterator it_check;
+        it_check = output_section_table.find("UNDEFINED");
+        if (it_check != output_section_table.end())
+        {
+            number_of_sections -= 1;
+        }
+        it_check = output_section_table.find("ABSOLUTE");
+        if (it_check != output_section_table.end())
+        {
+            number_of_sections -= 1;
+        }
+
         binary_output_file.write((char *)&number_of_sections, sizeof(number_of_sections));
         cout << number_of_sections << endl;
         //        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

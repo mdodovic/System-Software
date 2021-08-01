@@ -25,6 +25,7 @@ int main(int argc, const char *argv[])
         emulator.print_error_messages();
         return -1;
     }
+
     if (emulator.load_data_to_memory() == false)
     {
         emulator.print_error_messages();

@@ -13,27 +13,33 @@
   isr_reset:
     jmp main
   isr_timer:
-	push r0	
-#	ldr r0, $1
-#	str r0, myCounter
+	push r0
+	push r3	
+			ldr r0, myCounter
+			ldr r3, $1
+			add r0, r3
+			str r0, %myCounter
 	ldr r0, $asciiCode
 	str r0, term_out
+	pop r3
 	pop r0
     iret
   isr_terminal:
     iret
   main:
-	ldr r1, $6
+	ldr r1, $5
 	tim_loop:
+		ldr r0, $0x53 # S
+		str r0, term_out	
 		ldr r5, $0
 		str r5, %myCounter
 		str r1, tim_cfg
 		wait:
+                       # ldr r0, $77 # M
+                       # str r0, term_out
 			ldr r0, myCounter
+			ldr r2, $2
 			ldr r3, $1
-			add r0, r3
-			str r0, %myCounter
-			ldr r2, $3
 			shl r3, r2
 			cmp r0, r3
 			jne wait

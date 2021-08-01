@@ -9,9 +9,15 @@ class AssemblyParser
 {
 private:
     string path_to_file;
+    string path_to_output_file;
+
     vector<string> input_file_lines;
     int current_line_number;
     map<int, string> error_messages;
+    // lines from input files are changed (spaces, new lines, comments etc. have been removed),
+    // hence there are differences between actual file line numbers and ones that are processed.
+    map<int, int> transfer_error_lines;
+
     bool error_happened;
 
     static int id_symbol_in_symbol_table;
@@ -80,8 +86,11 @@ private:
     bool first_assembly_pass();
     bool second_assembly_pass();
 
+    void create_txt_file();
+    void create_binary_file();
+
 public:
-    AssemblyParser(string);
+    AssemblyParser(string, string);
     bool compile();
     void print_symbol_table();
     void print_relocation_table();

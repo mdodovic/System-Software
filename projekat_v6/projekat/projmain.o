@@ -1,0 +1,80 @@
+Relocative object file
+
+Section table:
+Id	Name		Size
+-1	ABSOLUTE	0002
+0	UNDEFINED	0000
+3	data	0014
+1	ivtp	0010
+2	text	0043
+
+
+Symbol table:
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	e	UNDEFINED	A_location	0004
+0000	l	data	A_text	000d
+0000	e	UNDEFINED	B_text	0006
+0000	e	UNDEFINED	B_value	0005
+ff00	g	ABSOLUTE	PRINT_REG	0007
+0000	l	UNDEFINED	UNDEFINED	0000
+0000	l	data	data	000c
+0000	l	ivtp	ivtp	0002
+0000	l	text	keyboard	0009
+0002	l	text	main	000b
+0000	e	UNDEFINED	print	0003
+0000	l	text	text	0008
+0001	l	text	timer	000a
+
+
+Relocation data <ABSOLUTE>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <ABSOLUTE>:
+0000   00 ff 
+
+Relocation data <UNDEFINED>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <UNDEFINED>:
+
+
+Relocation data <data>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <data>:
+0000   41 00 20 00 56 00 41 00 
+0008   4c 00 55 00 45 00 3a 00 
+0010   20 00 00 00 
+
+Relocation data <ivtp>:
+Offset	Type		Dat/Ins	Symbol	Section name
+0000	R_HYP_16	d	text	ivtp
+0004	R_HYP_16	d	text	ivtp
+0006	R_HYP_16	d	text	ivtp
+
+Section data <ivtp>:
+0000   02 00 00 00 01 00 00 00 
+0008   00 00 00 00 00 00 00 00 
+
+
+Relocation data <text>:
+Offset	Type		Dat/Ins	Symbol	Section name
+0006	R_HYP_16	i	data	text
+000b	R_HYP_16	i	print	text
+0010	R_HYP_16	i	A_location	text
+0026	R_HYP_16	i	B_text	text
+002b	R_HYP_16	i	print	text
+0030	R_HYP_16	i	A_location	text
+
+Section data <text>:
+0000   20 20 a0 2f 00 00 00 30 
+0008   ff 00 00 00 a0 3f 04 00 
+0010   00 a0 1f 00 00 30 70 31 
+0018   b0 3f 04 ff 00 b0 3f 04 
+0020   ff 00 a0 2f 00 00 00 30 
+0028   ff 00 00 00 a0 3f 04 00 
+0030   00 a0 1f 00 00 30 70 31 
+0038   b0 3f 04 ff 00 b0 3f 04 
+0040   ff 00 00 
+

@@ -1,8 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <regex>
 #include <iomanip>
+#include <regex>
+#include <iterator>
 
 #include "AssemblyParser.h"
 #include "AssemblyRegexes.h"
@@ -11,8 +12,8 @@ using namespace std;
 int AssemblyParser::id_symbol_in_symbol_table = 0;
 int AssemblyParser::id_section_in_section_table = 0;
 
-AssemblyParser::AssemblyParser(string path)
-    : path_to_file(path), location_counter(0), current_section("")
+AssemblyParser::AssemblyParser(string path, string path_to_output_text_file)
+    : path_to_file(path), path_to_output_file(path_to_output_text_file), location_counter(0), current_section("")
 {
     // symbol UNDEFINED represents section with id=0
     // it is used to mark all undefined
@@ -55,6 +56,197 @@ AssemblyParser::AssemblyParser(string path)
     // section ABSOLUTE represents section with symbols defined by literal
 }
 
+void AssemblyParser::create_txt_file()
+{
+
+    ofstream text_output_file(path_to_output_file);
+    text_output_file << "Relocative object file" << endl
+                     << endl;
+
+    text_output_file << "Section table:" << endl;
+    text_output_file << "Id\tName\t\tSize" << endl;
+    for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
+    {
+        text_output_file << it->second.id_section << "\t" << it->second.section_name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << endl;
+    }
+    text_output_file << dec;
+    text_output_file << endl
+                     << endl;
+
+    text_output_file << "Symbol table:" << endl;
+    text_output_file << "Value\tType\tSection\t\tName\t\tId" << endl;
+    for (map<string, SymbolTable>::iterator it = symbol_table.begin(); it != symbol_table.end(); it++)
+    {
+        text_output_file << hex << setfill('0') << setw(4) << (0xffff & it->second.value) << "\t";
+        // extern symbols?
+        if (it->second.is_local == true)
+            text_output_file << "l\t";
+        else
+        {
+            if (it->second.is_defined == true)
+                text_output_file << "g\t";
+            else
+            {
+                if (it->second.is_extern)
+                    text_output_file << "e\t";
+                else
+                    text_output_file << "u\t"; // undefined
+            }
+        }
+        text_output_file << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
+    }
+    text_output_file << dec;
+    text_output_file << endl
+                     << endl;
+    for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
+    {
+        //        if (it->first == "UNDEFINED")
+        //            continue;
+
+        text_output_file << "Relocation data <" << it->first << ">:" << endl;
+        text_output_file << "Offset\tType\t\tDat/Ins\tSymbol\tSection name" << endl;
+        for (RelocationTable rel_data : relocation_table)
+        {
+            if (rel_data.section_name != it->first)
+                continue;
+            text_output_file << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
+        }
+        text_output_file << dec << endl;
+
+        text_output_file << "Section data <" << it->first << ">:" << endl;
+
+        SectionTable s_table = it->second;
+        int counter = 0;
+
+        for (int i = 0; i < s_table.data.size(); i++)
+        {
+            char c = s_table.data[i];
+            if (counter % 8 == 0)
+            {
+                text_output_file << hex << setfill('0') << setw(4) << (0xffff & counter) << "   ";
+            }
+            text_output_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            counter++;
+            if (counter % 8 == 0)
+            {
+                text_output_file << endl;
+            }
+        }
+        text_output_file << dec;
+        text_output_file << endl
+                         << endl;
+    }
+    text_output_file.close();
+}
+void AssemblyParser::create_binary_file()
+{
+    string binary_filename_output = "./linker_input_" + path_to_output_file;
+    ofstream binary_output_file(binary_filename_output, ios::out | ios::binary);
+    cout << "Create binary file:" << endl;
+
+    // Relocation data
+    int number_of_relocations = relocation_table.size();
+    cout << number_of_relocations << endl;
+
+    binary_output_file.write((char *)&number_of_relocations, sizeof(number_of_relocations));
+
+    for (RelocationTable rel_data : relocation_table)
+    {
+        cout << sizeof(rel_data);
+
+        binary_output_file.write((char *)(&rel_data.addend), sizeof(rel_data.addend));
+        binary_output_file.write((char *)(&rel_data.is_data), sizeof(rel_data.is_data));
+        binary_output_file.write((char *)(&rel_data.offset), sizeof(rel_data.offset));
+
+        unsigned int stringLength = rel_data.section_name.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(rel_data.section_name.c_str(), rel_data.section_name.length());
+
+        stringLength = rel_data.symbol_name.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(rel_data.symbol_name.c_str(), rel_data.symbol_name.length());
+
+        stringLength = rel_data.type.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(rel_data.type.c_str(), rel_data.type.length());
+    }
+
+    // Symbol table
+    int number_of_symbols = symbol_table.size();
+    binary_output_file.write((char *)&number_of_symbols, sizeof(number_of_symbols));
+    cout << number_of_symbols << endl;
+    for (map<string, SymbolTable>::iterator it = symbol_table.begin(); it != symbol_table.end(); it++)
+    {
+        string key = it->first;
+        // key for map
+        unsigned int stringLength = key.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(key.c_str(), key.length());
+        // values:
+        binary_output_file.write((char *)(&it->second.id_symbol), sizeof(it->second.id_symbol));
+        binary_output_file.write((char *)(&it->second.is_defined), sizeof(it->second.is_defined));
+        binary_output_file.write((char *)(&it->second.is_extern), sizeof(it->second.is_extern));
+        binary_output_file.write((char *)(&it->second.is_local), sizeof(it->second.is_local));
+        binary_output_file.write((char *)(&it->second.value), sizeof(it->second.value));
+
+        stringLength = it->second.name.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(it->second.name.c_str(), it->second.name.length());
+
+        stringLength = it->second.section.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(it->second.section.c_str(), it->second.section.length());
+    }
+
+    // Section table:
+    int number_of_sections = section_table.size();
+    binary_output_file.write((char *)&number_of_sections, sizeof(number_of_sections));
+    cout << number_of_sections << endl;
+
+    for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
+    {
+        string key = it->first;
+        // key for map
+        unsigned int stringLength = key.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(key.c_str(), key.length());
+
+        binary_output_file.write((char *)(&it->second.id_section), sizeof(it->second.id_section));
+        binary_output_file.write((char *)(&it->second.size), sizeof(it->second.size));
+
+        stringLength = it->second.section_name.length();
+        binary_output_file.write((char *)(&stringLength), sizeof(stringLength));
+        binary_output_file.write(it->second.section_name.c_str(), it->second.section_name.length());
+
+        // section data
+        int number_of_chars = it->second.data.size();
+        binary_output_file.write((char *)&number_of_chars, sizeof(number_of_chars));
+        cout << number_of_chars << " - " << it->second.data.size() << " => ";
+
+        int x = 0;
+        for (char c : it->second.data)
+        {
+            x++;
+            binary_output_file.write((char *)&c, sizeof(c));
+        }
+        cout << x << endl;
+
+        int number_of_offsets = it->second.offsets.size();
+        binary_output_file.write((char *)&number_of_offsets, sizeof(number_of_offsets));
+        cout << number_of_offsets << " - " << it->second.offsets.size() << endl;
+
+        x = 0;
+        for (int o : it->second.offsets)
+        {
+            x++;
+            binary_output_file.write((char *)&o, sizeof(o));
+            cout << " " << o;
+        }
+        cout << " ->" << x << endl;
+    }
+    binary_output_file.close();
+}
+
 bool AssemblyParser::compile()
 {
     if (clear_input_file() == false)
@@ -66,6 +258,8 @@ bool AssemblyParser::compile()
         return false;
     if (second_assembly_pass() == false)
         return false;
+    create_txt_file();
+    create_binary_file();
     return true;
 }
 
@@ -76,8 +270,12 @@ bool AssemblyParser::clear_input_file()
     if (input_file.is_open() == false)
         return false;
     string line;
+    int line_before_processing = 0;
+    int line_after_processing = 0;
     while (getline(input_file, line))
     {
+        line_before_processing++;
+
         //cout << "###" << endl << line << endl;
         string cleared_line;
         cleared_line = regex_replace(line, rx_remove_comments, "$1", regex_constants::format_first_only);
@@ -89,6 +287,8 @@ bool AssemblyParser::clear_input_file()
         //cout << cleared_line << endl;
         if (cleared_line == "" || cleared_line == " ")
             continue;
+        line_after_processing++;
+        transfer_error_lines[line_after_processing] = line_before_processing;
         input_file_lines.push_back(cleared_line);
     }
     input_file.close();
@@ -271,26 +471,53 @@ bool AssemblyParser::process_equ_symbol(string symbol_name, string value)
     map<string, SymbolTable>::iterator sym = symbol_table.find(symbol_name);
     if (sym != symbol_table.end())
     {
-        // Error, equ defines absolute symbol
-        error_messages[current_line_number] = "equ directive cannot define an absolute symbol that is already defined";
-        return false;
+        // symbol exists in symbol table
+        cout << "Error?:" << endl;
+        cout << sym->second.name << ":" << sym->second.value << "(" << sym->second.section << ")" << endl;
+        cout << "is defined:" << sym->second.is_defined << endl;
+        cout << "is extern:" << sym->second.is_extern << endl;
+        cout << "is local:" << sym->second.is_local << endl;
+        if (sym->second.is_extern == true)
+        {
+            // Error, equ defines absolute symbol
+            error_messages[current_line_number] = "equ directive cannot define extern symbol";
+            return false;
+        }
+        if (sym->second.is_defined == true)
+        {
+            error_messages[current_line_number] = "equ directive cannot define an absolute symbol that is already defined";
+            return false;
+        }
+        // undefined and nonextern:
+        // local or global does not metter because it belongs to ABSOLUTE section!
+        sym->second.is_defined = true;
+        sym->second.section = "ABSOLUTE";
+        sym->second.value = fetch_decimal_value_from_literal(value);
+        section_table["ABSOLUTE"].offsets.push_back(section_table["ABSOLUTE"].size);
+        section_table["ABSOLUTE"].size += 2;
+        section_table["ABSOLUTE"].data.push_back(0xff & fetch_decimal_value_from_literal(value));
+        section_table["ABSOLUTE"].data.push_back(0xff & (fetch_decimal_value_from_literal(value) >> 8));
+        return true;
     }
+    else
+    {
+        // symbol do no exists, or it is not mentioned earlier
+        SymbolTable new_equ_symbol;
+        new_equ_symbol.id_symbol = id_symbol_in_symbol_table++;
+        new_equ_symbol.is_defined = true;
+        new_equ_symbol.is_extern = false;
+        new_equ_symbol.is_local = true;
+        new_equ_symbol.name = symbol_name;
+        new_equ_symbol.section = "ABSOLUTE"; // it is not a section like others, just notification that this symbol has
+        new_equ_symbol.value = fetch_decimal_value_from_literal(value);
+        symbol_table[symbol_name] = new_equ_symbol;
 
-    SymbolTable new_equ_symbol;
-    new_equ_symbol.id_symbol = id_symbol_in_symbol_table++;
-    new_equ_symbol.is_defined = true;
-    new_equ_symbol.is_extern = false;
-    new_equ_symbol.is_local = true;
-    new_equ_symbol.name = symbol_name;
-    new_equ_symbol.section = "ABSOLUTE"; // it is not a section like others, just notification that this symbol has
-    new_equ_symbol.value = fetch_decimal_value_from_literal(value);
-    symbol_table[symbol_name] = new_equ_symbol;
-
-    section_table["ABSOLUTE"].offsets.push_back(section_table["ABSOLUTE"].size);
-    section_table["ABSOLUTE"].size += 2;
-    section_table["ABSOLUTE"].data.push_back(0xff & fetch_decimal_value_from_literal(value));
-    section_table["ABSOLUTE"].data.push_back(0xff & (fetch_decimal_value_from_literal(value) >> 8));
-    return true;
+        section_table["ABSOLUTE"].offsets.push_back(section_table["ABSOLUTE"].size);
+        section_table["ABSOLUTE"].size += 2;
+        section_table["ABSOLUTE"].data.push_back(0xff & fetch_decimal_value_from_literal(value));
+        section_table["ABSOLUTE"].data.push_back(0xff & (fetch_decimal_value_from_literal(value) >> 8));
+        return true;
+    }
 }
 bool AssemblyParser::process_skip_first_pass(string value)
 {
@@ -951,9 +1178,9 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             //
             // source_reg = F - unimportant
             reg_descr += 0x7;
-            // address_mode: ua = 03 - regind with displacement!
+            // address_mode: ua = 05 - regdir with displacement!
 
-            adr_mode = 0x03;
+            adr_mode = 0x05;
 
             int value_to_be_written = process_pc_relative_addressing_symbol(operand);
             // return value for memory and also create relocation data!
@@ -1726,25 +1953,39 @@ void AssemblyParser::print_section_data()
          << endl;
     for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
     {
-        //        if (it->first == "UNDEFINED")
-        //            continue;
+        if (it->first == "UNDEFINED")
+            continue;
+        if (it->first == "ABSOLUTE")
+            continue;
         cout << "Section: " << it->first << endl;
 
         SectionTable s_table = it->second;
         int counter = 0;
-        for (char c : s_table.data)
+        cout << "?" << s_table.data.size() << "=" << s_table.offsets.size() << endl;
+        for (int i = 0; i < s_table.offsets.size() - 1; i++)
         {
-            if (counter % 16 == 0)
+
+            int current_offset = s_table.offsets[i];
+            int next_offset = s_table.offsets[i + 1];
+            cout << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+            for (int j = current_offset; j < next_offset; j++)
             {
-                cout << hex << setfill('0') << setw(4) << (0xffff & counter) << "   ";
+                char c = s_table.data[j];
+                cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
             }
-            cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
-            counter++;
-            if (counter % 16 == 0)
-            {
-                cout << endl;
-            }
+            cout << endl;
         }
+        // Last directive which is in memory
+        int current_offset = s_table.offsets[s_table.offsets.size() - 1];
+        int next_offset = s_table.data.size();
+        cout << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+        for (int j = current_offset; j < next_offset; j++)
+        {
+            char c = s_table.data[j];
+            cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+        }
+        cout << endl;
+
         cout << dec;
         cout << endl;
     }
@@ -1765,6 +2006,6 @@ void AssemblyParser::print_error_messages()
     cout << "Assmebly detects some errors:" << endl;
     for (map<int, string>::iterator it = error_messages.begin(); it != error_messages.end(); it++)
     {
-        cout << "Line " << it->first << ":" << it->second << endl;
+        cout << "Line " << transfer_error_lines[it->first] << ":" << it->second << endl;
     }
 }

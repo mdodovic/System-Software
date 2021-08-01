@@ -1,0 +1,35 @@
+TabelaSekcija
+ivtp	10	0	0	F
+text	43	6	0	42
+data	14	10	0	13
+equ	4	-1	0	3
+TabelaSimbola
+ivtp	0	ivtp	local	0
+print	-1	UND	global	1
+A_location	-1	UND	global	2
+B_value	-1	UND	global	3
+B_text	-1	UND	global	4
+PRINT_REG	0	equ	global	5
+text	0	text	local	6
+keyboard	0	text	local	7
+timer	1	text	local	8
+main	2	text	local	9
+data	0	data	local	10
+A_text	0	data	local	11
+RelokacionaTabela
+ivtp	0	R_X86_64noninst_16	6	0
+ivtp	4	R_X86_64noninst_16	6	0
+ivtp	6	R_X86_64noninst_16	6	0
+text	5	R_X86_64_16	10	0
+text	10	R_X86_64_16	1	0
+text	15	R_X86_64_16	2	0
+text	37	R_X86_64_16	4	0
+text	42	R_X86_64_16	1	0
+text	47	R_X86_64_16	2	0
+Kodovi
+ivtp
+02000000010000000000000000000000
+text
+2020A02900000030F9000000A039040000A0190000307031B03904FF00B03904FF00A02900000030F9000000A039040000A0190000307031B03904FF00B03904FF0000
+data
+41002000560041004C00550045003A0020000000

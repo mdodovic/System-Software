@@ -1,0 +1,21 @@
+TabelaSekcija
+text	1C	2	0	1B
+data	16	5	0	15
+equ	4	-1	0	3
+TabelaSimbola
+PRINT_REG	-1	UND	global	0
+B_value	0	equ	global	1
+text	0	text	local	2
+print	0	text	global	3
+loop_print	0	text	local	4
+data	0	data	local	5
+A_location	0	data	global	6
+B_text	2	data	global	7
+RelokacionaTabela
+text	6	R_X86_64_16	0	0
+text	25	R_X86_64_16	2	0
+Kodovi
+text
+A03202B039040000A0190000057021A019000000742152F900000040
+data
+040042002000560041004C00550045003A0020000000

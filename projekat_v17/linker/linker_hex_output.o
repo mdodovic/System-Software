@@ -1,0 +1,95 @@
+Linker output
+
+Helper info:
+Section: ABSOLUTE :{
+	# linker_input_projmain.o		ABSOLUTE	linker_input_projmain.o:	8 [0,8)
+	}
+
+Section: data :{
+	# linker_input_projmain.o		data	linker_input_projmain.o:	2 [2000,2002)
+	}
+
+Section: ivt :{
+	# linker_input_projmain.o		ivt	linker_input_projmain.o:	10 [0,10)
+	}
+
+Section: text :{
+	# linker_input_projmain.o		text	linker_input_projmain.o:	59 [1000,1059)
+	}
+
+Section table
+Id	Name		Size	VA
+ffffffff	ABSOLUTE	0008	0000
+0	UNDEFINED	0000	0000
+1	data	0002	2000
+2	ivt	0010	0000
+3	text	0059	1000
+
+Symbol table
+Value	Type	Section		Name		Id
+0000	l		ABSOLUTE		ABSOLUTE	ffff
+0000	l		UNDEFINED		UNDEFINED	0000
+0054	l		ABSOLUTE		asciiCode	0004
+2000	l		data		data	0001
+1000	l		text		isr_reset	0005
+1005	l		text		isr_terminal	0006
+1020	l		text		isr_timer	0007
+0000	l		ivt		ivt	0002
+1021	l		text		main	0008
+2000	g		data		myCounter	0009
+ff02	l		ABSOLUTE		term_in	000a
+ff00	l		ABSOLUTE		term_out	000b
+1000	l		text		text	0003
+ff10	l		ABSOLUTE		tim_cfg	000c
+1026	l		text		tim_loop	000d
+102b	l		text		wait	000e
+
+Relocation data
+Offset	Type		Dat/Ins	Symbol		Section name
+0000	R_HYP_16	d		text		ivt
+		linker_input_projmain.o
+0004	R_HYP_16	d		text		ivt
+		linker_input_projmain.o
+0006	R_HYP_16	d		text		ivt
+		linker_input_projmain.o
+0004	R_HYP_16	i		text		text
+		linker_input_projmain.o
+0011	R_HYP_16	i		myCounter		text
+		linker_input_projmain.o
+002f	R_HYP_16	i		myCounter		text
+		linker_input_projmain.o
+0039	R_HYP_16_PC	i		myCounter		text
+		linker_input_projmain.o
+0040	R_HYP_16	i		text		text
+		linker_input_projmain.o
+
+Content:
+Section data <ABSOLUTE>:
+0000   54 00 00 ff 02 ff 10 ff 
+
+
+Section data <UNDEFINED>:
+
+
+Section data <data>:
+2000   00 00 
+
+Section data <ivt>:
+0000   00 10 00 00 20 10 05 10 
+0008   00 00 00 00 00 00 00 00 
+
+
+Section data <text>:
+1000   50 ff 00 10 21 b0 06 12 
+1008   a0 0f 00 00 01 b0 0f 04 
+1010   20 00 a0 0f 00 00 54 b0 
+1018   0f 04 ff 00 a0 06 42 20 
+1020   20 a0 1f 00 00 07 b0 1f 
+1028   04 ff 10 a0 0f 04 20 00 
+1030   a0 3f 00 00 05 b0 37 03 
+1038   0f c6 74 03 52 ff 00 10 
+1040   2b 60 31 a0 2f 00 00 01 
+1048   71 32 60 31 a0 4f 00 00 
+1050   00 74 14 53 f7 05 ff ce 
+1058   00 
+

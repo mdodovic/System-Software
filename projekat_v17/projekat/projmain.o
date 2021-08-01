@@ -1,0 +1,99 @@
+Relocative object file
+
+Section table:
+Id	Name		Size
+-1	ABSOLUTE	0008
+0	UNDEFINED	0000
+3	data	0002
+1	ivt	0010
+2	text	0059
+
+
+Symbol table:
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	l	UNDEFINED	UNDEFINED	0000
+0054	l	ABSOLUTE	asciiCode	0003
+0000	l	data	data	000f
+0000	l	text	isr_reset	0009
+0005	l	text	isr_terminal	000a
+0020	l	text	isr_timer	000b
+0000	l	ivt	ivt	0002
+0021	l	text	main	000c
+0000	g	data	myCounter	0007
+ff02	l	ABSOLUTE	term_in	0005
+ff00	l	ABSOLUTE	term_out	0004
+0000	l	text	text	0008
+ff10	l	ABSOLUTE	tim_cfg	0006
+0026	l	text	tim_loop	000d
+002b	l	text	wait	000e
+
+
+Relocation data <ABSOLUTE>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <ABSOLUTE>:
+0000: 54 00 
+0002: 00 ff 
+0004: 02 ff 
+0006: 10 ff 
+
+Relocation data <UNDEFINED>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <UNDEFINED>:
+
+
+Relocation data <data>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <data>:
+0000: 00 00 
+
+Relocation data <ivt>:
+Offset	Type		Dat/Ins	Symbol	Section name
+0000	R_HYP_16	d	text	ivt
+0004	R_HYP_16	d	text	ivt
+0006	R_HYP_16	d	text	ivt
+
+Section data <ivt>:
+0000: 00 00 
+0002: 00 00 
+0004: 20 00 
+0006: 05 00 
+0008: 00 00 00 00 00 00 00 00 
+
+Relocation data <text>:
+Offset	Type		Dat/Ins	Symbol	Section name
+0004	R_HYP_16	i	text	text
+0011	R_HYP_16	i	myCounter	text
+002f	R_HYP_16	i	myCounter	text
+0039	R_HYP_16_PC	i	myCounter	text
+0040	R_HYP_16	i	text	text
+
+Section data <text>:
+0000: 50 ff 00 00 21 
+0005: b0 06 12 
+0008: a0 0f 00 00 01 
+000d: b0 0f 04 00 00 
+0012: a0 0f 00 00 54 
+0017: b0 0f 04 ff 00 
+001c: a0 06 42 
+001f: 20 
+0020: 20 
+0021: a0 1f 00 00 07 
+0026: b0 1f 04 ff 10 
+002b: a0 0f 04 00 00 
+0030: a0 3f 00 00 05 
+0035: b0 37 03 ff fe 
+003a: 74 03 
+003c: 52 ff 00 00 2b 
+0041: 60 31 
+0043: a0 2f 00 00 01 
+0048: 71 32 
+004a: 60 31 
+004c: a0 4f 00 00 00 
+0051: 74 14 
+0053: 53 f7 05 ff ce 
+0058: 00 
+

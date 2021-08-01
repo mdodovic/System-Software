@@ -379,7 +379,8 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
                         section_table[current_section].data.push_back((s_table.value >> 8) & 0xff);
                         // create relocation data for section
                         RelocationTable rel_data;
-                        rel_data.type = "R_X86_64_16";
+                        rel_data.is_data = true;
+                        rel_data.type = "R_HYP_16";
                         rel_data.section_name = current_section;
                         rel_data.offset = location_counter;
                         rel_data.symbol_name = s_table.section; // this is local symbol, so only section is necessary !
@@ -388,13 +389,15 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
                     }
                     else
                     {
+                        // global symbol
                         // add zeros to data
                         section_table[current_section].offsets.push_back(location_counter);
                         section_table[current_section].data.push_back(0 & 0xff);
                         section_table[current_section].data.push_back((0 >> 8) & 0xff);
                         // create relocation data for this symbol
                         RelocationTable rel_data;
-                        rel_data.type = "R_X86_64_16";
+                        rel_data.is_data = true;
+                        rel_data.type = "R_HYP_16";
                         rel_data.section_name = current_section;
                         rel_data.offset = location_counter;
                         rel_data.symbol_name = s_table.name;
@@ -411,7 +414,8 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
                     section_table[current_section].data.push_back((0 >> 8) & 0xff);
                     // create relocation data for this symbol
                     RelocationTable rel_data;
-                    rel_data.type = "R_X86_64_16";
+                    rel_data.is_data = true;
+                    rel_data.type = "R_HYP_16";
                     rel_data.section_name = current_section;
                     rel_data.offset = location_counter;
                     rel_data.symbol_name = s_table.name;
@@ -424,7 +428,6 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
         {
             // Symbol do not exists in symbol table
             error_messages[current_line_number] = ".word used with undefined symbol!";
-            location_counter += 2;
             return false;
         }
     }
@@ -447,6 +450,140 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
     }
     location_counter += 2;
     return true;
+}
+
+int AssemblyParser::process_absolute_addressing_symbol(string symbol)
+{
+    cout << "Process absolute addressing#" << symbol << endl;
+    map<string, SymbolTable>::iterator sym = symbol_table.find(symbol);
+    if (sym != symbol_table.end())
+    {
+        SymbolTable s_from_table = sym->second;
+        // symbol exists in symbol table
+        cout << s_from_table.name << endl;
+        if (s_from_table.section == "ABSOLUTE")
+        {
+            cout << "EQU CALCULATIONS: " << s_from_table.value << endl;
+            return s_from_table.value;
+        }
+        else
+        {
+            // it is in regular section:
+            cout << "Value: " << s_from_table.value << endl;
+            cout << "Section: " << s_from_table.section << endl;
+            cout << "Name: " << s_from_table.name << endl;
+            cout << "Local: " << s_from_table.is_local << endl;
+            cout << "Extern: " << s_from_table.is_extern << endl;
+            cout << "Defined: " << s_from_table.is_defined << endl;
+            cout << "Symbol: " << s_from_table.id_symbol << endl;
+
+            // Relocation data has to be written
+            RelocationTable rel_data;
+            rel_data.addend = 0;
+            rel_data.is_data = false;                // this is instruction, so use big endian when reloc
+            rel_data.offset = location_counter + 4;  // +0 - opcode, +1 - registers, +2 - ua flags, +3 - higher bits, +4 - lower bits
+            rel_data.section_name = current_section; // section for which this relocation data is about
+            rel_data.type = "R_HYP_16";
+
+            int written_symbol_value;
+            // only the difference is the name of what it is.
+            // if it is global/extern symbol, this very name should be in relocation table
+            // but in memory, there should be zeros
+            if ((s_from_table.is_local == false) || (s_from_table.is_extern == true))
+            {
+                rel_data.symbol_name = s_from_table.name;
+                written_symbol_value = 0;
+            } // else in memory should be the real value, but in relocation table there is section (symbol's, not current)
+            else
+            {
+                rel_data.symbol_name = s_from_table.section;
+                written_symbol_value = s_from_table.value;
+            }
+            relocation_table.push_back(rel_data); // add relocation data to relocation table
+            return written_symbol_value;
+        }
+    }
+    else
+    {
+        // Symbol do not exists in symbol table
+        error_messages[current_line_number] = "Symbol is not in symbol table";
+        return false; // THIS IS WRONG! use error_happened
+    }
+
+    return 0;
+}
+
+int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
+{
+    cout << "Process pc relative addressing#" << symbol << endl;
+    map<string, SymbolTable>::iterator sym = symbol_table.find(symbol);
+    if (sym != symbol_table.end())
+    {
+        SymbolTable s_from_table = sym->second;
+        // symbol exists in symbol table
+        cout << s_from_table.name << endl;
+        int addend = -2;
+        if (s_from_table.section == "ABSOLUTE")
+        {
+            cout << "EQU CALCULATIONS:#" << s_from_table.value << endl;
+            // ? TO BE SEEN
+            return addend + s_from_table.value;
+        }
+        else
+        {
+            // it is in regular section:
+            cout << "Value: " << s_from_table.value << endl;
+            cout << "Section: " << s_from_table.section << endl;
+            cout << "Name: " << s_from_table.name << endl;
+            cout << "Local: " << s_from_table.is_local << endl;
+            cout << "Extern: " << s_from_table.is_extern << endl;
+            cout << "Defined: " << s_from_table.is_defined << endl;
+            cout << "Symbol: " << s_from_table.id_symbol << endl;
+            // Relocation data has to be written
+            RelocationTable rel_data;
+            rel_data.addend = 0;
+            rel_data.is_data = false;                // this is instruction, so use big endian when reloc
+            rel_data.offset = location_counter + 4;  // ?? +0 - opcode, +1 - registers, +2 - ua flags, +3 - higher bits, +4 - lower bits
+            rel_data.section_name = current_section; // section for which this relocation data is about
+            rel_data.type = "R_HYP_16_PC";
+            int written_symbol_value;
+            // only the difference is the name of what it is.
+            // if it is global/extern symbol, this very name should be in relocation table
+            // but in memory, there should be zeros
+            if ((s_from_table.is_local == false) || (s_from_table.is_extern == true))
+            {
+                rel_data.symbol_name = s_from_table.name;
+                written_symbol_value = addend; // -2 is only in memory, value of symbol is left to linker
+            }
+            else
+            { // else in memory should be the real value, but in relocation table there is section (symbol's, not current)
+                if (current_section == s_from_table.section)
+                {
+                    // same section and pc relative address: difference between symbol and jmp instruction is always the same
+                    written_symbol_value = s_from_table.value + addend - (location_counter + 3);
+                    cout << "Ultimat local: s=" << s_from_table.value << ",l+5=" << location_counter + 5;
+                    cout << "=" << written_symbol_value << endl;
+                    return written_symbol_value;
+                }
+                else
+                {
+                    //different section
+                    rel_data.symbol_name = s_from_table.section;
+                    written_symbol_value = s_from_table.value + addend; // only section has to be relocated
+                }
+            }
+            relocation_table.push_back(rel_data); // add relocation data to relocation table
+            return written_symbol_value;
+        }
+    }
+    else
+    {
+        // Symbol do not exists in symbol table
+        error_messages[current_line_number] = "Symbol is not in symbol table";
+
+        return false; // THIS IS WRONG! use error_happened
+    }
+    return 0;
 }
 
 bool AssemblyParser::process_instruction_first_pass(string line_with_instruction)
@@ -499,6 +636,69 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
             section_table[current_section].size += 2;
         }
 
+        return true;
+    }
+    else if (regex_search(line_with_instruction, catch_parts, rx_one_operand_all_kind_addressing_jumps))
+    {
+        string instruction_mnemonic = catch_parts.str(1);
+        string operand = catch_parts.str(2);
+        smatch catch_operand;
+        cout << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
+        if (regex_search(operand, catch_operand, rx_address_syntax_notation_absolute))
+        {
+            // this is form: jmp 5 or jmp label
+            // there is payload:
+            cout << "label or literal" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_symbol_pc_relative))
+        {
+            // this is form: jmp %label
+            // there is payload: because of pc relative addressing
+            cout << "%label - pc relative" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regdir))
+        {
+            // this is form: jmp *r0
+            // there is not payload:
+            cout << " reg dir " << endl;
+            location_counter += 3;
+            section_table[current_section].size += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind))
+        {
+
+            // this is form: jmp *[r0]
+            // there is not payload:
+            cout << " reg ind " << endl;
+            location_counter += 3;
+            section_table[current_section].size += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind_with_displacement))
+        {
+            // this is form: jmp *[r0 + label] or jmp *[r0 + 5]
+            // there is payload:
+            cout << " reg ind with displacement" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_memdir))
+        {
+            // this is form: jmp *5 or jmp *label
+            // there is payload:
+            cout << "*label or *literal" << endl;
+            location_counter += 5;
+            section_table[current_section].size += 5;
+        }
+
+        else
+        {
+            error_messages[current_line_number] = "Addressing type is invalid";
+            return false;
+        }
         return true;
     }
     else
@@ -599,6 +799,224 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             location_counter += 2;
         }
     }
+    else if (regex_search(line_with_instruction, catch_parts, rx_one_operand_all_kind_addressing_jumps))
+    {
+        string instruction_mnemonic = catch_parts.str(1);
+        string operand = catch_parts.str(2);
+        smatch catch_operand;
+        cout << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
+        int instr_descr;
+        int reg_descr = 0xF0;
+        int adr_mode;
+        if (instruction_mnemonic == "call")
+        {
+            instr_descr = 0x30;
+        }
+        else if (instruction_mnemonic == "jmp")
+        {
+            instr_descr = 0x50;
+        }
+        else if (instruction_mnemonic == "jeq")
+        {
+            instr_descr = 0x51;
+        }
+        else if (instruction_mnemonic == "jne")
+        {
+            instr_descr = 0x52;
+        }
+        else if (instruction_mnemonic == "jgt")
+        {
+            instr_descr = 0x53;
+        }
+        if (regex_search(operand, catch_operand, rx_address_syntax_notation_absolute))
+        {
+            // this is form: jmp 5 or jmp label
+            // there is payload:
+            if (regex_match(operand, rx_symbol))
+            {
+                cout << "label#" << operand << endl;
+                // this is absolute addressing: Need relocation table andeverything!
+                // source_reg = F - unimportant
+                reg_descr += 0xF;
+                // address_mode: ua = 00
+                adr_mode = 0;
+
+                int value_to_be_written = process_absolute_addressing_symbol(operand);
+                // return value for memory and also create relocation data!
+                section_table[current_section].offsets.push_back(location_counter);
+                section_table[current_section].data.push_back(instr_descr);
+                section_table[current_section].data.push_back(reg_descr);
+                section_table[current_section].data.push_back(adr_mode);
+                section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+                section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+                location_counter += 5;
+            }
+            else
+            {
+                int value = fetch_decimal_value_from_literal(operand);
+                cout << "literal#" << value << endl;
+                // this is immediate addressing:
+                // source_reg = F - unimportant
+                reg_descr += 0xF;
+                // address_mode: ua = 00
+                adr_mode = 0;
+                section_table[current_section].offsets.push_back(location_counter);
+                section_table[current_section].data.push_back(instr_descr);
+                section_table[current_section].data.push_back(reg_descr);
+                section_table[current_section].data.push_back(adr_mode);
+                section_table[current_section].data.push_back(0xff & (value >> 8));
+                section_table[current_section].data.push_back(0xff & (value));
+                location_counter += 5;
+            }
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_symbol_pc_relative))
+        {
+            operand = catch_operand.str(1);
+            // this is form: jmp %label
+            // there is payload: because of pc relative addressing
+            cout << "%label - pc relative" << endl;
+            // this is pc relative with displacement!:
+            //
+            // source_reg = F - unimportant
+            reg_descr += 0x7;
+            // address_mode: ua = 03 - regind with displacement!
+
+            adr_mode = 0x03;
+
+            int value_to_be_written = process_pc_relative_addressing_symbol(operand);
+            // return value for memory and also create relocation data!
+
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+            section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+            location_counter += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regdir))
+        {
+            // this is form: jmp *r0
+            // there is not payload:
+            int register_number;
+            if (catch_operand.str(1) == "psw")
+            {
+                register_number = 8;
+            }
+            else
+            {
+                register_number = catch_operand.str(1).at(1) - '0';
+            }
+            cout << " reg dir: " << register_number << endl;
+            // source_reg: s = 0-8
+            reg_descr += register_number;
+            // address_mode: ua = 01 - reg dir!
+            adr_mode = 0x01;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            location_counter += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind))
+        {
+
+            // this is form: jmp *[r0]
+            // there is not payload:
+            cout << " reg ind " << endl;
+            int register_number;
+            if (catch_operand.str(1) == "psw")
+            {
+                register_number = 8;
+            }
+            else
+            {
+                register_number = catch_operand.str(1).at(1) - '0';
+            }
+            cout << " reg ind: " << register_number << endl;
+            // source_reg: s = 0-8
+            reg_descr += register_number;
+            // address_mode: ua = 02 - reg ind!
+            adr_mode = 0x02;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            location_counter += 3;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_regind_with_displacement))
+        {
+            // this is form: jmp *[r0 + label] or jmp *[r0 + 5]
+            // there is payload:
+            string displacement = catch_operand.str(2);
+            int register_number;
+            if (catch_operand.str(1) == "psw")
+            {
+                register_number = 8;
+            }
+            else
+            {
+                register_number = catch_operand.str(1).at(1) - '0';
+            }
+            cout << " reg ind with displacement " << register_number << " " << displacement << endl;
+            // source_reg: s = 0-8
+            reg_descr += register_number;
+            // address_mode: ua = 03 - regind with displacement
+            adr_mode = 0x03;
+            int value_to_be_written;
+            if (regex_match(displacement, rx_symbol))
+            {
+                cout << "Symbol: " << endl;
+                value_to_be_written = process_absolute_addressing_symbol(displacement);
+            }
+            else
+            {
+                cout << "Literal: " << endl;
+                value_to_be_written = fetch_decimal_value_from_literal(displacement);
+            }
+            cout << value_to_be_written << endl;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+            section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+            location_counter += 5;
+        }
+        else if (regex_search(operand, catch_operand, rx_address_syntax_notation_memdir))
+        {
+
+            // this is form: jmp *5 or jmp *label
+            // there is payload:
+            operand = catch_operand.str(1);
+            cout << "*label or *literal" << operand << endl;
+            // source_reg F - unimportant
+            reg_descr += 0xF;
+            // address_mode: ua = 04 - memory
+            adr_mode = 0x04;
+            int value_to_be_written;
+
+            if (regex_match(operand, rx_symbol))
+            {
+                cout << "Symbol: " << endl;
+                value_to_be_written = process_absolute_addressing_symbol(operand);
+            }
+            else
+            {
+                cout << "Literal: " << endl;
+                value_to_be_written = fetch_decimal_value_from_literal(operand);
+            }
+            cout << value_to_be_written << endl;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(instr_descr);
+            section_table[current_section].data.push_back(reg_descr);
+            section_table[current_section].data.push_back(adr_mode);
+            section_table[current_section].data.push_back(0xff & (value_to_be_written >> 8)); // location counter + 3
+            section_table[current_section].data.push_back(0xff & (value_to_be_written));      // location counter + 4
+            location_counter += 5;
+        }
+    }
+
     else
     {
         error_messages[current_line_number] = "Instruction does not exists";
@@ -963,10 +1381,10 @@ void AssemblyParser::print_relocation_table()
 {
     cout << "Relocation data:" << endl
          << endl;
-    cout << "Offset\tType\t\tSymbol\tSection name" << endl;
+    cout << "Offset\tType\t\tDat/Ins\tSymbol\tSection name" << endl;
     for (RelocationTable rel_data : relocation_table)
     {
-        cout << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
+        cout << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
     }
     cout << dec;
 }

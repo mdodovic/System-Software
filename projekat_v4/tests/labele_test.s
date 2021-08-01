@@ -1,4 +1,4 @@
-.section section1
+.section text
 label1:.skip 100
 .global label2	  
 label2:

@@ -29,6 +29,7 @@ private:
     };
     struct RelocationTable
     {
+        bool is_data;        // is this relocation of data or of instruction
         string section_name; // where to relocate, current section!
         int offset;          // which byte is the start byte for relocation
         string type;         // type of relocation
@@ -68,6 +69,9 @@ private:
 
     bool process_instruction_first_pass(string);
     bool process_instruction_second_pass(string);
+
+    int process_absolute_addressing_symbol(string);
+    int process_pc_relative_addressing_symbol(string);
 
     int fetch_decimal_value_from_literal(string);
     string get_hexadecimal_value_from_decimal(int);

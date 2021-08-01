@@ -9,9 +9,10 @@ myStart:
     iret
 wait:
     .word -1
-    .word -2
+#    .word 0
+    ret
+     .skip 2
     .word -3
-#    halt
 .section myData
 myCounter:
     .word 0

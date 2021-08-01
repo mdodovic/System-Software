@@ -275,9 +275,6 @@ bool AssemblyParser::process_equ_symbol(string symbol_name, string value)
         error_messages[current_line_number] = "equ directive cannot define an absolute symbol that is already defined";
         return false;
     }
-    /*
-    TEST THIS - SEEMS WRONG
-    */
 
     SymbolTable new_equ_symbol;
     new_equ_symbol.id_symbol = id_symbol_in_symbol_table++;
@@ -304,22 +301,14 @@ bool AssemblyParser::process_skip_first_pass(string value)
         return false;
     }
 
-    cout << "Want numeric value?!" << endl;
+    cout << "Want numeric value?!";
 
     int skip_value = fetch_decimal_value_from_literal(value);
-    // fill data with zeros
-    section_table[current_section].offsets.push_back(location_counter);
-    for (int i = 0; i < skip_value; i++)
-        section_table[current_section].data.push_back(0);
+    cout << skip_value << endl;
 
     location_counter += skip_value;
     section_table[current_section].size += skip_value;
 
-    for (char c : section_table[current_section].data)
-    {
-        cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
-    }
-    cout << dec;
     return true;
 }
 
@@ -327,6 +316,17 @@ bool AssemblyParser::process_skip_second_pass(string value)
 {
 
     int skip_value = fetch_decimal_value_from_literal(value);
+    // fill data with zeros
+    section_table[current_section].offsets.push_back(location_counter);
+    for (int i = 0; i < skip_value; i++)
+        section_table[current_section].data.push_back(0);
+
+    for (char c : section_table[current_section].data)
+    {
+        cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+    }
+    cout << dec;
+
     location_counter += skip_value;
     return true;
 }
@@ -462,14 +462,43 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
     {
         // These are halt, iret, ret:
         // increment location_counter for 1 (1B is instruction size)
-        // fill the shape of outut section file with zeros
         cout << "One byte: " << catch_parts.str(1);
-        section_table[current_section].offsets.push_back(location_counter);
-        section_table[current_section].data.push_back(0);
         location_counter += 1;
+        section_table[current_section].size += 1;
     }
-    else if (regex_search(line_with_instruction, catch_parts, rx_one_operand_data_instruction))
+    else if (regex_search(line_with_instruction, catch_parts, rx_one_operand_register_instruction))
     {
+        // These are push r, pop r, int r, not r:
+        // increment location_counter for 2 or 3 (2B is int and not instructions' size and 3B is push and pop instructions' size)
+        // fill the shape of output section file with zeros
+        string instruction_mnemonic = catch_parts.str(1);
+        cout << "TWO bytes push/pop/int/not: " << instruction_mnemonic << " reg: " << catch_parts.str(2);
+
+        if (instruction_mnemonic == "int")
+        {
+            cout << "int " << endl;
+            location_counter += 2;
+            section_table[current_section].size += 2;
+        }
+        else if (instruction_mnemonic == "push")
+        {
+            cout << "push " << endl;
+            location_counter += 3;
+            section_table[current_section].size += 3;
+        }
+        else if (instruction_mnemonic == "pop")
+        {
+            cout << "pop " << endl;
+            location_counter += 3;
+            section_table[current_section].size += 3;
+        }
+        else if (instruction_mnemonic == "not")
+        {
+            cout << "not " << endl;
+            location_counter += 2;
+            section_table[current_section].size += 2;
+        }
+
         return true;
     }
     else
@@ -492,22 +521,83 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         cout << "One byte: " << instruction_mnemonic;
         if (instruction_mnemonic == "halt")
         {
-            section_table[current_section].data[location_counter] = 0x00;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0x00);
         }
         else if (instruction_mnemonic == "iret")
         {
-            section_table[current_section].data[location_counter] = 0x20;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0x20);
         }
         else if (instruction_mnemonic == "ret")
         {
-            section_table[current_section].data[location_counter] = 0x40;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0x40);
         }
 
         location_counter += 1;
     }
-    else if (regex_search(line_with_instruction, catch_parts, rx_one_operand_data_instruction))
+    else if (regex_search(line_with_instruction, catch_parts, rx_one_operand_register_instruction))
     {
-        return true;
+        // These are push r, pop r, int r, not r:
+        // increment location_counter for 2 or 3 (2B is int and not instructions' size and 3B is push and pop instructions' size)
+        // fill the output with the actual binary representation of instruction
+        string instruction_mnemonic = catch_parts.str(1);
+        int register_number;
+        if (catch_parts.str(2) == "psw")
+        {
+            register_number = 8;
+        }
+        else
+        {
+            register_number = catch_parts.str(2).at(1) - '0';
+        }
+        cout << "TWO bytes push/pop/int/not: " << instruction_mnemonic << " reg: " << register_number;
+
+        if (instruction_mnemonic == "int")
+        {
+            cout << "int: 10 dF , d = " << register_number << endl;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0x10);
+            section_table[current_section].data.push_back((register_number << 4) + 15);
+            location_counter += 2;
+        }
+        else if (instruction_mnemonic == "push")
+        {
+            cout << "push: B0 ds ua" << endl;
+            cout << "d = " << register_number << ", s = 6 (sp->6), u = 1, a = 2" << endl;
+            // instruction push does: sp -= 2, mem[sp] = reg
+            // this means instructin that places data:
+            // U bits are: 0001: dec before
+            // A bits are 0010: reg indirect withou displacement
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0xB0);
+            section_table[current_section].data.push_back((register_number << 4) + 6);
+            section_table[current_section].data.push_back(0x12);
+            location_counter += 3;
+        }
+        else if (instruction_mnemonic == "pop")
+        {
+            cout << "pop: A0 ds ua" << endl;
+            cout << "d = " << register_number << ", s = 6 (sp->6), u = 4, a = 2" << endl;
+            // instruction push does: sp -= 2, mem[sp] = reg
+            // this means instructin that places data:
+            // U bits are: 0100: inc after
+            // A bits are 0010: reg indirect withou displacement
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0xA0);
+            section_table[current_section].data.push_back((register_number << 4) + 6);
+            section_table[current_section].data.push_back(0x42);
+            location_counter += 3;
+        }
+        else if (instruction_mnemonic == "not")
+        {
+            cout << "not: 8m ds , M = 0, D = " << register_number << ", S = F-unused" << endl;
+            section_table[current_section].offsets.push_back(location_counter);
+            section_table[current_section].data.push_back(0x80);
+            section_table[current_section].data.push_back((register_number << 4) + 15);
+            location_counter += 2;
+        }
     }
     else
     {

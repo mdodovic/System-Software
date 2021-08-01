@@ -139,10 +139,10 @@ short EmulatorWrapper::read_memory(int address, int size, bool little_endian)
             // [L H] is the representation in memory
             char lower_value = memory[address];
             char higher_value = memory[address + 1];
-            cout << " Val=> " << (int)higher_value << " " << (int)lower_value;
+            cout << " _READ:Val=> " << (int)higher_value << " " << (int)lower_value;
             // This is combination of lower and higher Byte. Lower Byte is only 8b and higher byte is expanded (its sign is expanded to the size of an int)
             short value = (short)((higher_value << 8) + (0xff & lower_value));
-            cout << " :" << value << "; ";
+            cout << " :" << value << "; READ_";
             return value;
         }
         else
@@ -150,10 +150,10 @@ short EmulatorWrapper::read_memory(int address, int size, bool little_endian)
             // [H L] is the representation in memory
             char higher_value = memory[address];
             char lower_value = memory[address + 1];
-            cout << " Val=> " << (int)higher_value << " " << (int)lower_value;
+            cout << " _READ:Val=> " << (int)higher_value << " " << (int)lower_value;
             // This is combination of lower and higher Byte. Lower Byte is only 8b and higher byte is expanded (its sign is expanded to the size of an int)
             short value = (short)((higher_value << 8) + (0xff & lower_value));
-            cout << " :" << value << "; ";
+            cout << " :" << value << "; READ_";
             return value;
         }
     }
@@ -170,14 +170,14 @@ void EmulatorWrapper::write_memory(short value, int address, int size, bool litt
     {
         char lower_value = value & 0xff;
         char higher_value = (value >> 8) & 0xff;
-        cout << " Val: " << (int)higher_value << " " << (int)lower_value << "! ";
+        cout << " _WRITE:Val: " << (int)higher_value << " " << (int)lower_value << "! ";
         if (little_endian)
         {
             // [L H] is the representation in memory
             cout << " [0, 1] " << (int)memory[address] << ", " << (int)memory[address + 1] << " => ";
             memory[address] = lower_value;
             memory[address + 1] = higher_value;
-            cout << (int)memory[address] << ", " << (int)memory[address + 1] << "; ";
+            cout << (int)memory[address] << ", " << (int)memory[address + 1] << "; WRITE_";
         }
         else
         {
@@ -185,7 +185,7 @@ void EmulatorWrapper::write_memory(short value, int address, int size, bool litt
             cout << " [0, 1] " << (int)memory[address] << ", " << (int)memory[address + 1] << " => ";
             memory[address] = higher_value;
             memory[address + 1] = lower_value;
-            cout << (int)memory[address] << ", " << (int)memory[address + 1] << "; ";
+            cout << (int)memory[address] << ", " << (int)memory[address + 1] << "; WRITE_";
         }
     }
 }
@@ -322,11 +322,53 @@ bool EmulatorWrapper::instruction_fetch_and_decode()
     case 0x6:
         return true;
     case 0x7:
+    {
+        // This is the group of the aritmetic instuctions (add, sub, mul, div, cmp) instructions
+        switch (modificator)
+        {
+            // instruction mnemonic depends on modificatios.
+        case 0x0:
+            cout << " !" << (int)modificator << "->add! ";
+            instruction_mnemonic = add;
+            break;
+        case 0x1:
+            cout << " !" << (int)modificator << "->sub! ";
+            instruction_mnemonic = sub;
+            break;
+        case 0x2:
+            cout << " !" << (int)modificator << "->mul! ";
+            instruction_mnemonic = mul;
+            break;
+        case 0x3:
+            cout << " !" << (int)modificator << "->div! ";
+            instruction_mnemonic = div;
+            break;
+        case 0x4:
+            cout << " !" << (int)modificator << "->cmp! ";
+            instruction_mnemonic = cmp;
+            break;
+
+        default:
+            string error = "Instruction with that operation code and modifier does not exists!";
+            error_messages.push_back(error);
+            return false;
+        } // end of switch that conctretize aritmetic instruction by mnemonic
+          // All aritmetic instructions have the same 2B size
+        short register_description = read_memory(rpc, BYTE);
+        rpc += 1;
+        cout << hex << setfill('0') << setw(2) << register_description << " ";
+        destination_register_number = (register_description >> 4) & 0xF;
+        source_register_number = register_description & 0xF;
+        cout << hex << "(d:" << destination_register_number << ";s:" << source_register_number << ") ";
+
         return true;
+    }
     case 0x8:
         return true;
     case 0x9:
+    {
         return true;
+    }
     case 0xA:
     {
         // This is the group of the load instructions
@@ -488,7 +530,7 @@ short EmulatorWrapper::fetch_operand_by_addressing_type()
     }
     case reg_ind_displ:
     {
-        operand = read_memory(registers[source_register_number], WORD, true) + instruction_payload;
+        operand = read_memory(registers[source_register_number] + instruction_payload, WORD, true);
         cout << "reg ind disp (" << operand << ")";
         break;
     }
@@ -511,6 +553,66 @@ short EmulatorWrapper::fetch_operand_by_addressing_type()
     }
     } // End of addressing type switch: operand is ready
     return operand;
+}
+
+bool EmulatorWrapper::set_operand_by_addressing_type(short value)
+{
+
+    switch (address_type)
+    { // Fetch operand
+    case imm:
+    {
+        string error = "Store in immediate value is forbidden";
+        error_messages.push_back(error);
+        return false;
+    }
+    case reg_dir:
+    {
+        cout << "reg_dir (" << registers[source_register_number];
+        registers[source_register_number] = value;
+        cout << "->" << registers[source_register_number] << ")";
+        return true;
+    }
+    case reg_ind:
+    {
+        int address_as_operand = registers[source_register_number];
+
+        cout << "reg_ind (" << read_memory(registers[source_register_number], WORD, true);
+        write_memory(value, registers[source_register_number], WORD, true);
+        cout << "->" << read_memory(registers[source_register_number], WORD, true) << ")";
+        return true;
+    }
+    case reg_ind_displ:
+    {
+        int address_as_operand = registers[source_register_number] + instruction_payload;
+
+        cout << "reg ind disp (" << read_memory(address_as_operand, WORD, true);
+        write_memory(value, address_as_operand, WORD, true);
+        cout << "->" << read_memory(address_as_operand, WORD, true) << ")";
+        return true;
+    }
+    case mem_dir:
+    {
+        int address_as_operand = instruction_payload;
+
+        cout << "mem dir (" << read_memory(address_as_operand, WORD, true);
+        write_memory(value, address_as_operand, WORD, true);
+        cout << "->" << read_memory(address_as_operand, WORD, true) << ")";
+
+        return true;
+    }
+    case reg_ind_addition:
+    {
+        string error = "Store in immediate value is forbidden";
+        error_messages.push_back(error);
+        return false;
+    }
+    default:
+    {
+        cout << "ERROR ";
+        return false;
+    }
+    } // End of addressing type switch: operand is set
 }
 
 bool EmulatorWrapper::instruction_execute()
@@ -556,17 +658,72 @@ bool EmulatorWrapper::instruction_execute()
     case  push
     case  pop
     case  xchg
-    case  add
-    case  sub
-    case  mul
-    case  div
-    case  cmp
-    case  not_i
+*/
+    case add:
+    {
+        //* reg[Dest] <= (reg[Dest] + reg[Src])
+        cout << "add r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+             << " += r" << source_register_number;
+        registers[destination_register_number] = registers[destination_register_number] + registers[source_register_number];
+
+        cout << " #> " << registers[destination_register_number];
+        // End of add instruction, everything passed well
+        return true;
+    }
+    case sub:
+    {
+        //* reg[Dest] <= (reg[Dest] - reg[Src])
+        cout << "sub r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+             << " -= r" << source_register_number;
+        registers[destination_register_number] = registers[destination_register_number] - registers[source_register_number];
+
+        cout << " #> " << registers[destination_register_number];
+
+        // End of sub instruction, everything passed well
+        return true;
+    }
+    case mul:
+    {
+        //* reg[Dest] <= (reg[Dest] * reg[Src])
+        cout << "mul r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+             << " *= r" << source_register_number;
+        registers[destination_register_number] = registers[destination_register_number] * registers[source_register_number];
+
+        cout << " #> " << registers[destination_register_number];
+
+        // End of mul instruction, everything passed well
+        return true;
+    }
+    case div:
+    {
+        //* reg[Dest] <= (reg[Dest] / reg[Src])
+        cout << "div r" << destination_register_number << "(" << registers[destination_register_number] << ")"
+             << " /= r" << source_register_number;
+        if (registers[source_register_number] == 0)
+        {
+            cout << "DIVISION WITH ZERO! ";
+            break;
+        }
+        registers[destination_register_number] = registers[destination_register_number] / registers[source_register_number];
+
+        cout << " #> " << registers[destination_register_number];
+
+        // End of div instruction, everything passed well
+        return true;
+    }
+    case cmp:
+    {
+        //* temp <= (reg[Dest] - reg[Src]); update_psw_
+
+        // End of cmp instruction, everything passed well
+        return true;
+    }
+        /*    case  not_i
     case  and_i
     case  or_i
     case  xor_i
     case  test
-    case          shl
+    case  shl
     case  shr
     */
     case ldr:
@@ -596,11 +753,15 @@ bool EmulatorWrapper::instruction_execute()
         // if the update type is pre_ :
         update_before_address_fetch_source_register();
 
-        set_operand_by_address_type(registers[destination_register_number]);
+        if (set_operand_by_addressing_type(registers[destination_register_number]) == false)
+        {
+            return false;
+        }
 
         // if the update type is post_ :
         update_after_address_fetch_source_register();
-
+        // End of ldr instruction, everything passed well
+        return true;
     } // end of case str
     default:
     {

@@ -109,6 +109,7 @@ class EmulatorWrapper
     short instruction_payload; // This is the 2B of data, ordered by [H L]
 
     short fetch_operand_by_addressing_type();           // depends on addressing type, fetch operand for necessary instructions
+    bool set_operand_by_addressing_type(short);         // depends on addressing type, set operand on given value for necessary instructions
     void update_before_address_fetch_source_register(); // depends on update type, update source register before usage
     void update_after_address_fetch_source_register();  // depends on update type, update source register after usage
 

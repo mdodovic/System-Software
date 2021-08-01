@@ -5,7 +5,7 @@ Id	Name		Size
 -1	ABSOLUTE	0002
 0	UNDEFINED	0000
 2	data	0016
-1	text	001c
+1	text	0038
 
 
 Symbol table:
@@ -17,7 +17,7 @@ Value	Type	Section		Name		Id
 0000	e	UNDEFINED	PRINT_REG	0002
 0000	l	UNDEFINED	UNDEFINED	0000
 0000	l	data	data	0009
-0000	l	text	loop_print	0008
+0009	l	text	loop_print	0008
 0000	g	text	print	0004
 0000	l	text	text	0007
 
@@ -52,16 +52,25 @@ Section data <data>:
 
 Relocation data <text>:
 Offset	Type		Dat/Ins	Symbol	Section name
-0007	R_HYP_16	i	PRINT_REG	text
-001a	R_HYP_16	i	text	text
+0010	R_HYP_16	i	PRINT_REG	text
+002d	R_HYP_16	i	text	text
 
 Section data <text>:
-0000: a0 32 02 
-0003: b0 3f 04 00 00 
-0008: a0 1f 00 00 05 
-000d: 70 21 
-000f: a0 1f 00 00 00 
-0014: 74 21 
-0016: 52 ff 00 00 00 
-001b: 40 
+0000: b0 16 12 
+0003: b0 36 12 
+0006: b0 56 12 
+0009: a0 32 02 
+000c: b0 3f 04 00 00 
+0011: a0 1f 00 00 01 
+0016: a0 5f 00 00 02 
+001b: 72 15 
+001d: 70 21 
+001f: a0 1f 00 00 00 
+0024: a0 32 02 
+0027: 74 31 
+0029: 52 ff 00 00 09 
+002e: a0 56 42 
+0031: a0 36 42 
+0034: a0 16 42 
+0037: 40 
 

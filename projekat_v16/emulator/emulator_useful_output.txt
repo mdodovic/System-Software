@@ -1,0 +1,670 @@
+Collect data from file:emulator_input_linker_hex_output.o
+3
+1080
+2a
+1080   41 00 20 00 56 00 41 00 
+1088   4c 00 55 00 45 00 3a 00 
+1090   20 00 00 00 04 00 42 00 
+1098   20 00 56 00 41 00 4c 00 
+10a0   55 00 45 00 3a 00 20 00 
+10a8   00 00 
+0
+10
+0000   02 10 00 00 01 10 00 10 
+0008   00 00 00 00 00 00 00 00 
+
+1000
+80
+1000   20 20 a0 2f 00 10 80 30 
+1008   ff 00 10 48 a0 3f 04 10 
+1010   94 a0 37 03 00 7e a0 1f 
+1018   00 00 30 70 31 b0 3f 04 
+1020   ff 00 a0 5f 00 00 2e b0 
+1028   5f 04 ff 00 a0 2f 00 10 
+1030   96 30 f7 05 00 12 a0 3f 
+1038   00 00 05 a0 1f 00 00 30 
+1040   70 31 b0 3f 04 ff 00 00 
+1048   b0 16 12 b0 36 12 b0 56 
+1050   12 a0 32 02 b0 3f 04 ff 
+1058   00 a0 1f 00 00 01 a0 5f 
+1060   00 00 02 72 15 70 21 a0 
+1068   1f 00 00 00 a0 32 02 74 
+1070   31 52 ff 00 10 51 a0 56 
+1078   42 a0 36 42 a0 16 42 40 
+
+Loading data to memory ...
+
+ _READ:Val=> 10 2 :1002; READ_PC:1002
+SP:ff00
+PSW:0
+ffa0 2f (d:2;s:f) 00 (a:0;u:0)  _READ:Val=> 10 ffffff80 :1080; READ_1080 OK(s:5)_I!
+ldr r2=0 ,no pre update, imm+ (1080) ,no post update,  #> 1080OK_E!
+
+30 ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 48 :1048; READ_1048 OK(s:5)_I!
+call  ,no pre update,  #Push 100c on stack:  _WRITE:Val: 10 c!  [0, 1] 0, 0 => c, 10; WRITE_# imm+ (1048) ,no post update,  #>  _READ:Val=> 10 c :100c; READ_100c1048OK_E!
+
+ffb0 16 (d:1;s:6) 12 (a:2;u:1) OK(s:3)_I!
+str r1=0 ,pre update (fefe->fefc), reg_ind ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 0!  [0, 1] 0, 0 => 0, 0; WRITE_-> _READ:Val=> 0 0 :0; READ_0)OK_E!
+
+ffb0 36 (d:3;s:6) 12 (a:2;u:1) OK(s:3)_I!
+str r3=0 ,pre update (fefc->fefa), reg_ind ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 0!  [0, 1] 0, 0 => 0, 0; WRITE_-> _READ:Val=> 0 0 :0; READ_0)OK_E!
+
+ffb0 56 (d:5;s:6) 12 (a:2;u:1) OK(s:3)_I!
+str r5=0 ,pre update (fefa->fef8), reg_ind ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 0!  [0, 1] 0, 0 => 0, 0; WRITE_-> _READ:Val=> 0 0 :0; READ_0)OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=0 ,no pre update,  _READ:Val=> 0 41 :41; READ_reg_ind+ (41) ,no post update,  #> 41OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=41 ,no pre update, mem dir ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 41!  [0, 1] 0, 0 => 41, 0; WRITE_>>A<< ; WRITE_-> _READ:Val=> 0 41 :41; READ_41) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=0 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1080) += r1(2) #> 1082OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=41 ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(20) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=20 ,no pre update, mem dir ( _READ:Val=> 0 41 :41; READ_41 _WRITE:Val: 0 20!  [0, 1] 41, 0 => 20, 0; WRITE_>> << ; WRITE_-> _READ:Val=> 0 20 :20; READ_20) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1082) += r1(2) #> 1084OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 56 :56; READ_reg_ind+ (56) ,no post update,  #> 56OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(56) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=56 ,no pre update,  _READ:Val=> 0 56 :56; READ_reg_ind+ (56) ,no post update,  #> 56OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=56 ,no pre update, mem dir ( _READ:Val=> 0 20 :20; READ_20 _WRITE:Val: 0 56!  [0, 1] 20, 0 => 56, 0; WRITE_>>V<< ; WRITE_-> _READ:Val=> 0 56 :56; READ_56) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1084) += r1(2) #> 1086OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=56 ,no pre update,  _READ:Val=> 0 41 :41; READ_reg_ind+ (41) ,no post update,  #> 41OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(41) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=41 ,no pre update,  _READ:Val=> 0 41 :41; READ_reg_ind+ (41) ,no post update,  #> 41OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=41 ,no pre update, mem dir ( _READ:Val=> 0 56 :56; READ_56 _WRITE:Val: 0 41!  [0, 1] 56, 0 => 41, 0; WRITE_>>A<< ; WRITE_-> _READ:Val=> 0 41 :41; READ_41) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1086) += r1(2) #> 1088OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=41 ,no pre update,  _READ:Val=> 0 4c :4c; READ_reg_ind+ (4c) ,no post update,  #> 4cOK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(4c) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=4c ,no pre update,  _READ:Val=> 0 4c :4c; READ_reg_ind+ (4c) ,no post update,  #> 4cOK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=4c ,no pre update, mem dir ( _READ:Val=> 0 41 :41; READ_41 _WRITE:Val: 0 4c!  [0, 1] 41, 0 => 4c, 0; WRITE_>>L<< ; WRITE_-> _READ:Val=> 0 4c :4c; READ_4c) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1088) += r1(2) #> 108aOK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=4c ,no pre update,  _READ:Val=> 0 55 :55; READ_reg_ind+ (55) ,no post update,  #> 55OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(55) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=55 ,no pre update,  _READ:Val=> 0 55 :55; READ_reg_ind+ (55) ,no post update,  #> 55OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=55 ,no pre update, mem dir ( _READ:Val=> 0 4c :4c; READ_4c _WRITE:Val: 0 55!  [0, 1] 4c, 0 => 55, 0; WRITE_>>U<< ; WRITE_-> _READ:Val=> 0 55 :55; READ_55) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(108a) += r1(2) #> 108cOK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=55 ,no pre update,  _READ:Val=> 0 45 :45; READ_reg_ind+ (45) ,no post update,  #> 45OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(45) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=45 ,no pre update,  _READ:Val=> 0 45 :45; READ_reg_ind+ (45) ,no post update,  #> 45OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=45 ,no pre update, mem dir ( _READ:Val=> 0 55 :55; READ_55 _WRITE:Val: 0 45!  [0, 1] 55, 0 => 45, 0; WRITE_>>E<< ; WRITE_-> _READ:Val=> 0 45 :45; READ_45) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(108c) += r1(2) #> 108eOK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=45 ,no pre update,  _READ:Val=> 0 3a :3a; READ_reg_ind+ (3a) ,no post update,  #> 3aOK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(3a) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=3a ,no pre update,  _READ:Val=> 0 3a :3a; READ_reg_ind+ (3a) ,no post update,  #> 3aOK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=3a ,no pre update, mem dir ( _READ:Val=> 0 45 :45; READ_45 _WRITE:Val: 0 3a!  [0, 1] 45, 0 => 3a, 0; WRITE_>>:<< ; WRITE_-> _READ:Val=> 0 3a :3a; READ_3a) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(108e) += r1(2) #> 1090OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=3a ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(20) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=20 ,no pre update, mem dir ( _READ:Val=> 0 3a :3a; READ_3a _WRITE:Val: 0 20!  [0, 1] 3a, 0 => 20, 0; WRITE_>> << ; WRITE_-> _READ:Val=> 0 20 :20; READ_20) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1090) += r1(2) #> 1092OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 0 :0; READ_reg_ind+ (0) ,no post update,  #> 0OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(0) ? r1(0) #psw: 0 #> 1OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 1 ,no pre update, imm+ (1051) !condition (jeq)? psw: 1 ,no post update,  #> 1076OK_E!
+
+ffa0 56 (d:5;s:6) 42 (a:2;u:4) OK(s:3)_I!
+ldr r5=2 _READ:Val=> 0 0 :0; READ_reg_ind+ (0) ,post update (fef8->fefa),  #> 0OK_E!
+
+ffa0 36 (d:3;s:6) 42 (a:2;u:4) OK(s:3)_I!
+ldr r3=0 _READ:Val=> 0 0 :0; READ_reg_ind+ (0) ,post update (fefa->fefc),  #> 0OK_E!
+
+ffa0 16 (d:1;s:6) 42 (a:2;u:4) OK(s:3)_I!
+ldr r1=0 _READ:Val=> 0 0 :0; READ_reg_ind+ (0) ,post update (fefc->fefe),  #> 0OK_E!
+
+40 OK(s:3)_I!
+ret pc: 1080 _READ:Val=> 10 c :100c; READ_ #Pop 100c from stack (sp=fefe->ff00#  #> 100cOK_E!
+
+ffa0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> 10 ffffff94 :1094; READ_1094 OK(s:5)_I!
+ldr r3=0 ,no pre update,  _READ:Val=> 0 4 :4; READ_mem dir (4) ,no post update,  #> 4OK_E!
+
+ffa0 37 (d:3;s:7) 03 (a:3;u:0)  _READ:Val=> 0 7e :7e; READ_7e OK(s:5)_I!
+ldr r3=4 ,no pre update,  _READ:Val=> 0 4 :4; READ_reg ind disp (4) ,no post update,  #> 4OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 30 :30; READ_30 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (30) ,no post update,  #> 30OK_E!
+
+70  !0->add! 31 (d:3;s:1) OK(s:5)_I!
+add r3(4) += r1(30) #> 34OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=34 ,no pre update, mem dir ( _READ:Val=> 0 20 :20; READ_20 _WRITE:Val: 0 34!  [0, 1] 20, 0 => 34, 0; WRITE_>>4<< ; WRITE_-> _READ:Val=> 0 34 :34; READ_34) ,no post update, OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2e :2e; READ_2e OK(s:5)_I!
+ldr r5=0 ,no pre update, imm+ (2e) ,no post update,  #> 2eOK_E!
+
+ffb0 5f (d:5;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r5=2e ,no pre update, mem dir ( _READ:Val=> 0 34 :34; READ_34 _WRITE:Val: 0 2e!  [0, 1] 34, 0 => 2e, 0; WRITE_>>.<< ; WRITE_-> _READ:Val=> 0 2e :2e; READ_2e) ,no post update, OK_E!
+
+ffa0 2f (d:2;s:f) 00 (a:0;u:0)  _READ:Val=> 10 ffffff96 :1096; READ_1096 OK(s:5)_I!
+ldr r2=1092 ,no pre update, imm+ (1096) ,no post update,  #> 1096OK_E!
+
+30 fff7 (d:f;s:7) 05 (a:5;u:0)  _READ:Val=> 0 12 :12; READ_12 OK(s:5)_I!
+call  ,no pre update,  #Push 1036 on stack:  _WRITE:Val: 10 36!  [0, 1] c, 10 => 36, 10; WRITE_# reg ind add  (1048) ,no post update,  #>  _READ:Val=> 10 36 :1036; READ_10361048OK_E!
+
+ffb0 16 (d:1;s:6) 12 (a:2;u:1) OK(s:3)_I!
+str r1=30 ,pre update (fefe->fefc), reg_ind ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 30!  [0, 1] 0, 0 => 30, 0; WRITE_-> _READ:Val=> 0 30 :30; READ_30)OK_E!
+
+ffb0 36 (d:3;s:6) 12 (a:2;u:1) OK(s:3)_I!
+str r3=34 ,pre update (fefc->fefa), reg_ind ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 34!  [0, 1] 0, 0 => 34, 0; WRITE_-> _READ:Val=> 0 34 :34; READ_34)OK_E!
+
+ffb0 56 (d:5;s:6) 12 (a:2;u:1) OK(s:3)_I!
+str r5=2e ,pre update (fefa->fef8), reg_ind ( _READ:Val=> 0 0 :0; READ_0 _WRITE:Val: 0 2e!  [0, 1] 0, 0 => 2e, 0; WRITE_-> _READ:Val=> 0 2e :2e; READ_2e)OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=34 ,no pre update,  _READ:Val=> 0 42 :42; READ_reg_ind+ (42) ,no post update,  #> 42OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=42 ,no pre update, mem dir ( _READ:Val=> 0 2e :2e; READ_2e _WRITE:Val: 0 42!  [0, 1] 2e, 0 => 42, 0; WRITE_>>B<< ; WRITE_-> _READ:Val=> 0 42 :42; READ_42) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=30 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2e ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1096) += r1(2) #> 1098OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=42 ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(20) ? r1(0) #psw: 1 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=20 ,no pre update, mem dir ( _READ:Val=> 0 42 :42; READ_42 _WRITE:Val: 0 20!  [0, 1] 42, 0 => 20, 0; WRITE_>> << ; WRITE_-> _READ:Val=> 0 20 :20; READ_20) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(1098) += r1(2) #> 109aOK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 56 :56; READ_reg_ind+ (56) ,no post update,  #> 56OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(56) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=56 ,no pre update,  _READ:Val=> 0 56 :56; READ_reg_ind+ (56) ,no post update,  #> 56OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=56 ,no pre update, mem dir ( _READ:Val=> 0 20 :20; READ_20 _WRITE:Val: 0 56!  [0, 1] 20, 0 => 56, 0; WRITE_>>V<< ; WRITE_-> _READ:Val=> 0 56 :56; READ_56) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(109a) += r1(2) #> 109cOK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=56 ,no pre update,  _READ:Val=> 0 41 :41; READ_reg_ind+ (41) ,no post update,  #> 41OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(41) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=41 ,no pre update,  _READ:Val=> 0 41 :41; READ_reg_ind+ (41) ,no post update,  #> 41OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=41 ,no pre update, mem dir ( _READ:Val=> 0 56 :56; READ_56 _WRITE:Val: 0 41!  [0, 1] 56, 0 => 41, 0; WRITE_>>A<< ; WRITE_-> _READ:Val=> 0 41 :41; READ_41) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(109c) += r1(2) #> 109eOK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=41 ,no pre update,  _READ:Val=> 0 4c :4c; READ_reg_ind+ (4c) ,no post update,  #> 4cOK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(4c) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=4c ,no pre update,  _READ:Val=> 0 4c :4c; READ_reg_ind+ (4c) ,no post update,  #> 4cOK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=4c ,no pre update, mem dir ( _READ:Val=> 0 41 :41; READ_41 _WRITE:Val: 0 4c!  [0, 1] 41, 0 => 4c, 0; WRITE_>>L<< ; WRITE_-> _READ:Val=> 0 4c :4c; READ_4c) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(109e) += r1(2) #> 10a0OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=4c ,no pre update,  _READ:Val=> 0 55 :55; READ_reg_ind+ (55) ,no post update,  #> 55OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(55) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=55 ,no pre update,  _READ:Val=> 0 55 :55; READ_reg_ind+ (55) ,no post update,  #> 55OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=55 ,no pre update, mem dir ( _READ:Val=> 0 4c :4c; READ_4c _WRITE:Val: 0 55!  [0, 1] 4c, 0 => 55, 0; WRITE_>>U<< ; WRITE_-> _READ:Val=> 0 55 :55; READ_55) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(10a0) += r1(2) #> 10a2OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=55 ,no pre update,  _READ:Val=> 0 45 :45; READ_reg_ind+ (45) ,no post update,  #> 45OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(45) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=45 ,no pre update,  _READ:Val=> 0 45 :45; READ_reg_ind+ (45) ,no post update,  #> 45OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=45 ,no pre update, mem dir ( _READ:Val=> 0 55 :55; READ_55 _WRITE:Val: 0 45!  [0, 1] 55, 0 => 45, 0; WRITE_>>E<< ; WRITE_-> _READ:Val=> 0 45 :45; READ_45) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(10a2) += r1(2) #> 10a4OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=45 ,no pre update,  _READ:Val=> 0 3a :3a; READ_reg_ind+ (3a) ,no post update,  #> 3aOK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(3a) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=3a ,no pre update,  _READ:Val=> 0 3a :3a; READ_reg_ind+ (3a) ,no post update,  #> 3aOK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=3a ,no pre update, mem dir ( _READ:Val=> 0 45 :45; READ_45 _WRITE:Val: 0 3a!  [0, 1] 45, 0 => 3a, 0; WRITE_>>:<< ; WRITE_-> _READ:Val=> 0 3a :3a; READ_3a) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(10a4) += r1(2) #> 10a6OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=3a ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(20) ? r1(0) #psw: 0 #> 0OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 0 ,no pre update, imm+ (1051) !condition (jeq)? psw: 0 ,no post update,  #> 1051OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 20 :20; READ_reg_ind+ (20) ,no post update,  #> 20OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=20 ,no pre update, mem dir ( _READ:Val=> 0 3a :3a; READ_3a _WRITE:Val: 0 20!  [0, 1] 3a, 0 => 20, 0; WRITE_>> << ; WRITE_-> _READ:Val=> 0 20 :20; READ_20) ,no post update, OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 1 :1; READ_01 OK(s:5)_I!
+ldr r1=0 ,no pre update, imm+ (1) ,no post update,  #> 1OK_E!
+
+ffa0 5f (d:5;s:f) 00 (a:0;u:0)  _READ:Val=> 0 2 :2; READ_02 OK(s:5)_I!
+ldr r5=2 ,no pre update, imm+ (2) ,no post update,  #> 2OK_E!
+
+72  !2->mul! 15 (d:1;s:5) OK(s:5)_I!
+mul r1(1) *= r5(2) #> 2OK_E!
+
+70  !0->add! 21 (d:2;s:1) OK(s:5)_I!
+add r2(10a6) += r1(2) #> 10a8OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 0 :0; READ_00 OK(s:5)_I!
+ldr r1=2 ,no pre update, imm+ (0) ,no post update,  #> 0OK_E!
+
+ffa0 32 (d:3;s:2) 02 (a:2;u:0) OK(s:3)_I!
+ldr r3=20 ,no pre update,  _READ:Val=> 0 0 :0; READ_reg_ind+ (0) ,no post update,  #> 0OK_E!
+
+74  !4->cmp! 31 (d:3;s:1) OK(s:3)_I!
+cmp r3(0) ? r1(0) #psw: 0 #> 1OK_E!
+
+52  !2->jne! ffff (d:f;s:f) 00 (a:0;u:0)  _READ:Val=> 10 51 :1051; READ_1051 OK(s:5)_I!
+jne pc = 1076 ?psw: 1 ,no pre update, imm+ (1051) !condition (jeq)? psw: 1 ,no post update,  #> 1076OK_E!
+
+ffa0 56 (d:5;s:6) 42 (a:2;u:4) OK(s:3)_I!
+ldr r5=2 _READ:Val=> 0 2e :2e; READ_reg_ind+ (2e) ,post update (fef8->fefa),  #> 2eOK_E!
+
+ffa0 36 (d:3;s:6) 42 (a:2;u:4) OK(s:3)_I!
+ldr r3=0 _READ:Val=> 0 34 :34; READ_reg_ind+ (34) ,post update (fefa->fefc),  #> 34OK_E!
+
+ffa0 16 (d:1;s:6) 42 (a:2;u:4) OK(s:3)_I!
+ldr r1=0 _READ:Val=> 0 30 :30; READ_reg_ind+ (30) ,post update (fefc->fefe),  #> 30OK_E!
+
+40 OK(s:3)_I!
+ret pc: 1080 _READ:Val=> 10 36 :1036; READ_ #Pop 1036 from stack (sp=fefe->ff00#  #> 1036OK_E!
+
+ffa0 3f (d:3;s:f) 00 (a:0;u:0)  _READ:Val=> 0 5 :5; READ_05 OK(s:5)_I!
+ldr r3=34 ,no pre update, imm+ (5) ,no post update,  #> 5OK_E!
+
+ffa0 1f (d:1;s:f) 00 (a:0;u:0)  _READ:Val=> 0 30 :30; READ_30 OK(s:5)_I!
+ldr r1=30 ,no pre update, imm+ (30) ,no post update,  #> 30OK_E!
+
+70  !0->add! 31 (d:3;s:1) OK(s:5)_I!
+add r3(5) += r1(30) #> 35OK_E!
+
+ffb0 3f (d:3;s:f) 04 (a:4;u:0)  _READ:Val=> ffffffff 0 :ff00; READ_ff00 OK(s:5)_I!
+str r3=35 ,no pre update, mem dir ( _READ:Val=> 0 20 :20; READ_20 _WRITE:Val: 0 35!  [0, 1] 20, 0 => 35, 0; WRITE_>>5<< ; WRITE_-> _READ:Val=> 0 35 :35; READ_35) ,no post update, OK_E!
+
+00 OK(s:5)_I!
+halt! OK_E!
+
+

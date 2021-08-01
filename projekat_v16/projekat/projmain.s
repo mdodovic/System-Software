@@ -29,9 +29,12 @@
 	str r3, PRINT_REG  
 	#str r3, %PRINT_REG # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
 	# gotov A
+	# lupi enter:
+	ldr r5, $46
+	str r5, PRINT_REG 
 	ldr r2, $B_text
     call %print   # stavljeno pc relativno radi probe
-	ldr r3, B_value # ispravljeno u B_value iz A_location
+	ldr r3, $B_value # ispravljeno u B_value iz A_location
 	ldr r1, $48
 	add r3, r1
 	str r3, PRINT_REG

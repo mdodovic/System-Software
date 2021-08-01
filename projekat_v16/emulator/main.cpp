@@ -17,7 +17,7 @@ int main(int argc, const char *argv[])
         cout << "Only one file for execution needs to be passed to emulator" << endl;
         return -1;
     }
-    cout << argc << ":" << argv[0] << "#" << argv[1] << endl;
+    //cout << argc << ":" << argv[0] << "#" << argv[1] << endl;
     EmulatorWrapper emulator(argv[1]);
 
     if (emulator.collect_data_from_relocatible_files() == false)

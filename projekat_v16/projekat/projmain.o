@@ -6,7 +6,7 @@ Id	Name		Size
 0	UNDEFINED	0000
 3	data	0014
 1	ivtp	0010
-2	text	003e
+2	text	0048
 
 
 Symbol table:
@@ -73,9 +73,9 @@ Offset	Type		Dat/Ins	Symbol	Section name
 000b	R_HYP_16	i	print	text
 0010	R_HYP_16	i	A_location	text
 0015	R_HYP_16_PC	i	A_location	text
-0026	R_HYP_16	i	B_text	text
-002b	R_HYP_16_PC	i	print	text
-0030	R_HYP_16	i	B_value	text
+0030	R_HYP_16	i	B_text	text
+0035	R_HYP_16_PC	i	print	text
+003a	R_HYP_16	i	B_value	text
 
 Section data <text>:
 0000: 20 
@@ -87,11 +87,13 @@ Section data <text>:
 0016: a0 1f 00 00 30 
 001b: 70 31 
 001d: b0 3f 04 ff 00 
-0022: a0 2f 00 00 00 
-0027: 30 f7 05 ff fe 
-002c: a0 3f 04 00 00 
-0031: a0 1f 00 00 30 
-0036: 70 31 
-0038: b0 3f 04 ff 00 
-003d: 00 
+0022: a0 5f 00 00 2e 
+0027: b0 5f 04 ff 00 
+002c: a0 2f 00 00 00 
+0031: 30 f7 05 ff fe 
+0036: a0 3f 00 00 00 
+003b: a0 1f 00 00 30 
+0040: 70 31 
+0042: b0 3f 04 ff 00 
+0047: 00 
 

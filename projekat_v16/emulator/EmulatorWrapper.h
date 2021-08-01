@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 //#include "EmulatorConstants.h"
 
 using namespace std;
@@ -48,8 +51,6 @@ class EmulatorWrapper
         jeq,
         jne,
         jgt,
-        push,
-        pop,
         xchg,
         add,
         sub,
@@ -127,6 +128,7 @@ class EmulatorWrapper
     void write_memory(short, int, int, bool = true); // write value (first argument) to memory at position (second argument) which is size equals to third argument
                                                      // forth argument said that type of data that should be written is little endian (true) of big endian
                                                      // it is predefined to be true for the case that fetch only one byte. With WORD it is recommended to use this fourth argument
+    void create_memory_snapshot(string);
 
     // Registers
     vector<short> registers; // Register bank; register with specific meaning r6 is sp, r7 is pc, r8 is psw
@@ -139,12 +141,16 @@ class EmulatorWrapper
     short &rpsw = registers[psw];
     void reset_flag(short);
     void set_flag(short);
+    bool get_flag(short);
+    bool calculate_condition(short);
 
     // Timer
     void reset_timer();
 
     // Terminal
     void reset_terminal();
+
+    ofstream emulator_output_file;
 
 public:
     EmulatorWrapper(string);
@@ -159,6 +165,11 @@ public:
     static int REGISTER_NUMBER;         // Number of processor's register
     static int BYTE;                    // Memory acceptable size of reading;
     static int WORD;                    // Memory acceptable size of reading;
+
+    static int START_PROGRAM_ADDRESS_ENTRY; // entry in ivt for program beginning
+    static int ERROR_IN_PROGRAM_ENTRY;      // entry in ivt error (invalid instruction, invalid addressing type, zero division ...) happened
+    static int TIMER_ENTRY;                 // entry in ivt for timer interrupts
+    static int TERMINAL_ENTRY;              // entry in ivt for terminal interrupts
 
     static short TERM_OUT; // data out register (data goes on displey)
     static short TERM_IN;  // data in register (data fetched from displey goes to this register)

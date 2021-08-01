@@ -8,16 +8,26 @@
 
 .section text
   print:
+    push r1
+    push r3
+    push r5
     loop_print:
     ldr r3, [r2]
     str r3, PRINT_REG
     #str r3, %PRINT_REG # ovo bi bilo zgodno da moze jer ime smisla da neko rokne ovako
+  
+	ldr r1, $1
+  ldr r5, $2
+  mul r1, r5
 
-	ldr r1, $5
   	add r2, r1
   	ldr r1, $0
-    cmp r2, r1
+    ldr r3, [r2]
+    cmp r3, r1
     jne loop_print
+    pop r5
+    pop r3
+    pop r1
     ret
 
 .section data

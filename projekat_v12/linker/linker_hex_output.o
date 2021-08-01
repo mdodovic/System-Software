@@ -10,7 +10,7 @@ Section: data :{
 	}
 
 Section: ivtp :{
-	# linker_input_linker_linkable_output.o		ivtp	linker_input_linker_linkable_output.o:	10 [100,110)
+	# linker_input_linker_linkable_output.o		ivtp	linker_input_linker_linkable_output.o:	10 [0,10)
 	}
 
 Section: text :{
@@ -22,7 +22,7 @@ Id	Name		Size	VA
 ffffffff	ABSOLUTE	0004	0000
 0	UNDEFINED	0000	0000
 1	data	002a	105a
-2	ivtp	0010	0100
+2	ivtp	0010	0000
 3	text	005a	1000
 
 Symbol table
@@ -35,7 +35,7 @@ Value	Type	Section		Name		Id
 ff00	g		ABSOLUTE		PRINT_REG	0008
 0000	l		UNDEFINED		UNDEFINED	0000
 105a	l		data		data	0001
-0100	l		ivtp		ivtp	0002
+0000	l		ivtp		ivtp	0002
 1000	l		text		keyboard	0009
 103e	l		text		loop_print	000a
 1002	l		text		main	000b
@@ -86,8 +86,8 @@ Section data <data>:
 1082   00 00 
 
 Section data <ivtp>:
-0100   02 10 00 00 01 10 00 10 
-0108   00 00 00 00 00 00 00 00 
+0000   02 10 00 00 01 10 00 10 
+0008   00 00 00 00 00 00 00 00 
 
 
 Section data <text>:

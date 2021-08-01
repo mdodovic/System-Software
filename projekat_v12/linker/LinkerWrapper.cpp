@@ -260,7 +260,12 @@ bool LinkerWrapper::move_sections_to_virtual_address()
             // those sections are ghost sections, not really write in memory
             continue;
         }
-
+        map<string, int>::iterator it_place = mapped_section_address.find(it_outer_output_sections->first);
+        if (it_place == mapped_section_address.end())
+        {
+            // This section is not processed yet. The only intersections that are going to be checked are between -place's mentioned section
+            continue;
+        }
         int left_address = it_outer_output_sections->second.virtual_memory_address;
         int right_address = it_outer_output_sections->second.virtual_memory_address + it_outer_output_sections->second.size;
 
@@ -286,6 +291,12 @@ bool LinkerWrapper::move_sections_to_virtual_address()
                 // this section is currently processed, so cannot be intersect with itself
                 continue;
             }
+            map<string, int>::iterator it_place = mapped_section_address.find(it_output_sections->first);
+            if (it_place == mapped_section_address.end())
+            {
+                // This section is not processed yet. The only intersections that are going to be checked are between -place's mentioned section
+                continue;
+            }
             if (intersect_of_two_sections(left_address, right_address,
                                           it_output_sections->second.virtual_memory_address,
                                           it_output_sections->second.virtual_memory_address + it_output_sections->second.size) == true)
@@ -306,10 +317,11 @@ bool LinkerWrapper::move_sections_to_virtual_address()
         {
             continue;
         }
+
         map<string, int>::iterator it_place = mapped_section_address.find(it_output_sections->first);
         if (it_place == mapped_section_address.end())
         {
-
+            // This section is not mapped by -place option. Insead, this will be mapped after the highest section mentioned in -place
             cout << "sec: " << it_output_sections->first << endl;
             cout << "VA_b: " << it_output_sections->second.virtual_memory_address << endl;
 
@@ -1214,15 +1226,20 @@ void LinkerWrapper::fill_output_binary_file()
         int number_of_sections = output_section_table.size();
         binary_output_file.write((char *)&number_of_sections, sizeof(number_of_sections));
         cout << number_of_sections << endl;
-
+        //        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         for (map<string, SectionTable>::iterator it = output_section_table.begin(); it != output_section_table.end(); it++)
         {
+            if (it->first == "UNDEFINED" || it->first == "ABSOLUTE")
+            {
+                // those sections are ghost sections, not really exists in memory
+                continue;
+            }
 
             // section data
             // This is the start address where data should be loaded in memory
             int virtual_address_of_data = it->second.virtual_memory_address;
             binary_output_file.write((char *)&virtual_address_of_data, sizeof(virtual_address_of_data));
-
+            cout << "VA:" << virtual_address_of_data << " ; ";
             // This will represent how many 1B-data there are in memory in each segment
             int number_of_chars = it->second.data.size();
             binary_output_file.write((char *)&number_of_chars, sizeof(number_of_chars));

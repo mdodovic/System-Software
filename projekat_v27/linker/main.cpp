@@ -24,12 +24,12 @@ int main(int argc, const char *argv[])
     for (int i = 1; i < argc; i++)
     {
         string current = argv[i];
-        cout << current << endl;
+        //cout << current << endl;
         if (current == "-o")
         {
 
             output_file = true;
-            cout << "IN:" << output_file << endl;
+            //cout << "IN:" << output_file << endl;
         }
         else if (current == "-hex")
         {
@@ -48,13 +48,13 @@ int main(int argc, const char *argv[])
         }
         else if (output_file)
         {
-            cout << "OF:" << output_file << endl;
+            //cout << "OF:" << output_file << endl;
             output_file_name = current;
             output_file = false;
         }
         else
         {
-            cout << "File for link:" << current << endl;
+            //cout << "File for link:" << current << endl;
             files_to_be_linked.push_back(current);
         }
     }
@@ -78,11 +78,12 @@ int main(int argc, const char *argv[])
         linker.print_error_messages();
         return -1;
     }
-    cout << endl
+    /*    cout << endl
          << endl
          << endl
          << "OUTPUT:" << endl
          << endl;
+*/
     linker.print_section_table();
     linker.print_symbol_table();
     linker.print_relocation_table();

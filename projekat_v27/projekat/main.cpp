@@ -8,10 +8,10 @@ int main(int argc, const char *argv[])
     string input_file;
     string output_file;
     string current = argv[1];
-    cout << argv[1] << "#-o" << endl;
-    cout << argv[2] << endl;
-    cout << argv[3] << endl;
-    cout << strcmp(argv[1], "-o") << endl;
+    //    cout << argv[1] << "#-o" << endl;
+    //    cout << argv[2] << endl;
+    //    cout << argv[3] << endl;
+    //    cout << strcmp(argv[1], "-o") << endl;
     if (current == "-o")
     {
         input_file = argv[3];

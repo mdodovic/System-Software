@@ -1,0 +1,238 @@
+
+FIRST PASS
+(:0).global myStart
+Global:
+Find:#myStart
+#myStart
+###
+(:0).global myCounter
+Global:
+Find:#myCounter
+#myCounter
+###
+(:0).section myCode
+Section start found:
+Find:#myCode
+###
+(myCode:0).equ tim_cfg,0xFF10
+EQU found:
+Find:#tim_cfg#0xFF10
+###
+(myCode:0)myStart:
+RX_label_only:
+Find:#myStart
+###
+(myCode:0)ldr r0,$0x1
+This is an instruction!
+FIRST PASS INSTRUCTION:
+Ld/St: ldr str:#ldr#reg:#r0#operand:#$0x1
+$label or $literal
+###
+(myCode:5)str r0,tim_cfg
+This is an instruction!
+FIRST PASS INSTRUCTION:
+Ld/St: ldr str:#str#reg:#r0#operand:#tim_cfg
+label or literal
+###
+(myCode:10)wait:
+RX_label_only:
+Find:#wait
+###
+(myCode:10)ldr r0,myCounter
+This is an instruction!
+FIRST PASS INSTRUCTION:
+Ld/St: ldr str:#ldr#reg:#r0#operand:#myCounter
+label or literal
+###
+(myCode:15)ldr r1,$5
+This is an instruction!
+FIRST PASS INSTRUCTION:
+Ld/St: ldr str:#ldr#reg:#r1#operand:#$5
+$label or $literal
+###
+(myCode:20)cmp r0,r1
+This is an instruction!
+FIRST PASS INSTRUCTION:
+Aritmethical/Logical:#cmp#regD:#r0#regS:#r1
+###
+(myCode:22)jne wait
+This is an instruction!
+FIRST PASS INSTRUCTION:
+Jump instructions: call jmp jeq jne jgt: jne operand: wait
+label or literal
+###
+(myCode:27)halt
+This is an instruction!
+FIRST PASS INSTRUCTION:
+One byte: halt###
+(myCode:28).section myData
+Section start found:
+Find:#myData
+End section: 28-28
+###
+(myData:0)myCounter:
+RX_label_only:
+Find:#myCounter
+###
+(myData:0).word 0
+WORD:
+Find:#0
+#0
+###
+(myData:2).end
+
+SECOND PASS
+(:0).global myStart
+GLOBAL
+(:0).global myCounter
+GLOBAL
+(:0).section myCode
+SECTION:#myCode
+(myCode:0).equ tim_cfg,0xFF10
+EQU
+(myCode:0)myStart:
+RX_LABEL_ONLY
+(myCode:0)ldr r0,$0x1
+This is an instruction!
+SECOND PASS INSTRUCTION:
+Ld/St: ldr str:#ldr#reg:#r0#operand:#$0x1
+I:#160#0#
+$label or $literal:
+literal0x1
+literal#1
+###
+(myCode:5)str r0,tim_cfg
+This is an instruction!
+SECOND PASS INSTRUCTION:
+Ld/St: ldr str:#str#reg:#r0#operand:#tim_cfg
+I:#176#0#
+label or literal#tim_cfg
+Symbol: 
+Process absolute addressing#tim_cfg
+tim_cfg
+EQU CALCULATIONS: 65296
+65296
+###
+(myCode:10)wait:
+RX_LABEL_ONLY
+(myCode:10)ldr r0,myCounter
+This is an instruction!
+SECOND PASS INSTRUCTION:
+Ld/St: ldr str:#ldr#reg:#r0#operand:#myCounter
+I:#160#0#
+label or literal#myCounter
+Symbol: 
+Process absolute addressing#myCounter
+myCounter
+Value: 0
+Section: myData
+Name: myCounter
+Local: 0
+Extern: 0
+Defined: 1
+Symbol: 3
+0
+###
+(myCode:15)ldr r1,$5
+This is an instruction!
+SECOND PASS INSTRUCTION:
+Ld/St: ldr str:#ldr#reg:#r1#operand:#$5
+I:#160#16#
+$label or $literal:
+literal5
+literal#5
+###
+(myCode:20)cmp r0,r1
+This is an instruction!
+SECOND PASS INSTRUCTION:
+Aritmethical/Logical:#cmp#regD:#r0#regS:#r1
+I:#74#1#
+###
+(myCode:22)jne wait
+This is an instruction!
+SECOND PASS INSTRUCTION:
+Jump instructions: call jmp jeq jne jgt: jne operand: wait
+label#wait
+Process absolute addressing#wait
+wait
+Value: 10
+Section: myCode
+Name: wait
+Local: 1
+Extern: 0
+Defined: 1
+Symbol: 6
+###
+(myCode:27)halt
+This is an instruction!
+SECOND PASS INSTRUCTION:
+One byte: halt###
+(myCode:28).section myData
+SECTION:#myData
+(myData:0)myCounter:
+RX_LABEL_ONLY
+(myData:0).word 0
+WORD:
+Find:#0
+#0
+SECOND WORD PASS: 0->0
+00 00 ###
+(myData:2).end
+Create binary file:
+2
+1201208
+4
+2 - 2 => 2
+1 - 1
+ 0 ->1
+0 - 0 => 0
+0 - 0
+ ->0
+28 - 28 => 28
+7 - 7
+ 0 5 10 15 20 22 27 ->7
+2 - 2 => 2
+1 - 1
+ 0 ->1
+Symbol table:
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	l	UNDEFINED	UNDEFINED	0000
+0000	l	myCode	myCode	0004
+0000	g	myData	myCounter	0003
+0000	l	myData	myData	0007
+0000	g	myCode	myStart	0002
+ff10	l	ABSOLUTE	tim_cfg	0005
+000a	l	myCode	wait	0006
+Relocation data:
+
+Offset	Type		Dat/Ins	Symbol	Section name
+000e	R_HYP_16	i	myCounter	myCode
+001a	R_HYP_16	i	myCode	myCode
+Section table:
+Id	Name		Size
+-1	ABSOLUTE	0002
+0	UNDEFINED	0000
+1	myCode	001c
+2	myData	0002
+Data:
+
+Section: ABSOLUTE(2)
+?2=1
+0000: 10 ff 
+
+Section: UNDEFINED(0)
+Section: myCode(28)
+?28=7
+0000: a0 0f 00 00 01 
+0005: b0 0f 04 ff 10 
+000a: a0 0f 04 00 00 
+000f: a0 1f 00 00 05 
+0014: 74 01 
+0016: 52 ff 00 00 0a 
+001b: 00 
+
+Section: myData(2)
+?2=1
+0000: 00 00 
+

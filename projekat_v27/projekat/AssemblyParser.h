@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 using namespace std;
 
 class AssemblyParser
@@ -88,6 +91,8 @@ private:
 
     void create_txt_file();
     void create_binary_file();
+
+    ofstream assembly_output_helper_file;
 
 public:
     AssemblyParser(string, string);

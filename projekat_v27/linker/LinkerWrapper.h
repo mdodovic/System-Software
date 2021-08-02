@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -81,6 +84,8 @@ private:
 
     void fill_output_text_file();
     void fill_output_binary_file();
+
+    ofstream linker_output_helper_file;
 
 public:
     static int MEMORY_MAPPED_REGISTERS;

@@ -1,0 +1,415 @@
+Collect data from all files:
+linker_input_projmain.o 2
+Relocation data:
+Offset	Type		Dat/Ins	Symbol	Section name
+152
+000e	R_HYP_16	i	myCounter	myCode
+98
+001a	R_HYP_16	i	myCode	myCode
+8
+Symbol table:
+Value	Type	Section		Name		Id
+ABSOLUTE
+0000	l	ABSOLUTE	ABSOLUTE	0001
+UNDEFINED
+0000	l	UNDEFINED	UNDEFINED	0000
+myCode
+0000	l	myCode	myCode	0004
+myCounter
+0000	g	myData	myCounter	0003
+myData
+0000	l	myData	myData	0007
+myStart
+0000	g	myCode	myStart	0002
+tim_cfg
+ff10	l	ABSOLUTE	tim_cfg	0005
+wait
+000a	l	myCode	wait	0006
+4
+Section table:
+Id	Name		Size
+ABSOLUTE
+2
+2
+Data:
+0000   10 ff 
+1
+1
+0 
+-1	ABSOLUTE	0002
+UNDEFINED
+0
+0
+Data:
+
+0
+0
+
+0	UNDEFINED	0000
+myCode
+28
+28
+Data:
+0000   a0 0f 00 00 01 b0 0f 04 ff 10 a0 0f 04 00 00 a0 
+0010   1f 00 00 05 74 01 52 ff 00 00 0a 00 
+7
+7
+0 5 10 15 20 22 27 
+1	myCode	001c
+myData
+2
+2
+Data:
+0000   00 00 
+1
+1
+0 
+2	myData	0002
+linker_input_projinterrupts.o 6
+Relocation data:
+Offset	Type		Dat/Ins	Symbol	Section name
+98
+0000	R_HYP_16	d	isr	ivt
+98
+0004	R_HYP_16	d	isr	ivt
+98
+0006	R_HYP_16	d	isr	ivt
+98
+0004	R_HYP_16	i	myStart	isr
+98
+002a	R_HYP_16_PC	i	myCounter	isr
+98
+0036	R_HYP_16	i	myCounter	isr
+12
+Symbol table:
+Value	Type	Section		Name		Id
+ABSOLUTE
+0000	l	ABSOLUTE	ABSOLUTE	0001
+UNDEFINED
+0000	l	UNDEFINED	UNDEFINED	0000
+asciiCode
+0054	l	ABSOLUTE	asciiCode	0008
+isr
+0000	l	isr	isr	0005
+isr_reset
+0000	l	isr	isr_reset	0009
+isr_terminal
+0016	l	isr	isr_terminal	000b
+isr_timer
+0005	l	isr	isr_timer	000a
+ivt
+0000	l	ivt	ivt	0002
+myCounter
+0000	e	UNDEFINED	myCounter	0004
+myStart
+0000	e	UNDEFINED	myStart	0003
+term_in
+ff02	l	ABSOLUTE	term_in	0007
+term_out
+ff00	l	ABSOLUTE	term_out	0006
+4
+Section table:
+Id	Name		Size
+ABSOLUTE
+6
+6
+Data:
+0000   00 ff 02 ff 54 00 
+3
+3
+0 2 4 
+-1	ABSOLUTE	0006
+UNDEFINED
+0
+0
+Data:
+
+0
+0
+
+0	UNDEFINED	0000
+isr
+62
+62
+Data:
+0000   50 ff 00 00 00 b0 06 12 a0 0f 00 00 54 b0 0f 04 
+0010   ff 00 a0 06 42 20 b0 06 12 b0 16 12 a0 0f 04 ff 
+0020   02 b0 0f 04 ff 00 a0 07 03 ff fe a0 1f 00 00 01 
+0030   70 01 b0 0f 04 00 00 a0 16 42 a0 06 42 20 
+17
+17
+0 5 8 13 18 21 22 25 28 33 38 43 48 50 55 58 61 
+2	isr	003e
+ivt
+16
+16
+Data:
+0000   00 00 00 00 05 00 16 00 00 00 00 00 00 00 00 00 
+
+5
+5
+0 2 4 6 8 
+1	ivt	0010
+
+Section table:linker_input_projinterrupts.o
+Id	Name		Size
+ffffffff	ABSOLUTE	0006
+0	UNDEFINED	0000
+2	isr	003e
+1	ivt	0010
+Section table:linker_input_projmain.o
+Id	Name		Size
+-1	ABSOLUTE	0002
+0	UNDEFINED	0000
+1	myCode	001c
+2	myData	0002
+Symbol table:linker_input_projinterrupts.o
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	l	UNDEFINED	UNDEFINED	0000
+0054	l	ABSOLUTE	asciiCode	0008
+0000	l	isr	isr	0005
+0000	l	isr	isr_reset	0009
+0016	l	isr	isr_terminal	000b
+0005	l	isr	isr_timer	000a
+0000	l	ivt	ivt	0002
+0000	e	UNDEFINED	myCounter	0004
+0000	e	UNDEFINED	myStart	0003
+ff02	l	ABSOLUTE	term_in	0007
+ff00	l	ABSOLUTE	term_out	0006
+Symbol table:linker_input_projmain.o
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	l	UNDEFINED	UNDEFINED	0000
+0000	l	myCode	myCode	0004
+0000	g	myData	myCounter	0003
+0000	l	myData	myData	0007
+0000	g	myCode	myStart	0002
+ff10	l	ABSOLUTE	tim_cfg	0005
+000a	l	myCode	wait	0006
+Relocation data:linker_input_projinterrupts.o
+
+Offset	Type		Dat/Ins	Symbol	Section name
+0000	R_HYP_16	d	isr	ivt
+0004	R_HYP_16	d	isr	ivt
+0006	R_HYP_16	d	isr	ivt
+0004	R_HYP_16	i	myStart	isr
+002a	R_HYP_16_PC	i	myCounter	isr
+0036	R_HYP_16	i	myCounter	isr
+Relocation data:linker_input_projmain.o
+
+Offset	Type		Dat/Ins	Symbol	Section name
+000e	R_HYP_16	i	myCounter	myCode
+001a	R_HYP_16	i	myCode	myCode
+Data:linker_input_projinterrupts.o
+
+Section: ABSOLUTE
+0000   00 ff 02 ff 54 00 
+Section: UNDEFINED
+
+Section: isr
+0000   50 ff 00 00 00 b0 06 12 a0 0f 00 00 54 b0 0f 04 
+0010   ff 00 a0 06 42 20 b0 06 12 b0 16 12 a0 0f 04 ff 
+0020   02 b0 0f 04 ff 00 a0 07 03 ff fe a0 1f 00 00 01 
+0030   70 01 b0 0f 04 00 00 a0 16 42 a0 06 42 20 
+Section: ivt
+0000   00 00 00 00 05 00 16 00 00 00 00 00 00 00 00 00 
+
+Data:linker_input_projmain.o
+
+Section: ABSOLUTE
+0000   10 ff 
+Section: UNDEFINED
+
+Section: myCode
+0000   a0 0f 00 00 01 b0 0f 04 ff 10 a0 0f 04 00 00 a0 
+0010   1f 00 00 05 74 01 52 ff 00 00 0a 00 
+Section: myData
+0000   00 00 
+File: linker_input_projmain.o
+File: linker_input_projinterrupts.o
+File: linker_input_projmain.o
+-1	ABSOLUTE=ABSOLUTE	0002
+0	UNDEFINED=UNDEFINED	0000
+1	myCode=myCode	001c
+2	myData=myData	0002
+File: linker_input_projinterrupts.o
+ffffffff	ABSOLUTE=ABSOLUTE	0006
+0	UNDEFINED=UNDEFINED	0000
+2	isr=isr	003e
+1	ivt=ivt	0010
+ivt:0
+F: linker_input_projinterrupts.o :0
+ivt[0,10]
+NEXT ADDRESS: 10
+sec: isr
+VA_b: 0
+VA_b: 10
+F: linker_input_projinterrupts.o :0
+sec: myCode
+VA_b: 0
+VA_b: 4e
+F: linker_input_projmain.o :0
+sec: myData
+VA_b: 0
+VA_b: 6a
+F: linker_input_projmain.o :0
+NEXT ADDRESS: 6c
+Linker output
+
+Helper info:
+Section: ABSOLUTE :{
+	# linker_input_projinterrupts.o		ABSOLUTE	linker_input_projinterrupts.o:	6 [2,8)
+	# linker_input_projmain.o		ABSOLUTE	linker_input_projmain.o:	2 [0,2)
+	}
+
+Section: isr :{
+	# linker_input_projinterrupts.o		isr	linker_input_projinterrupts.o:	3e [10,4e)
+	}
+
+Section: ivt :{
+	# linker_input_projinterrupts.o		ivt	linker_input_projinterrupts.o:	10 [0,10)
+	}
+
+Section: myCode :{
+	# linker_input_projmain.o		myCode	linker_input_projmain.o:	1c [4e,6a)
+	}
+
+Section: myData :{
+	# linker_input_projmain.o		myData	linker_input_projmain.o:	2 [6a,6c)
+	}
+
+File: linker_input_projmain.o
+->myCounter=myCounter:10
+Should be added: 6a
+->myStart=myStart:10
+Should be added: 4e
+->tim_cfg=tim_cfg:10
+Should be added: 0
+->wait=wait:10
+Should be added: 4e
+File: linker_input_projinterrupts.o
+->asciiCode=asciiCode:10
+Should be added: 2
+->isr_reset=isr_reset:10
+Should be added: 10
+->isr_terminal=isr_terminal:10
+Should be added: 10
+->isr_timer=isr_timer:10
+Should be added: 10
+Extern( linker_input_projinterrupts.o: myCounter)
+Extern( linker_input_projinterrupts.o: myStart)
+->term_in=term_in:10
+Should be added: 2
+->term_out=term_out:10
+Should be added: 2
+HERE: myCounter!
+HERE: myStart!
+linker_input_projmain.o:myCode(+4e-4e)	#000e	R_HYP_16	i	myCounter	myCode
+linker_input_projmain.o:myCode(+4e-4e)	#001a	R_HYP_16	i	myCode	myCode
+linker_input_projinterrupts.o:ivt(+0-0)	#0000	R_HYP_16	d	isr	ivt
+linker_input_projinterrupts.o:ivt(+0-0)	#0004	R_HYP_16	d	isr	ivt
+linker_input_projinterrupts.o:ivt(+0-0)	#0006	R_HYP_16	d	isr	ivt
+linker_input_projinterrupts.o:isr(+10-10)	#0004	R_HYP_16	i	myStart	isr
+linker_input_projinterrupts.o:isr(+10-10)	#002a	R_HYP_16_PC	i	myCounter	isr
+linker_input_projinterrupts.o:isr(+10-10)	#0036	R_HYP_16	i	myCounter	isr
+Section <ABSOLUTE(8)>:
+File: linker_input_projmain.o
+S:ABSOLUTE F:linker_input_projmain.o
+1?2
+0000: 10 ff 
+File: linker_input_projinterrupts.o
+S:ABSOLUTE F:linker_input_projinterrupts.o
+3?6
+0002: 00 ff 
+0004: 02 ff 
+0006: 54 00 
+Section <UNDEFINED(0)>:
+Section <isr(3e)>:
+File: linker_input_projmain.o
+File: linker_input_projinterrupts.o
+S:isr F:linker_input_projinterrupts.o
+11?3e
+0010: 50 ff 00 00 00 
+0015: b0 06 12 
+0018: a0 0f 00 00 54 
+001d: b0 0f 04 ff 00 
+0022: a0 06 42 
+0025: 20 
+0026: b0 06 12 
+0029: b0 16 12 
+002c: a0 0f 04 ff 02 
+0031: b0 0f 04 ff 00 
+0036: a0 07 03 ff fe 
+003b: a0 1f 00 00 01 
+0040: 70 01 
+0042: b0 0f 04 00 00 
+0047: a0 16 42 
+004a: a0 06 42 
+004d: 20 
+Section <ivt(10)>:
+File: linker_input_projmain.o
+File: linker_input_projinterrupts.o
+S:ivt F:linker_input_projinterrupts.o
+5?10
+0000: 00 00 
+0002: 00 00 
+0004: 05 00 
+0006: 16 00 
+0008: 00 00 00 00 00 00 00 00 
+Section <myCode(1c)>:
+File: linker_input_projmain.o
+S:myCode F:linker_input_projmain.o
+7?1c
+004e: a0 0f 00 00 01 
+0053: b0 0f 04 ff 10 
+0058: a0 0f 04 00 00 
+005d: a0 1f 00 00 05 
+0062: 74 01 
+0064: 52 ff 00 00 0a 
+0069: 00 
+File: linker_input_projinterrupts.o
+Section <myData(2)>:
+File: linker_input_projmain.o
+S:myData F:linker_input_projmain.o
+1?2
+006a: 00 00 
+File: linker_input_projinterrupts.o
+e[R_HYP_16,0] <- myCounter (myCode)
+ symbol + 6a ! 0 0
+ :0 + 6a - 0 -> 6a
+
+1a[R_HYP_16,0] <- myCode (myCode)
+ section + 4e ! 0 a
+ :a + 4e - 0 -> 58
+
+0[R_HYP_16,1] <- isr (ivt)
+ section + 10 ! 0 0
+ :0 + 10 - 0 -> 10
+
+4[R_HYP_16,1] <- isr (ivt)
+ section + 10 ! 0 5
+ :5 + 10 - 0 -> 15
+
+6[R_HYP_16,1] <- isr (ivt)
+ section + 10 ! 0 16
+ :16 + 10 - 0 -> 26
+
+4[R_HYP_16,0] <- myStart (isr)
+ symbol + 4e ! 0 0
+ :0 + 4e - 0 -> 4e
+
+2a[R_HYP_16_PC,0] <- myCounter (isr)
+ symbol + 6a ! ffffffff fffffffe
+ :fffffffe + 6a - 39 -> 2f
+
+36[R_HYP_16,0] <- myCounter (isr)
+ symbol + 6a ! 0 0
+ :0 + 6a - 0 -> 6a
+
+Create binary file for emulator:
+4
+VA:10 ; 3e - 3e => 3e
+VA:0 ; 10 - 10 => 10
+VA:4e ; 1c - 1c => 1c
+VA:6a ; 2 - 2 => 2

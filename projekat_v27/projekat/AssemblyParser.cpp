@@ -13,7 +13,8 @@ int AssemblyParser::id_symbol_in_symbol_table = 0;
 int AssemblyParser::id_section_in_section_table = 0;
 
 AssemblyParser::AssemblyParser(string path, string path_to_output_text_file)
-    : path_to_file(path), path_to_output_file(path_to_output_text_file), location_counter(0), current_section("")
+    : path_to_file(path), path_to_output_file(path_to_output_text_file), location_counter(0),
+      current_section(""), assembly_output_helper_file("assembly_output_helper_file.txt")
 {
     // symbol UNDEFINED represents section with id=0
     // it is used to mark all undefined
@@ -173,17 +174,17 @@ void AssemblyParser::create_binary_file()
 {
     string binary_filename_output = "./linker_input_" + path_to_output_file;
     ofstream binary_output_file(binary_filename_output, ios::out | ios::binary);
-    cout << "Create binary file:" << endl;
+    assembly_output_helper_file << "Create binary file:" << endl;
 
     // Relocation data
     int number_of_relocations = relocation_table.size();
-    cout << number_of_relocations << endl;
+    assembly_output_helper_file << number_of_relocations << endl;
 
     binary_output_file.write((char *)&number_of_relocations, sizeof(number_of_relocations));
 
     for (RelocationTable rel_data : relocation_table)
     {
-        cout << sizeof(rel_data);
+        assembly_output_helper_file << sizeof(rel_data);
 
         binary_output_file.write((char *)(&rel_data.addend), sizeof(rel_data.addend));
         binary_output_file.write((char *)(&rel_data.is_data), sizeof(rel_data.is_data));
@@ -205,7 +206,7 @@ void AssemblyParser::create_binary_file()
     // Symbol table
     int number_of_symbols = symbol_table.size();
     binary_output_file.write((char *)&number_of_symbols, sizeof(number_of_symbols));
-    cout << number_of_symbols << endl;
+    assembly_output_helper_file << number_of_symbols << endl;
     for (map<string, SymbolTable>::iterator it = symbol_table.begin(); it != symbol_table.end(); it++)
     {
         string key = it->first;
@@ -232,7 +233,7 @@ void AssemblyParser::create_binary_file()
     // Section table:
     int number_of_sections = section_table.size();
     binary_output_file.write((char *)&number_of_sections, sizeof(number_of_sections));
-    cout << number_of_sections << endl;
+    assembly_output_helper_file << number_of_sections << endl;
 
     for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
     {
@@ -252,7 +253,7 @@ void AssemblyParser::create_binary_file()
         // section data
         int number_of_chars = it->second.data.size();
         binary_output_file.write((char *)&number_of_chars, sizeof(number_of_chars));
-        cout << number_of_chars << " - " << it->second.data.size() << " => ";
+        assembly_output_helper_file << number_of_chars << " - " << it->second.data.size() << " => ";
 
         int x = 0;
         for (char c : it->second.data)
@@ -260,20 +261,20 @@ void AssemblyParser::create_binary_file()
             x++;
             binary_output_file.write((char *)&c, sizeof(c));
         }
-        cout << x << endl;
+        assembly_output_helper_file << x << endl;
 
         int number_of_offsets = it->second.offsets.size();
         binary_output_file.write((char *)&number_of_offsets, sizeof(number_of_offsets));
-        cout << number_of_offsets << " - " << it->second.offsets.size() << endl;
+        assembly_output_helper_file << number_of_offsets << " - " << it->second.offsets.size() << endl;
 
         x = 0;
         for (int o : it->second.offsets)
         {
             x++;
             binary_output_file.write((char *)&o, sizeof(o));
-            cout << " " << o;
+            assembly_output_helper_file << " " << o;
         }
-        cout << " ->" << x << endl;
+        assembly_output_helper_file << " ->" << x << endl;
     }
     binary_output_file.close();
 }
@@ -282,7 +283,7 @@ bool AssemblyParser::compile()
 {
     if (clear_input_file() == false)
     {
-        cout << "File " + path_to_file + " cannot be opened!" << endl;
+        assembly_output_helper_file << "File " + path_to_file + " cannot be opened!" << endl;
         return false;
     }
     if (first_assembly_pass() == false)
@@ -307,7 +308,7 @@ bool AssemblyParser::clear_input_file()
     {
         line_before_processing++;
 
-        //cout << "###" << endl << line << endl;
+        //assembly_output_helper_file << "###" << endl << line << endl;
         string cleared_line;
         cleared_line = regex_replace(line, rx_remove_comments, "$1", regex_constants::format_first_only);
         cleared_line = regex_replace(cleared_line, rx_find_extra_spaces, " ");
@@ -315,7 +316,7 @@ bool AssemblyParser::clear_input_file()
         cleared_line = regex_replace(cleared_line, rx_remove_boundary_spaces, "$2");
         cleared_line = regex_replace(cleared_line, rx_find_comma_spaces, ",");
         cleared_line = regex_replace(cleared_line, rx_find_columns_spaces, ":");
-        //cout << cleared_line << endl;
+        //assembly_output_helper_file << cleared_line << endl;
         if (cleared_line == "" || cleared_line == " ")
             continue;
         line_after_processing++;
@@ -382,7 +383,7 @@ bool AssemblyParser::process_section(string section_name)
 
     if (previous_section_exists == true)
     {
-        cout << "End section: " << section_table[current_section].size << "-" << location_counter << endl;
+        assembly_output_helper_file << "End section: " << section_table[current_section].size << "-" << location_counter << endl;
         // size of section is authomatically added dealing with other directives that changes its size
     }
     // end previous section
@@ -463,10 +464,10 @@ int AssemblyParser::fetch_decimal_value_from_literal(string literal)
 {
     smatch number;
     int int_number;
-    //cout << "str:" << n << endl;
+    //assembly_output_helper_file << "str:" << n << endl;
     if (regex_search(literal, number, rx_literal_hexadecimal))
     {
-        //        cout << "0x#" << number.str(1).substr(2);
+        //        assembly_output_helper_file << "0x#" << number.str(1).substr(2);
         stringstream ss;
         ss << number.str(1).substr(2); // std::string hex_value
         ss >> hex >> int_number;       //int decimal_value
@@ -476,13 +477,13 @@ int AssemblyParser::fetch_decimal_value_from_literal(string literal)
         regex_search(literal, number, rx_literal_decimal);
         int_number = stoi(number.str(1));
         /* convert to hexadecimal
-        cout << "int:" << int_number << endl;
+        assembly_output_helper_file << "int:" << int_number << endl;
         stringstream ss;
         ss << hex << int_number; // int decimal_value
         string res(ss.str());
 
-        cout << res;
-        //cout << "hex:" << hex << int_number << endl;
+        assembly_output_helper_file << res;
+        //assembly_output_helper_file << "hex:" << hex << int_number << endl;
         */
     }
     return int_number;
@@ -503,11 +504,11 @@ bool AssemblyParser::process_equ_symbol(string symbol_name, string value)
     if (sym != symbol_table.end())
     {
         // symbol exists in symbol table
-        cout << "Error?:" << endl;
-        cout << sym->second.name << ":" << sym->second.value << "(" << sym->second.section << ")" << endl;
-        cout << "is defined:" << sym->second.is_defined << endl;
-        cout << "is extern:" << sym->second.is_extern << endl;
-        cout << "is local:" << sym->second.is_local << endl;
+        assembly_output_helper_file << "Error?:" << endl;
+        assembly_output_helper_file << sym->second.name << ":" << sym->second.value << "(" << sym->second.section << ")" << endl;
+        assembly_output_helper_file << "is defined:" << sym->second.is_defined << endl;
+        assembly_output_helper_file << "is extern:" << sym->second.is_extern << endl;
+        assembly_output_helper_file << "is local:" << sym->second.is_local << endl;
         if (sym->second.is_extern == true)
         {
             // Error, equ defines absolute symbol
@@ -559,10 +560,10 @@ bool AssemblyParser::process_skip_first_pass(string value)
         return false;
     }
 
-    cout << "Want numeric value?!";
+    assembly_output_helper_file << "Want numeric value?!";
 
     int skip_value = fetch_decimal_value_from_literal(value);
-    cout << skip_value << endl;
+    assembly_output_helper_file << skip_value << endl;
 
     location_counter += skip_value;
     section_table[current_section].size += skip_value;
@@ -581,9 +582,9 @@ bool AssemblyParser::process_skip_second_pass(string value)
 
     for (char c : section_table[current_section].data)
     {
-        cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+        assembly_output_helper_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
     }
-    cout << dec;
+    assembly_output_helper_file << dec;
 
     location_counter += skip_value;
     return true;
@@ -610,23 +611,23 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
     // if it is not, raise error!
     if (regex_match(word_argument, rx_symbol))
     {
-        cout << "SECOND WORD PASS: " << word_argument << "->";
+        assembly_output_helper_file << "SECOND WORD PASS: " << word_argument << "->";
         map<string, SymbolTable>::iterator sym = symbol_table.find(word_argument);
         if (sym != symbol_table.end())
         {
             SymbolTable s_table = sym->second;
             // symbol exists in symbol table
-            cout << s_table.name << endl;
+            assembly_output_helper_file << s_table.name << endl;
             if (s_table.section == "ABSOLUTE")
             {
-                cout << "EQU CALCULATIONS: " << s_table.value << endl;
+                assembly_output_helper_file << "EQU CALCULATIONS: " << s_table.value << endl;
                 section_table[current_section].offsets.push_back(location_counter);
                 section_table[current_section].data.push_back(s_table.value & 0xff);
                 section_table[current_section].data.push_back((s_table.value >> 8) & 0xff);
             }
             else
             {
-                cout << s_table.value << endl;
+                assembly_output_helper_file << s_table.value << endl;
                 if (s_table.is_defined == true)
                 {
                     if (s_table.is_local == true)
@@ -692,19 +693,19 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
     else
     {
         string s = get_hexadecimal_value_from_decimal(fetch_decimal_value_from_literal(word_argument));
-        cout << "SECOND WORD PASS: "
-             << fetch_decimal_value_from_literal(word_argument)
-             << "->"
-             << s
-             << endl;
+        assembly_output_helper_file << "SECOND WORD PASS: "
+                                    << fetch_decimal_value_from_literal(word_argument)
+                                    << "->"
+                                    << s
+                                    << endl;
         char c = fetch_decimal_value_from_literal(word_argument);
         section_table[current_section].offsets.push_back(location_counter);
         section_table[current_section].data.push_back(0xff & c);
         section_table[current_section].data.push_back(0xff & (c >> 8));
 
-        cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
-        cout << hex << setfill('0') << setw(2) << (0xff & (c >> 8)) << " ";
-        cout << dec;
+        assembly_output_helper_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+        assembly_output_helper_file << hex << setfill('0') << setw(2) << (0xff & (c >> 8)) << " ";
+        assembly_output_helper_file << dec;
     }
     location_counter += 2;
     return true;
@@ -712,28 +713,28 @@ bool AssemblyParser::process_word_second_pass(string word_argument)
 
 int AssemblyParser::process_absolute_addressing_symbol(string symbol)
 {
-    cout << "Process absolute addressing#" << symbol << endl;
+    assembly_output_helper_file << "Process absolute addressing#" << symbol << endl;
     map<string, SymbolTable>::iterator sym = symbol_table.find(symbol);
     if (sym != symbol_table.end())
     {
         SymbolTable s_from_table = sym->second;
         // symbol exists in symbol table
-        cout << s_from_table.name << endl;
+        assembly_output_helper_file << s_from_table.name << endl;
         if (s_from_table.section == "ABSOLUTE")
         {
-            cout << "EQU CALCULATIONS: " << s_from_table.value << endl;
+            assembly_output_helper_file << "EQU CALCULATIONS: " << s_from_table.value << endl;
             return s_from_table.value;
         }
         else
         {
             // it is in regular section:
-            cout << "Value: " << s_from_table.value << endl;
-            cout << "Section: " << s_from_table.section << endl;
-            cout << "Name: " << s_from_table.name << endl;
-            cout << "Local: " << s_from_table.is_local << endl;
-            cout << "Extern: " << s_from_table.is_extern << endl;
-            cout << "Defined: " << s_from_table.is_defined << endl;
-            cout << "Symbol: " << s_from_table.id_symbol << endl;
+            assembly_output_helper_file << "Value: " << s_from_table.value << endl;
+            assembly_output_helper_file << "Section: " << s_from_table.section << endl;
+            assembly_output_helper_file << "Name: " << s_from_table.name << endl;
+            assembly_output_helper_file << "Local: " << s_from_table.is_local << endl;
+            assembly_output_helper_file << "Extern: " << s_from_table.is_extern << endl;
+            assembly_output_helper_file << "Defined: " << s_from_table.is_defined << endl;
+            assembly_output_helper_file << "Symbol: " << s_from_table.id_symbol << endl;
 
             // Relocation data has to be written
             RelocationTable rel_data;
@@ -773,17 +774,17 @@ int AssemblyParser::process_absolute_addressing_symbol(string symbol)
 
 int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
 {
-    cout << "Process pc relative addressing#" << symbol << endl;
+    assembly_output_helper_file << "Process pc relative addressing#" << symbol << endl;
     map<string, SymbolTable>::iterator sym = symbol_table.find(symbol);
     if (sym != symbol_table.end())
     {
         SymbolTable s_from_table = sym->second;
         // symbol exists in symbol table
-        cout << s_from_table.name << endl;
+        assembly_output_helper_file << s_from_table.name << endl;
         int addend = -2;
         if (s_from_table.section == "ABSOLUTE")
         {
-            cout << "EQU CALCULATIONS:#" << hex << s_from_table.value << dec << endl;
+            assembly_output_helper_file << "EQU CALCULATIONS:#" << hex << s_from_table.value << dec << endl;
             RelocationTable rel_data;
             rel_data.addend = 0;
             rel_data.is_data = false;                // this is instruction, so use big endian when reloc
@@ -797,13 +798,13 @@ int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
         else
         {
             // it is in regular section:
-            cout << "Value: " << s_from_table.value << endl;
-            cout << "Section: " << s_from_table.section << endl;
-            cout << "Name: " << s_from_table.name << endl;
-            cout << "Local: " << s_from_table.is_local << endl;
-            cout << "Extern: " << s_from_table.is_extern << endl;
-            cout << "Defined: " << s_from_table.is_defined << endl;
-            cout << "Symbol: " << s_from_table.id_symbol << endl;
+            assembly_output_helper_file << "Value: " << s_from_table.value << endl;
+            assembly_output_helper_file << "Section: " << s_from_table.section << endl;
+            assembly_output_helper_file << "Name: " << s_from_table.name << endl;
+            assembly_output_helper_file << "Local: " << s_from_table.is_local << endl;
+            assembly_output_helper_file << "Extern: " << s_from_table.is_extern << endl;
+            assembly_output_helper_file << "Defined: " << s_from_table.is_defined << endl;
+            assembly_output_helper_file << "Symbol: " << s_from_table.id_symbol << endl;
             // Relocation data has to be written
             RelocationTable rel_data;
             rel_data.addend = 0;
@@ -826,8 +827,8 @@ int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
                 {
                     // same section and pc relative address: difference between symbol and jmp instruction is always the same
                     written_symbol_value = s_from_table.value + addend - (location_counter + 3);
-                    cout << "Ultimat local: s=" << s_from_table.value << ",l+5=" << location_counter + 5;
-                    cout << "=" << written_symbol_value << endl;
+                    assembly_output_helper_file << "Ultimat local: s=" << s_from_table.value << ",l+5=" << location_counter + 5;
+                    assembly_output_helper_file << "=" << written_symbol_value << endl;
                     return written_symbol_value;
                 }
                 else
@@ -853,7 +854,7 @@ int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
 
 bool AssemblyParser::process_instruction_first_pass(string line_with_instruction)
 {
-    cout << "FIRST PASS INSTRUCTION:" << endl;
+    assembly_output_helper_file << "FIRST PASS INSTRUCTION:" << endl;
     if (current_section == "")
     {
         error_messages[current_line_number] = "Instruction has to be in a section!";
@@ -864,7 +865,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
     {
         // These are halt, iret, ret:
         // increment location_counter for 1 (1B is instruction size)
-        cout << "One byte: " << catch_parts.str(1);
+        assembly_output_helper_file << "One byte: " << catch_parts.str(1);
         location_counter += 1;
         section_table[current_section].size += 1;
     }
@@ -874,29 +875,29 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         // increment location_counter for 2 or 3 (2B is int and not instructions' size and 3B is push and pop instructions' size)
         // fill the shape of output section file with zeros
         string instruction_mnemonic = catch_parts.str(1);
-        cout << "TWO bytes push/pop/int/not: " << instruction_mnemonic << " reg: " << catch_parts.str(2);
+        assembly_output_helper_file << "TWO bytes push/pop/int/not: " << instruction_mnemonic << " reg: " << catch_parts.str(2);
 
         if (instruction_mnemonic == "int")
         {
-            cout << "int " << endl;
+            assembly_output_helper_file << "int " << endl;
             location_counter += 2;
             section_table[current_section].size += 2;
         }
         else if (instruction_mnemonic == "push")
         {
-            cout << "push " << endl;
+            assembly_output_helper_file << "push " << endl;
             location_counter += 3;
             section_table[current_section].size += 3;
         }
         else if (instruction_mnemonic == "pop")
         {
-            cout << "pop " << endl;
+            assembly_output_helper_file << "pop " << endl;
             location_counter += 3;
             section_table[current_section].size += 3;
         }
         else if (instruction_mnemonic == "not")
         {
-            cout << "not " << endl;
+            assembly_output_helper_file << "not " << endl;
             location_counter += 2;
             section_table[current_section].size += 2;
         }
@@ -908,12 +909,12 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         string instruction_mnemonic = catch_parts.str(1);
         string operand = catch_parts.str(2);
         smatch catch_operand;
-        cout << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
+        assembly_output_helper_file << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
         if (regex_search(operand, catch_operand, rx_jmp_address_syntax_notation_absolute))
         {
             // this is form: jmp 5 or jmp label
             // there is payload:
-            cout << "label or literal" << endl;
+            assembly_output_helper_file << "label or literal" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -921,7 +922,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: jmp %label
             // there is payload: because of pc relative addressing
-            cout << "%label - pc relative" << endl;
+            assembly_output_helper_file << "%label - pc relative" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -929,7 +930,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: jmp *r0
             // there is not payload:
-            cout << " reg dir " << endl;
+            assembly_output_helper_file << " reg dir " << endl;
             location_counter += 3;
             section_table[current_section].size += 3;
         }
@@ -938,7 +939,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
 
             // this is form: jmp *[r0]
             // there is not payload:
-            cout << " reg ind " << endl;
+            assembly_output_helper_file << " reg ind " << endl;
             location_counter += 3;
             section_table[current_section].size += 3;
         }
@@ -946,7 +947,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: jmp *[r0 + label] or jmp *[r0 + 5]
             // there is payload:
-            cout << " reg ind with displacement" << endl;
+            assembly_output_helper_file << " reg ind with displacement" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -954,7 +955,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: jmp *5 or jmp *label
             // there is payload:
-            cout << "*label or *literal" << endl;
+            assembly_output_helper_file << "*label or *literal" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -972,12 +973,12 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         string regD = catch_parts.str(2);
         string operand = catch_parts.str(3);
         smatch catch_operand;
-        cout << "Ld/St: ldr str:#" << instruction_mnemonic << "#reg:#" << regD << "#operand:#" << operand << endl;
+        assembly_output_helper_file << "Ld/St: ldr str:#" << instruction_mnemonic << "#reg:#" << regD << "#operand:#" << operand << endl;
         if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_absolute))
         {
             // this is form: ld ri, $5 or ld ri, $label
             // there is payload:
-            cout << "$label or $literal" << endl;
+            assembly_output_helper_file << "$label or $literal" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -985,7 +986,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: ld ri, %label
             // there is payload:
-            cout << "%label" << endl;
+            assembly_output_helper_file << "%label" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -993,7 +994,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: ld ri, rj
             // there is not payload:
-            cout << "rj" << endl;
+            assembly_output_helper_file << "rj" << endl;
             location_counter += 3;
             section_table[current_section].size += 3;
         }
@@ -1001,7 +1002,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: ld ri, [rj]
             // there is not payload:
-            cout << "[rj]" << endl;
+            assembly_output_helper_file << "[rj]" << endl;
             location_counter += 3;
             section_table[current_section].size += 3;
         }
@@ -1009,7 +1010,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: ld ri, [rj + label / 5]
             // there is payload:
-            cout << "[rj + label / 5]" << endl;
+            assembly_output_helper_file << "[rj + label / 5]" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -1017,7 +1018,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         {
             // this is form: ld ri, 5 or ld ri, label
             // there is payload:
-            cout << "label or literal" << endl;
+            assembly_output_helper_file << "label or literal" << endl;
             location_counter += 5;
             section_table[current_section].size += 5;
         }
@@ -1033,7 +1034,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
         string regD = catch_parts.str(2);
         string regS = catch_parts.str(3);
         smatch catch_operand;
-        cout << "Aritmethical/Logical:#" << instruction_mnemonic << "#regD:#" << regD << "#regS:#" << regS << endl;
+        assembly_output_helper_file << "Aritmethical/Logical:#" << instruction_mnemonic << "#regD:#" << regD << "#regS:#" << regS << endl;
         location_counter += 2;
         section_table[current_section].size += 2;
     }
@@ -1046,7 +1047,7 @@ bool AssemblyParser::process_instruction_first_pass(string line_with_instruction
 }
 bool AssemblyParser::process_instruction_second_pass(string line_with_instruction)
 {
-    cout << "SECOND PASS INSTRUCTION:" << endl;
+    assembly_output_helper_file << "SECOND PASS INSTRUCTION:" << endl;
     smatch catch_parts;
     if (regex_search(line_with_instruction, catch_parts, rx_no_operand_instruction))
     {
@@ -1054,7 +1055,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         // increment location_counter for 1 (1B is instruction size), because of compatibility
         // fill the output with the actual binary representation of instruction
         string instruction_mnemonic = catch_parts.str(1);
-        cout << "One byte: " << instruction_mnemonic;
+        assembly_output_helper_file << "One byte: " << instruction_mnemonic;
         if (instruction_mnemonic == "halt")
         {
             section_table[current_section].offsets.push_back(location_counter);
@@ -1088,11 +1089,11 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         {
             register_number = catch_parts.str(2).at(1) - '0';
         }
-        cout << "TWO bytes push/pop/int/not: " << instruction_mnemonic << " reg: " << register_number;
+        assembly_output_helper_file << "TWO bytes push/pop/int/not: " << instruction_mnemonic << " reg: " << register_number;
 
         if (instruction_mnemonic == "int")
         {
-            cout << "int: 10 dF , d = " << register_number << endl;
+            assembly_output_helper_file << "int: 10 dF , d = " << register_number << endl;
             section_table[current_section].offsets.push_back(location_counter);
             section_table[current_section].data.push_back(0x10);
             section_table[current_section].data.push_back((register_number << 4) + 15);
@@ -1100,8 +1101,8 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         }
         else if (instruction_mnemonic == "push")
         {
-            cout << "push: B0 ds ua" << endl;
-            cout << "d = " << register_number << ", s = 6 (sp->6), u = 1, a = 2" << endl;
+            assembly_output_helper_file << "push: B0 ds ua" << endl;
+            assembly_output_helper_file << "d = " << register_number << ", s = 6 (sp->6), u = 1, a = 2" << endl;
             // instruction push does: sp -= 2, mem[sp] = reg
             // this means instructin that places data:
             // U bits are: 0001: dec before
@@ -1114,8 +1115,8 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         }
         else if (instruction_mnemonic == "pop")
         {
-            cout << "pop: A0 ds ua" << endl;
-            cout << "d = " << register_number << ", s = 6 (sp->6), u = 4, a = 2" << endl;
+            assembly_output_helper_file << "pop: A0 ds ua" << endl;
+            assembly_output_helper_file << "d = " << register_number << ", s = 6 (sp->6), u = 4, a = 2" << endl;
             // instruction push does: sp -= 2, mem[sp] = reg
             // this means instructin that places data:
             // U bits are: 0100: inc after
@@ -1128,7 +1129,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         }
         else if (instruction_mnemonic == "not")
         {
-            cout << "not: 8m ds , M = 0, D = " << register_number << ", S = F-unused" << endl;
+            assembly_output_helper_file << "not: 8m ds , M = 0, D = " << register_number << ", S = F-unused" << endl;
             section_table[current_section].offsets.push_back(location_counter);
             section_table[current_section].data.push_back(0x80);
             section_table[current_section].data.push_back((register_number << 4) + 15);
@@ -1140,7 +1141,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         string instruction_mnemonic = catch_parts.str(1);
         string operand = catch_parts.str(2);
         smatch catch_operand;
-        cout << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
+        assembly_output_helper_file << "Jump instructions: call jmp jeq jne jgt: " << instruction_mnemonic << " operand: " << operand << endl;
         int instr_descr;
         int reg_descr = 0xF0;
         int adr_mode;
@@ -1170,7 +1171,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             // there is payload:
             if (regex_match(operand, rx_symbol))
             {
-                cout << "label#" << operand << endl;
+                assembly_output_helper_file << "label#" << operand << endl;
                 // this is absolute addressing: Need relocation table andeverything!
                 // source_reg = F - unimportant
                 reg_descr += 0xF;
@@ -1190,7 +1191,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             else
             {
                 int value = fetch_decimal_value_from_literal(operand);
-                cout << "literal#" << value << endl;
+                assembly_output_helper_file << "literal#" << value << endl;
                 // this is immediate addressing:
                 // source_reg = F - unimportant
                 reg_descr += 0xF;
@@ -1211,7 +1212,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             operand = catch_operand.str(1);
             // this is form: jmp %label
             // there is payload: because of pc relative addressing
-            cout << "%label - pc relative" << endl;
+            assembly_output_helper_file << "%label - pc relative" << endl;
             // this is pc relative with displacement!:
             //
             // source_reg = F - unimportant
@@ -1244,7 +1245,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             {
                 register_number = catch_operand.str(1).at(1) - '0';
             }
-            cout << " reg dir: " << register_number << endl;
+            assembly_output_helper_file << " reg dir: " << register_number << endl;
             // source_reg: s = 0-8
             reg_descr += register_number;
             // address_mode: ua = 01 - reg dir!
@@ -1260,7 +1261,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
 
             // this is form: jmp *[r0]
             // there is not payload:
-            cout << " reg ind " << endl;
+            assembly_output_helper_file << " reg ind " << endl;
             int register_number;
             if (catch_operand.str(1) == "psw")
             {
@@ -1270,7 +1271,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             {
                 register_number = catch_operand.str(1).at(1) - '0';
             }
-            cout << " reg ind: " << register_number << endl;
+            assembly_output_helper_file << " reg ind: " << register_number << endl;
             // source_reg: s = 0-8
             reg_descr += register_number;
             // address_mode: ua = 02 - reg ind!
@@ -1295,7 +1296,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             {
                 register_number = catch_operand.str(1).at(1) - '0';
             }
-            cout << " reg ind with displacement " << register_number << " " << displacement << endl;
+            assembly_output_helper_file << " reg ind with displacement " << register_number << " " << displacement << endl;
             // source_reg: s = 0-8
             reg_descr += register_number;
             // address_mode: ua = 03 - regind with displacement
@@ -1303,15 +1304,15 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             int value_to_be_written;
             if (regex_match(displacement, rx_symbol))
             {
-                cout << "Symbol: " << endl;
+                assembly_output_helper_file << "Symbol: " << endl;
                 value_to_be_written = process_absolute_addressing_symbol(displacement);
             }
             else
             {
-                cout << "Literal: " << endl;
+                assembly_output_helper_file << "Literal: " << endl;
                 value_to_be_written = fetch_decimal_value_from_literal(displacement);
             }
-            cout << value_to_be_written << endl;
+            assembly_output_helper_file << value_to_be_written << endl;
             section_table[current_section].offsets.push_back(location_counter);
             section_table[current_section].data.push_back(instr_descr);
             section_table[current_section].data.push_back(reg_descr);
@@ -1326,7 +1327,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             // this is form: jmp *5 or jmp *label
             // there is payload:
             operand = catch_operand.str(1);
-            cout << "*label or *literal" << operand << endl;
+            assembly_output_helper_file << "*label or *literal" << operand << endl;
             // source_reg F - unimportant
             reg_descr += 0xF;
             // address_mode: ua = 04 - memory
@@ -1335,15 +1336,15 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
 
             if (regex_match(operand, rx_symbol))
             {
-                cout << "Symbol: " << endl;
+                assembly_output_helper_file << "Symbol: " << endl;
                 value_to_be_written = process_absolute_addressing_symbol(operand);
             }
             else
             {
-                cout << "Literal: " << endl;
+                assembly_output_helper_file << "Literal: " << endl;
                 value_to_be_written = fetch_decimal_value_from_literal(operand);
             }
-            cout << value_to_be_written << endl;
+            assembly_output_helper_file << value_to_be_written << endl;
             section_table[current_section].offsets.push_back(location_counter);
             section_table[current_section].data.push_back(instr_descr);
             section_table[current_section].data.push_back(reg_descr);
@@ -1359,7 +1360,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         string regD = catch_parts.str(2);
         string operand = catch_parts.str(3);
         smatch catch_operand;
-        cout << "Ld/St: ldr str:#" << instruction_mnemonic << "#reg:#" << regD << "#operand:#" << operand << endl;
+        assembly_output_helper_file << "Ld/St: ldr str:#" << instruction_mnemonic << "#reg:#" << regD << "#operand:#" << operand << endl;
 
         int instr_descr;
         int reg_descr;
@@ -1381,18 +1382,18 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             reg_descr = regD.at(1) - '0';
         }
         reg_descr <<= 4;
-        cout << "I:#" << instr_descr << "#" << reg_descr << "#" << endl;
+        assembly_output_helper_file << "I:#" << instr_descr << "#" << reg_descr << "#" << endl;
         if (regex_search(operand, catch_operand, rx_load_store_address_syntax_notation_absolute))
         {
             // this is form: ld ri, $5 or ld ri, $label
             // there is payload:
             operand = catch_operand.str(1);
-            cout << "$label or $literal:" << endl;
+            assembly_output_helper_file << "$label or $literal:" << endl;
             if (regex_match(operand, rx_symbol))
             {
                 // this is immediate addressing: Need relocation table and everything!
                 // source_reg = F - unimportant
-                cout << "label" << operand << endl;
+                assembly_output_helper_file << "label" << operand << endl;
                 reg_descr += 0xF;
                 // address_mode: ua = 00
                 adr_mode = 0;
@@ -1407,9 +1408,9 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             }
             else
             {
-                cout << "literal" << operand << endl;
+                assembly_output_helper_file << "literal" << operand << endl;
                 int value = fetch_decimal_value_from_literal(operand);
-                cout << "literal#" << value << endl;
+                assembly_output_helper_file << "literal#" << value << endl;
                 // this is immediate addressing:
                 // source_reg = F - unimportant
                 reg_descr += 0xF;
@@ -1429,7 +1430,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             // this is form: ld ri, %label
             // there is payload: because of pc relative addressing
             operand = catch_operand.str(1);
-            cout << "%label - pc relative" << operand << endl;
+            assembly_output_helper_file << "%label - pc relative" << operand << endl;
             // source_reg = pc: 7 is number of pc
             reg_descr += 0x7;
             // this is pc relative with displacement!:
@@ -1460,7 +1461,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             {
                 register_number = catch_operand.str(1).at(1) - '0';
             }
-            cout << " reg dir: " << register_number << endl;
+            assembly_output_helper_file << " reg dir: " << register_number << endl;
             // source_reg: s = 0-8
             reg_descr += register_number;
             // address_mode: ua = 01 - reg dir!
@@ -1475,7 +1476,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         {
             // this is form: ld ri, [rj]
             // there is not payload:
-            cout << "[rj]" << endl;
+            assembly_output_helper_file << "[rj]" << endl;
             int register_number;
             if (catch_operand.str(1) == "psw")
             {
@@ -1485,7 +1486,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             {
                 register_number = catch_operand.str(1).at(1) - '0';
             }
-            cout << " reg ind: " << register_number << endl;
+            assembly_output_helper_file << " reg ind: " << register_number << endl;
             // source_reg: s = 0-8
             reg_descr += register_number;
             // address_mode: ua = 02 - reg ind!
@@ -1500,7 +1501,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         {
             // this is form: ld ri, [rj + label / 5]
             // there is payload:
-            cout << "[rj + label / 5]" << endl;
+            assembly_output_helper_file << "[rj + label / 5]" << endl;
             string displacement = catch_operand.str(2);
             int register_number;
             if (catch_operand.str(1) == "psw")
@@ -1511,7 +1512,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             {
                 register_number = catch_operand.str(1).at(1) - '0';
             }
-            cout << " reg ind with displacement " << register_number << " " << displacement << endl;
+            assembly_output_helper_file << " reg ind with displacement " << register_number << " " << displacement << endl;
             // source_reg: s = 0-8
             reg_descr += register_number;
             // address_mode: ua = 03 - regind with displacement
@@ -1519,15 +1520,15 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             int value_to_be_written;
             if (regex_match(displacement, rx_symbol))
             {
-                cout << "Symbol: " << endl;
+                assembly_output_helper_file << "Symbol: " << endl;
                 value_to_be_written = process_absolute_addressing_symbol(displacement);
             }
             else
             {
-                cout << "Literal: " << endl;
+                assembly_output_helper_file << "Literal: " << endl;
                 value_to_be_written = fetch_decimal_value_from_literal(displacement);
             }
-            cout << value_to_be_written << endl;
+            assembly_output_helper_file << value_to_be_written << endl;
             section_table[current_section].offsets.push_back(location_counter);
             section_table[current_section].data.push_back(instr_descr);
             section_table[current_section].data.push_back(reg_descr);
@@ -1540,7 +1541,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         {
             // this is form: ld ri, 5 or ld ri, label
             // there is payload:
-            cout << "label or literal#" << operand << endl;
+            assembly_output_helper_file << "label or literal#" << operand << endl;
             // source_reg F - unimportant
             reg_descr += 0xF;
             // address_mode: ua = 04 - memory
@@ -1548,15 +1549,15 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
             int value_to_be_written;
             if (regex_match(operand, rx_symbol))
             {
-                cout << "Symbol: " << endl;
+                assembly_output_helper_file << "Symbol: " << endl;
                 value_to_be_written = process_absolute_addressing_symbol(operand);
             }
             else
             {
-                cout << "Literal: " << endl;
+                assembly_output_helper_file << "Literal: " << endl;
                 value_to_be_written = fetch_decimal_value_from_literal(operand);
             }
-            cout << value_to_be_written << endl;
+            assembly_output_helper_file << value_to_be_written << endl;
             section_table[current_section].offsets.push_back(location_counter);
             section_table[current_section].data.push_back(instr_descr);
             section_table[current_section].data.push_back(reg_descr);
@@ -1577,7 +1578,7 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         string regD = catch_parts.str(2);
         string regS = catch_parts.str(3);
         smatch catch_operand;
-        cout << "Aritmethical/Logical:#" << instruction_mnemonic << "#regD:#" << regD << "#regS:#" << regS << endl;
+        assembly_output_helper_file << "Aritmethical/Logical:#" << instruction_mnemonic << "#regD:#" << regD << "#regS:#" << regS << endl;
         int instr_descr;
         int reg_descr;
 
@@ -1647,8 +1648,8 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
         {
             reg_descr += regS.at(1) - '0';
         }
-        cout << hex << "I:#" << instr_descr << "#" << reg_descr << "#" << endl;
-        cout << dec;
+        assembly_output_helper_file << hex << "I:#" << instr_descr << "#" << reg_descr << "#" << endl;
+        assembly_output_helper_file << dec;
         section_table[current_section].offsets.push_back(location_counter);
         section_table[current_section].data.push_back(instr_descr);
         section_table[current_section].data.push_back(reg_descr);
@@ -1664,22 +1665,22 @@ bool AssemblyParser::process_instruction_second_pass(string line_with_instructio
 
 bool AssemblyParser::first_assembly_pass()
 {
-    cout << endl
-         << "FIRST PASS" << endl;
+    assembly_output_helper_file << endl
+                                << "FIRST PASS" << endl;
     current_line_number = 0;
     for (string line : input_file_lines)
     {
         current_line_number++;
         smatch catch_parts;
-        cout << "(" << current_section << ":" << location_counter << ")" << line << endl;
+        assembly_output_helper_file << "(" << current_section << ":" << location_counter << ")" << line << endl;
         if (regex_search(line, catch_parts, rx_label_only))
         { // partially finished
 
             // only thing in the line is label:
             string label_name = catch_parts.str(1);
 
-            cout << "RX_label_only:" << endl;
-            cout << "Find:#" << label_name << endl;
+            assembly_output_helper_file << "RX_label_only:" << endl;
+            assembly_output_helper_file << "Find:#" << label_name << endl;
 
             if (process_label(label_name) == false)
             {
@@ -1687,7 +1688,7 @@ bool AssemblyParser::first_assembly_pass()
                 error_happened = true;
             }
 
-            cout << "###" << endl;
+            assembly_output_helper_file << "###" << endl;
         }
         else
         {
@@ -1698,14 +1699,14 @@ bool AssemblyParser::first_assembly_pass()
                 string label_name = catch_parts.str(1);
                 line = catch_parts.str(2);
 
-                cout << "RX_label_with:" << endl;
-                cout << "Find:#" << label_name << "#" << line << endl;
+                assembly_output_helper_file << "RX_label_with:" << endl;
+                assembly_output_helper_file << "Find:#" << label_name << "#" << line << endl;
 
                 if (process_label(label_name) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             // continue with the line if it was after label:line
             if (regex_search(line, catch_parts, rx_global_directive))
@@ -1713,78 +1714,78 @@ bool AssemblyParser::first_assembly_pass()
                 string symbols = catch_parts.str(1);
                 stringstream ss(symbols);
 
-                cout << "Global:" << endl;
-                cout << "Find:#" << symbols << endl;
+                assembly_output_helper_file << "Global:" << endl;
+                assembly_output_helper_file << "Find:#" << symbols << endl;
                 string symbol;
                 while (getline(ss, symbol, ','))
                 {
-                    cout << "#" << symbol << endl;
+                    assembly_output_helper_file << "#" << symbol << endl;
 
                     if (process_global_symbol(symbol) == false)
                     {
                         error_happened = true;
                     }
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else if (regex_search(line, catch_parts, rx_extern_directive))
             { // partially finished
                 string symbols = catch_parts.str(1);
                 stringstream ss(symbols);
 
-                cout << "Extern:" << endl;
-                cout << "Find:#" << symbols << endl;
+                assembly_output_helper_file << "Extern:" << endl;
+                assembly_output_helper_file << "Find:#" << symbols << endl;
                 string symbol;
                 while (getline(ss, symbol, ','))
                 {
-                    cout << "#" << symbol << endl;
+                    assembly_output_helper_file << "#" << symbol << endl;
 
                     if (process_extern_symbol(symbol) == false)
                     {
                         error_happened = true;
                     }
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else if (regex_search(line, catch_parts, rx_section_directive))
             { // partially finished
 
                 // Optain, detect and process section
                 string section_name = catch_parts.str(1);
-                cout << "Section start found:" << endl;
-                cout << "Find:#" << section_name << endl;
+                assembly_output_helper_file << "Section start found:" << endl;
+                assembly_output_helper_file << "Find:#" << section_name << endl;
 
                 if (process_section(section_name) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else if (regex_search(line, catch_parts, rx_skip_directive))
             {
                 string value = catch_parts.str(1);
-                cout << "SKIP found:" << endl;
-                cout << "Find:#" << value << endl;
+                assembly_output_helper_file << "SKIP found:" << endl;
+                assembly_output_helper_file << "Find:#" << value << endl;
 
                 if (process_skip_first_pass(value) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else if (regex_search(line, catch_parts, rx_equ_directive))
             { // -------------------------------------------
                 // Not finished at all, wait for examples and check!
                 string symbol_name = catch_parts.str(1);
                 string value = catch_parts.str(2);
-                cout << "EQU found:" << endl;
-                cout << "Find:#" << symbol_name << "#" << value << endl;
+                assembly_output_helper_file << "EQU found:" << endl;
+                assembly_output_helper_file << "Find:#" << symbol_name << "#" << value << endl;
 
                 if (process_equ_symbol(symbol_name, value) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else if (regex_search(line, catch_parts, rx_end_directive))
             {
@@ -1799,30 +1800,30 @@ bool AssemblyParser::first_assembly_pass()
                 string data = catch_parts.str(1);
                 stringstream ss(data);
 
-                cout << "WORD:" << endl;
-                cout << "Find:#" << data << endl;
+                assembly_output_helper_file << "WORD:" << endl;
+                assembly_output_helper_file << "Find:#" << data << endl;
                 string symbol_or_number;
                 while (getline(ss, symbol_or_number, ','))
                 {
-                    cout << "#" << symbol_or_number << endl;
+                    assembly_output_helper_file << "#" << symbol_or_number << endl;
 
                     if (process_word_first_pass(symbol_or_number) == false)
                     {
                         error_happened = true;
                     }
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else
             {
                 // If line goes there, this has to be an instruction or some undefined directive:
 
-                cout << "This is an instruction!" << endl;
+                assembly_output_helper_file << "This is an instruction!" << endl;
                 if (process_instruction_first_pass(line) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
         }
     }
@@ -1834,8 +1835,8 @@ bool AssemblyParser::first_assembly_pass()
 
 bool AssemblyParser::second_assembly_pass()
 {
-    cout << endl
-         << "SECOND PASS" << endl;
+    assembly_output_helper_file << endl
+                                << "SECOND PASS" << endl;
     current_line_number = 0;
     current_section = "";
     location_counter = 0;
@@ -1843,11 +1844,11 @@ bool AssemblyParser::second_assembly_pass()
     {
         current_line_number++;
         smatch catch_parts;
-        cout << "(" << current_section << ":" << location_counter << ")" << line << endl;
+        assembly_output_helper_file << "(" << current_section << ":" << location_counter << ")" << line << endl;
         if (regex_search(line, catch_parts, rx_label_only))
         {
             // Nothing to do in the second pass
-            cout << "RX_LABEL_ONLY" << endl;
+            assembly_output_helper_file << "RX_LABEL_ONLY" << endl;
         }
         else
         {
@@ -1858,18 +1859,18 @@ bool AssemblyParser::second_assembly_pass()
                 // nothing to do with the label in the second pass
                 string label_name = catch_parts.str(1);
                 line = catch_parts.str(2);
-                cout << "RX_LABEL_WITH_SMTH" << endl;
+                assembly_output_helper_file << "RX_LABEL_WITH_SMTH" << endl;
             }
 
             // continue with the line if it was after label:line
             if (regex_search(line, catch_parts, rx_global_directive))
             {
-                cout << "GLOBAL" << endl;
+                assembly_output_helper_file << "GLOBAL" << endl;
                 // nothing to do with the .global directive in the second pass
             }
             else if (regex_search(line, catch_parts, rx_extern_directive))
             {
-                cout << "EXTERN" << endl;
+                assembly_output_helper_file << "EXTERN" << endl;
                 // nothing to do with the .global directive in the second pass
             }
             else if (regex_search(line, catch_parts, rx_section_directive))
@@ -1879,7 +1880,7 @@ bool AssemblyParser::second_assembly_pass()
 
                 string section_name = catch_parts.str(1);
 
-                cout << "SECTION:#" << section_name << endl;
+                assembly_output_helper_file << "SECTION:#" << section_name << endl;
                 // second pass of section
                 location_counter = 0;
                 current_section = section_name;
@@ -1888,18 +1889,18 @@ bool AssemblyParser::second_assembly_pass()
             {
                 // second pass contains only increment location_counter for the value in directive
                 string value = catch_parts.str(1);
-                cout << "SKIP found:" << endl;
-                cout << "Find:#" << value << endl;
+                assembly_output_helper_file << "SKIP found:" << endl;
+                assembly_output_helper_file << "Find:#" << value << endl;
 
                 if (process_skip_second_pass(value) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else if (regex_search(line, catch_parts, rx_equ_directive))
             {
-                cout << "EQU" << endl;
+                assembly_output_helper_file << "EQU" << endl;
                 // nothing to do with the .global directive in the second pass
             }
             else if (regex_search(line, catch_parts, rx_end_directive))
@@ -1915,30 +1916,30 @@ bool AssemblyParser::second_assembly_pass()
                 string data = catch_parts.str(1);
                 stringstream ss(data);
 
-                cout << "WORD:" << endl;
-                cout << "Find:#" << data << endl;
+                assembly_output_helper_file << "WORD:" << endl;
+                assembly_output_helper_file << "Find:#" << data << endl;
                 string symbol_or_number;
                 while (getline(ss, symbol_or_number, ','))
                 {
-                    cout << "#" << symbol_or_number << endl;
+                    assembly_output_helper_file << "#" << symbol_or_number << endl;
 
                     if (process_word_second_pass(symbol_or_number) == false)
                     {
                         error_happened = true;
                     }
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
             else
             {
                 // If line goes there, this has to be an instruction or some undefined directive:
 
-                cout << "This is an instruction!" << endl;
+                assembly_output_helper_file << "This is an instruction!" << endl;
                 if (process_instruction_second_pass(line) == false)
                 {
                     error_happened = true;
                 }
-                cout << "###" << endl;
+                assembly_output_helper_file << "###" << endl;
             }
         }
     }
@@ -1950,97 +1951,97 @@ bool AssemblyParser::second_assembly_pass()
 
 void AssemblyParser::print_symbol_table()
 {
-    cout << "Symbol table:" << endl;
-    cout << "Value\tType\tSection\t\tName\t\tId" << endl;
+    assembly_output_helper_file << "Symbol table:" << endl;
+    assembly_output_helper_file << "Value\tType\tSection\t\tName\t\tId" << endl;
     for (map<string, SymbolTable>::iterator it = symbol_table.begin(); it != symbol_table.end(); it++)
     {
-        cout << hex << setfill('0') << setw(4) << (0xffff & it->second.value) << "\t";
+        assembly_output_helper_file << hex << setfill('0') << setw(4) << (0xffff & it->second.value) << "\t";
         // extern symbols?
         if (it->second.is_local == true)
-            cout << "l\t";
+            assembly_output_helper_file << "l\t";
         else
         {
             if (it->second.is_defined == true)
-                cout << "g\t";
+                assembly_output_helper_file << "g\t";
             else
             {
                 if (it->second.is_extern)
-                    cout << "e\t";
+                    assembly_output_helper_file << "e\t";
                 else
-                    cout << "u\t"; // undefined
+                    assembly_output_helper_file << "u\t"; // undefined
             }
         }
-        cout << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
+        assembly_output_helper_file << it->second.section << "\t" << it->second.name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.id_symbol) << endl;
     }
-    cout << dec;
+    assembly_output_helper_file << dec;
 }
 void AssemblyParser::print_section_table()
 {
-    cout << "Section table:" << endl;
-    cout << "Id\tName\t\tSize" << endl;
+    assembly_output_helper_file << "Section table:" << endl;
+    assembly_output_helper_file << "Id\tName\t\tSize" << endl;
     for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
     {
-        cout << it->second.id_section << "\t" << it->second.section_name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << endl;
+        assembly_output_helper_file << it->second.id_section << "\t" << it->second.section_name << "\t" << hex << setfill('0') << setw(4) << (0xffff & it->second.size) << endl;
     }
-    cout << dec;
+    assembly_output_helper_file << dec;
 }
 
 void AssemblyParser::print_section_data()
 {
-    cout << "Data:" << endl
-         << endl;
+    assembly_output_helper_file << "Data:" << endl
+                                << endl;
     for (map<string, SectionTable>::iterator it = section_table.begin(); it != section_table.end(); it++)
     {
         //if (it->first == "UNDEFINED")
         //    continue;
         //        if (it->first == "ABSOLUTE")
         //            continue;
-        cout << "Section: " << it->first << "(" << it->second.size << ")" << endl;
+        assembly_output_helper_file << "Section: " << it->first << "(" << it->second.size << ")" << endl;
         if (it->second.size == 0)
         {
             continue;
         }
         SectionTable s_table = it->second;
         int counter = 0;
-        cout << "?" << s_table.data.size() << "=" << s_table.offsets.size() << endl;
+        assembly_output_helper_file << "?" << s_table.data.size() << "=" << s_table.offsets.size() << endl;
         for (int i = 0; i < s_table.offsets.size() - 1; i++)
         {
 
             int current_offset = s_table.offsets[i];
             int next_offset = s_table.offsets[i + 1];
-            cout << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+            assembly_output_helper_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
             for (int j = current_offset; j < next_offset; j++)
             {
                 char c = s_table.data[j];
-                cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+                assembly_output_helper_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
             }
-            cout << endl;
+            assembly_output_helper_file << endl;
         }
         // Last directive which is in memory
         int current_offset = s_table.offsets[s_table.offsets.size() - 1];
         int next_offset = s_table.data.size();
-        cout << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
+        assembly_output_helper_file << hex << setfill('0') << setw(4) << (0xffff & current_offset) << ": ";
         for (int j = current_offset; j < next_offset; j++)
         {
             char c = s_table.data[j];
-            cout << hex << setfill('0') << setw(2) << (0xff & c) << " ";
+            assembly_output_helper_file << hex << setfill('0') << setw(2) << (0xff & c) << " ";
         }
-        cout << endl;
+        assembly_output_helper_file << endl;
 
-        cout << dec;
-        cout << endl;
+        assembly_output_helper_file << dec;
+        assembly_output_helper_file << endl;
     }
 }
 void AssemblyParser::print_relocation_table()
 {
-    cout << "Relocation data:" << endl
-         << endl;
-    cout << "Offset\tType\t\tDat/Ins\tSymbol\tSection name" << endl;
+    assembly_output_helper_file << "Relocation data:" << endl
+                                << endl;
+    assembly_output_helper_file << "Offset\tType\t\tDat/Ins\tSymbol\tSection name" << endl;
     for (RelocationTable rel_data : relocation_table)
     {
-        cout << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
+        assembly_output_helper_file << hex << setfill('0') << setw(4) << (0xffff & rel_data.offset) << "\t" << rel_data.type << "\t" << (rel_data.is_data ? 'd' : 'i') << "\t" << rel_data.symbol_name << "\t" << rel_data.section_name << endl;
     }
-    cout << dec;
+    assembly_output_helper_file << dec;
 }
 void AssemblyParser::print_error_messages()
 {

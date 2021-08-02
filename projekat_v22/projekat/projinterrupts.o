@@ -1,0 +1,78 @@
+Relocative object file
+
+Section table:
+Id	Name		Size
+-1	ABSOLUTE	0006
+0	UNDEFINED	0000
+2	isr	003e
+1	ivt	0010
+
+
+Symbol table:
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	l	UNDEFINED	UNDEFINED	0000
+0054	l	ABSOLUTE	asciiCode	0008
+0000	l	isr	isr	0005
+0000	l	isr	isr_reset	0009
+0016	l	isr	isr_terminal	000b
+0005	l	isr	isr_timer	000a
+0000	l	ivt	ivt	0002
+0000	e	UNDEFINED	myCounter	0004
+0000	e	UNDEFINED	myStart	0003
+ff02	l	ABSOLUTE	term_in	0007
+ff00	l	ABSOLUTE	term_out	0006
+
+
+Relocation data <ABSOLUTE>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <ABSOLUTE>:
+0000: 00 ff 
+0002: 02 ff 
+0004: 54 00 
+
+Relocation data <UNDEFINED>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <UNDEFINED>:
+
+
+Relocation data <isr>:
+Offset	Type		Dat/Ins	Symbol	Section name
+0004	R_HYP_16	i	myStart	isr
+002a	R_HYP_16_PC	i	myCounter	isr
+0036	R_HYP_16	i	myCounter	isr
+
+Section data <isr>:
+0000: 50 ff 00 00 00 
+0005: b0 06 12 
+0008: a0 0f 00 00 54 
+000d: b0 0f 04 ff 00 
+0012: a0 06 42 
+0015: 20 
+0016: b0 06 12 
+0019: b0 16 12 
+001c: a0 0f 04 ff 02 
+0021: b0 0f 04 ff 00 
+0026: a0 07 03 ff fe 
+002b: a0 1f 00 00 01 
+0030: 70 01 
+0032: b0 0f 04 00 00 
+0037: a0 16 42 
+003a: a0 06 42 
+003d: 20 
+
+Relocation data <ivt>:
+Offset	Type		Dat/Ins	Symbol	Section name
+0000	R_HYP_16	d	isr	ivt
+0004	R_HYP_16	d	isr	ivt
+0006	R_HYP_16	d	isr	ivt
+
+Section data <ivt>:
+0000: 00 00 
+0002: 00 00 
+0004: 05 00 
+0006: 16 00 
+0008: 00 00 00 00 00 00 00 00 
+

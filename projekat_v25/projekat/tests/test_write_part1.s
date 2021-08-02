@@ -27,7 +27,7 @@
 	ldr r1, $48
 	add r3, r1
 	str r3, PRINT_REG  
-	#str r3, %PRINT_REG # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
+	str r3, %PRINT_REG # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
 	# gotov A
 	# lupi enter:
 	ldr r5, $46
@@ -38,7 +38,7 @@
 	ldr r1, $48
 	add r3, r1
 	str r3, PRINT_REG
-	#str r3, %PRINT_REG  # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
+	str r3, %PRINT_REG  # pc relativni equ - ostavlja se za kasnije (kad se i emulator zavrsi)
 	# gotov B
     halt
 

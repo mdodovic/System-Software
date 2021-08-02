@@ -783,9 +783,16 @@ int AssemblyParser::process_pc_relative_addressing_symbol(string symbol)
         int addend = -2;
         if (s_from_table.section == "ABSOLUTE")
         {
-            cout << "EQU CALCULATIONS:#" << s_from_table.value << "->" << (addend + s_from_table.value) << endl;
-            // ? TO BE SEEN
-            return addend + s_from_table.value;
+            cout << "EQU CALCULATIONS:#" << hex << s_from_table.value << dec << endl;
+            RelocationTable rel_data;
+            rel_data.addend = 0;
+            rel_data.is_data = false;                // this is instruction, so use big endian when reloc
+            rel_data.offset = location_counter + 4;  // ?? +0 - opcode, +1 - registers, +2 - ua flags, +3 - higher bits, +4 - lower bits
+            rel_data.section_name = current_section; // section for which this relocation data is about
+            rel_data.type = "R_HYP_16_PC";
+            rel_data.symbol_name = s_from_table.name;
+            relocation_table.push_back(rel_data); // add relocation data to relocation table
+            return addend;
         }
         else
         {

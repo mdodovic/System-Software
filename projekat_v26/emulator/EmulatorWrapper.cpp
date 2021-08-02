@@ -251,7 +251,10 @@ bool EmulatorWrapper::start_emulation()
         // Emulator has several phases
         if (instruction_fetch_and_decode() == false)
         {
+            // This is an error in fetching and decoding instructions
             cout << error_messages[0] << endl;
+            rpc = previous_pc;
+            jump_on_interrupt_routine(ERROR_IN_PROGRAM_ENTRY);
         }
         else
         {
@@ -259,7 +262,10 @@ bool EmulatorWrapper::start_emulation()
         }
         if (instruction_execute() == false)
         {
+            // This is an error in executing instructions
             cout << error_messages[0] << endl;
+            rpc = previous_pc;
+            jump_on_interrupt_routine(ERROR_IN_PROGRAM_ENTRY);
         }
         else
         {

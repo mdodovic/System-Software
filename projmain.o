@@ -1,0 +1,54 @@
+Relocative object file
+
+Section table:
+Id	Name		Size
+-1	ABSOLUTE	0002
+0	UNDEFINED	0000
+1	myCode	001c
+2	myData	0002
+
+
+Symbol table:
+Value	Type	Section		Name		Id
+0000	l	ABSOLUTE	ABSOLUTE	0001
+0000	l	UNDEFINED	UNDEFINED	0000
+0000	l	myCode	myCode	0004
+0000	g	myData	myCounter	0003
+0000	l	myData	myData	0007
+0000	g	myCode	myStart	0002
+ff10	l	ABSOLUTE	tim_cfg	0005
+000a	l	myCode	wait	0006
+
+
+Relocation data <ABSOLUTE>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <ABSOLUTE>:
+0000: 10 ff 
+
+Relocation data <UNDEFINED>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <UNDEFINED>:
+
+
+Relocation data <myCode>:
+Offset	Type		Dat/Ins	Symbol	Section name
+000e	R_HYP_16	i	myCounter	myCode
+001a	R_HYP_16	i	myCode	myCode
+
+Section data <myCode>:
+0000: a0 0f 00 00 01 
+0005: b0 0f 04 ff 10 
+000a: a0 0f 04 00 00 
+000f: a0 1f 00 00 05 
+0014: 74 01 
+0016: 52 ff 00 00 0a 
+001b: 00 
+
+Relocation data <myData>:
+Offset	Type		Dat/Ins	Symbol	Section name
+
+Section data <myData>:
+0000: 00 00 
+

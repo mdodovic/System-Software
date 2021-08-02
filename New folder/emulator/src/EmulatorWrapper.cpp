@@ -1533,24 +1533,26 @@ long long int EmulatorWrapper::fetch_duration_by_identifier(short id)
 }
 
 struct termios stdin_backup_settings; // backup for standard input; in order to save settings before emulator execution
-volatile bool user_interrupt_emulation = false;
+/*volatile bool user_interrupt_emulation = false;*/
 
 void backup_stdin_settings()
 {
+	// https://pubs.opengroup.org/onlinepubs/7908799/xsh/tcsetattr.html
     // At the end of emulation, this function will return initial settings (before emulation)
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &stdin_backup_settings);
     // TCSAFLUSH option makes that all changes waits for all characters to be written to STDIN (fd), but all characters waiting to be read will be discarded
 }
-
+/*
 void restore_settings_on_user_interrupt(int signal_number)
 {
     // This function is handler for user interrupt exeption
     user_interrupt_emulation = true; // flag for emulation to be killed
     backup_stdin_settings();
 }
-
+*/
 bool EmulatorWrapper::configure_terminal()
 {
+	// https://pubs.opengroup.org/onlinepubs/7908799/xsh/tcgetattr.html
     // fetch data from STDIN_FILENO to fill backup structure
     if (tcgetattr(STDIN_FILENO, &stdin_backup_settings) < 0)
     {
@@ -1558,7 +1560,8 @@ bool EmulatorWrapper::configure_terminal()
         error_messages.push_back(error);
         return false;
     }
-
+	
+	// https://man7.org/linux/man-pages/man3/termios.3.html
     // This settings will be changed. In backup_stdi_settings are data from STDIN_FILENO
     static struct termios changed_settings = stdin_backup_settings;
     // c_lflag - local model:
@@ -1587,10 +1590,10 @@ bool EmulatorWrapper::configure_terminal()
         return false;
     }
 
-    atexit(backup_stdin_settings);
+    /*atexit(backup_stdin_settings);*/
     // SIGINT is interrupt number for user generate interrupts
     // this will set handler for this interrupt which will restore settings calling backup_stdin_settings function and then set marker user_interrupt_emulation to true
-    signal(SIGINT, restore_settings_on_user_interrupt);
+    /*signal(SIGINT, restore_settings_on_user_interrupt);*/
 
     // at the end fill STDIN_FILENO with changed data
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &changed_settings))
@@ -1619,12 +1622,13 @@ void EmulatorWrapper::read_character_from_input()
         set_interrupt_request_on_line(TERMINAL_LINE_NUMBER);
         emulator_output_file << " ..c=" << c;
     }
-
+/*
     if (user_interrupt_emulation == true)
     {
         emulator_output_file << "User interrupted emulation!";
         exit(1);
     }
+*/	
 }
 
 void EmulatorWrapper::reset_flag(short flag)
